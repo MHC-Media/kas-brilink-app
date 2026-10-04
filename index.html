@@ -196,13 +196,16 @@
         <aside id="side" class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full md:translate-x-0 transition-transform glass border-r border-slate-200 dark:border-slate-700 p-4 flex flex-col">
             <div class="flex items-center gap-2 text-xl font-bold text-bri dark:text-white mb-6 px-2"><span class="w-9 h-9 rounded-xl bg-bri text-white grid place-items-center"><i data-lucide="landmark" class="w-5"></i></span>Kas BRILink</div>
             <nav id="nav" class="space-y-1 flex-1 overflow-y-auto"></nav>
-            <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-500/10"><i data-lucide="log-out"></i>Keluar</button>
+
         </aside>
         <div class="md:ml-60">
             <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
                 <h2 id="title" class="font-bold flex-1"></h2><span id="brchip" onclick="location.hash='#tutup'" class="cursor-pointer text-xs font-bold px-2 py-1 rounded-full bg-slate-500/20">Cabang: ...</span>
-                <button id="who" onclick="pwForm()" title="Ubah password" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
+                <button id="who" onclick="toggleAcct(event)" title="Menu akun" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
+                <div id="acct" class="hidden absolute right-3 top-14 z-30 w-60 glass rounded-2xl p-2 shadow-xl">
+                    <div id="acctInfo" class="px-3 py-2 text-xs text-slate-500"></div><button class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-500/10 text-left" onclick="$('acct').classList.add('hidden');pwForm()"><i data-lucide="key-round" class="w-4"></i>Ubah password</button><button class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-500/10 text-left text-red-500 font-bold" onclick="$('acct').classList.add('hidden');doLogout()"><i data-lucide="log-out" class="w-4"></i>Keluar / Logout</button>
+                </div>
                 <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
             </header>
             <main id="view" class="p-4 max-w-6xl mx-auto"></main>
@@ -249,7 +252,8 @@
                 getAnalytics: 120,
                 getLogs: 15,
                 getSettings: 60,
-                getBranch: 10
+                getBranch: 10,
+                getSaldo: 10
             },
             CACHE = new Map();
         let OFFQ = JSON.parse(localStorage.offq || '[]');
@@ -561,7 +565,8 @@
             $('login').classList.toggle('flex', !ok);
             $('app').classList.toggle('hidden', !ok);
             if (ok) {
-                $('who').innerHTML = `<i data-lucide="key-round" class="w-4"></i>${escH(S.user.nama)} (${S.user.role})`;
+                $('who').innerHTML = `<i data-lucide="user-round" class="w-4"></i>${escH(S.user.nama)} (${S.user.role})<i data-lucide="chevron-down" class="w-4"></i>`;
+                $('acctInfo').textContent = S.user.nama + ' · ' + S.user.role + ' (@' + S.user.username + ')';
                 route();
             }
             paintTheme();
@@ -766,7 +771,7 @@
       <input type="date" class="inp !w-40" value="${f.dari}" onchange="VIEWS.f.dari=this.value;VIEWS.transaksi()"><input type="date" class="inp !w-40" value="${f.sampai}" onchange="VIEWS.f.sampai=this.value;VIEWS.transaksi()">
       <button class="btn ml-auto" onclick="trxForm()"><i data-lucide="plus" class="w-4"></i>Transaksi</button></div>
       <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal / Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Rek. tujuan / Ref</th><th>Nominal</th><th>Admin</th><th>Kas</th><th>Laba</th><th></th></tr></thead><tbody>
-      ${d.items.map((t, i) => { const k = kasDelta(t); return `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${t.tanggal}<br><small>${t.waktu}</small></td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td><td>${escH(t.rekening_tujuan || '-')}<br><small>${escH(t.no_referensi || '')}</small></td><td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td class="${k < 0 ? 'text-red-500' : 'text-emerald-500'}">${k < 0 ? '-' : '+'}${rp(Math.abs(k))}</td><td>${rp(t.laba)}</td>
+      ${d.items.map((t, i) => { const k = kasDelta(t); return `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${t.tanggal}<br><small>${t.waktu}</small></td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td><td>${escH(t.rekening_tujuan || '-')}<br><small>${escH([t.bank_tujuan, t.no_referensi].filter(Boolean).join(' · '))}</small></td><td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td class="${k < 0 ? 'text-red-500' : 'text-emerald-500'}">${k < 0 ? '-' : '+'}${rp(Math.abs(k))}</td><td>${rp(t.laba)}</td>
       <td class="whitespace-nowrap noprint"><button onclick="struk(TRX[${i}])"><i data-lucide="printer" class="w-4"></i></button> <button onclick="trxForm(TRX[${i}])"><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteTransaction','${t.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`; }).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="9">Belum ada transaksi.</td></tr>'}
       </tbody></table></div>
       <div class="flex justify-between mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="VIEWS.transaksi(${page - 1})">Sebelumnya</button><span>Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="VIEWS.transaksi(${page + 1})">Berikutnya</button></div>`;
@@ -790,7 +795,7 @@
 
             async pelanggan() {
                 const d = window.CUST = await api('getCustomers');
-                $('view').innerHTML = `<div class="mb-3"><button class="btn" onclick="custForm()"><i data-lucide="user-plus" class="w-4"></i>Pelanggan</button></div><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Pelanggan (klik: riwayat)</th><th>No. HP</th><th>No. rekening</th><th>Transaksi</th><th>Total nominal</th><th>Terakhir</th><th></th></tr></thead><tbody>${d.map((c, i) => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 cursor-pointer text-bri dark:text-sky-300" onclick="openCust(CUST[${i}].nama)">${escH(c.nama)}</td><td>${escH(c.no_hp || '-')}</td><td>${escH(c.no_rekening || '-')}</td><td>${c.jumlah}</td><td>${rp(c.total)}</td><td>${c.terakhir || '-'}</td><td class="whitespace-nowrap"><button onclick="custForm(${i})"><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="delCust(${i})"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Belum ada pelanggan.</td></tr>'}</tbody></table></div>`;
+                $('view').innerHTML = `<div class="mb-3"><button class="btn" onclick="custForm()"><i data-lucide="user-plus" class="w-4"></i>Pelanggan</button></div><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Pelanggan (klik: riwayat)</th><th>No. HP</th><th>No. rekening</th><th>Transaksi</th><th>Total nominal</th><th>Terakhir</th><th></th></tr></thead><tbody>${d.map((c, i) => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 cursor-pointer text-bri dark:text-sky-300" onclick="openCust(CUST[${i}].nama)">${escH(c.nama)}</td><td>${escH(c.no_hp || '-')}</td><td>${escH((c.bank ? c.bank + ' ' : '') + (c.no_rekening || '-'))}</td><td>${c.jumlah}</td><td>${rp(c.total)}</td><td>${c.terakhir || '-'}</td><td class="whitespace-nowrap"><button onclick="custForm(${i})"><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="delCust(${i})"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Belum ada pelanggan.</td></tr>'}</tbody></table></div>`;
             },
 
             async tutup() {
@@ -800,13 +805,13 @@
                     row = (a, v, c = '') => `<div class="flex justify-between text-sm"><span>${a}</span><b class="${c}">${v}</b></div>`;
                 const hist = `<div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Catatan</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${x.tanggal}</td><td>${rp(x.saldo_sistem)}</td><td>${rp(x.kas_fisik)}</td><td class="${x.selisih < 0 ? 'text-red-500' : ''}">${rp(x.selisih)}</td><td>${escH(x.catatan || '-')}</td><td>${escH(x.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="6">Belum ada riwayat tutup kas.</td></tr>'}</tbody></table></div>`;
                 if (!b.open) {
-                    $('view').innerHTML = `<div class="glass rounded-2xl p-5 space-y-3 max-w-md"><b class="flex items-center gap-2"><i data-lucide="unlock" class="w-4"></i>Buka kas (Open Branch)</b><p class="text-sm text-slate-500">Hitung uang fisik di laci, lalu isi saldo kas awal. Transaksi baru hanya bisa dicatat setelah kas dibuka.</p><input id="o_saldo" type="number" min="0" class="inp" placeholder="Saldo kas awal (Rp)"><button class="btn" onclick="doBuka()"><i data-lucide="unlock" class="w-4"></i>Buka kas</button></div>` + hist;
+                    $('view').innerHTML = `<div class="glass rounded-2xl p-5 space-y-3 max-w-md"><b class="flex items-center gap-2"><i data-lucide="unlock" class="w-4"></i>Buka kas (Open Branch)</b><p class="text-sm text-slate-500">Hitung uang fisik di laci, lalu isi saldo kas awal. Transaksi baru hanya bisa dicatat setelah kas dibuka.</p><input id="o_saldo" type="number" min="0" class="inp" placeholder="Saldo kas fisik awal (Rp)"><input id="o_rek" type="number" min="0" class="inp" placeholder="Saldo rekening BRILink awal (Rp)"><button class="btn" onclick="doBuka()"><i data-lucide="unlock" class="w-4"></i>Buka kas</button></div>` + hist;
                     return;
                 }
                 $('view').innerHTML = `${b.basi ? `<div class="rounded-2xl p-4 mb-3 bg-amber-500/10 border border-amber-500/30 text-sm">Sesi kas tanggal <b>${b.tanggal}</b> belum ditutup. Tutup kas dulu agar transaksi hari ini bisa dicatat.</div>` : ''}
       <div class="grid lg:grid-cols-2 gap-3"><div class="glass rounded-2xl p-5 space-y-2"><b>Kas sistem (otomatis dari transaksi)</b>
       ${row('Dibuka oleh', escH(b.oleh || '-'))}${row('Saldo kas awal', rp(k.awal))}${row(`Kas masuk (${k.trx} transaksi)`, '+' + rp(k.masuk), 'text-emerald-500')}${row('Kas keluar (tarik tunai + pengeluaran)', '-' + rp(k.keluar), 'text-red-500')}
-      <div class="border-t border-slate-500/30 pt-2 flex justify-between"><span>Saldo kas sistem</span><b class="text-xl">${rp(k.saldo)}</b></div>
+      <div class="border-t border-slate-500/30 pt-2 flex justify-between"><span>Saldo kas sistem</span><b class="text-xl">${rp(k.saldo)}</b></div>${row('Saldo rekening BRILink', rp(k.rekSaldo), 'text-sky-500')}${row('awal ' + rp(k.rekAwal) + ', +' + rp(k.rekMasuk) + ', -' + rp(k.rekKeluar), '')}
       <p class="text-xs text-slate-500">Sesi dibuka ${new Date(b.mulai).toLocaleString('id-ID')}.</p></div>
       <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="lock" class="w-4"></i>Tutup kas (Close Branch)</b>
       <input id="k_fisik" type="number" min="0" class="inp" placeholder="Kas fisik (hasil hitung uang)" oninput="$('k_sel').textContent = rp(this.value - ${Number(k.saldo)})">
@@ -898,10 +903,11 @@
             icons();
         }
         async function doBuka() {
-            if (!need('o_saldo') || !confirm('Buka kas dengan saldo awal ' + rp(val('o_saldo')) + '?')) return;
+            if (!need('o_saldo', 'o_rek') || !confirm('Buka kas dengan kas fisik ' + rp(val('o_saldo')) + ' dan saldo rekening BRILink ' + rp(val('o_rek')) + '?')) return;
             try {
                 await api('bukaKas', {
-                    saldo_awal: val('o_saldo')
+                    saldo_awal: val('o_saldo'),
+                    saldo_rekening: val('o_rek')
                 });
                 toast('Kas dibuka, transaksi dapat dimulai');
                 route();
@@ -922,7 +928,7 @@
 
         function custForm(i) {
             const c = i === undefined ? {} : CUST[i];
-            openModal(`<h3 class="font-bold mb-3">${c.nama ? 'Edit' : 'Tambah'} pelanggan</h3><div class="space-y-2"><input id="c_n" class="inp" placeholder="Nama" value="${escH(c.nama || '')}"><input id="c_h" class="inp" placeholder="No. HP" inputmode="tel" value="${escH(c.no_hp || '')}"><input id="c_r" class="inp" placeholder="No. rekening utama" value="${escH(c.no_rekening || '')}"><input id="c_c" class="inp" placeholder="Catatan" value="${escH(c.catatan || '')}">
+            openModal(`<h3 class="font-bold mb-3">${c.nama ? 'Edit' : 'Tambah'} pelanggan</h3><div class="space-y-2"><input id="c_n" class="inp" placeholder="Nama" value="${escH(c.nama || '')}"><input id="c_h" class="inp" placeholder="No. HP" inputmode="tel" value="${escH(c.no_hp || '')}"><select id="c_b" class="inp"><option value="">Bank (opsional)</option>${opt(Object.keys(BANKS))}</select><input id="c_r" class="inp" inputmode="numeric" placeholder="No. rekening utama" value="${escH(c.no_rekening || '')}"><input id="c_c" class="inp" placeholder="Catatan" value="${escH(c.catatan || '')}">
   ${c.nama && c.jumlah ? '<p class="text-xs text-slate-500">Mengubah nama ikut memperbarui seluruh riwayat transaksi pelanggan ini.</p>' : ''}
   <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveCust(${i === undefined ? -1 : i})">Simpan</button></div></div>`);
         }
@@ -936,6 +942,7 @@
                     nama: val('c_n'),
                     no_hp: val('c_h'),
                     no_rekening: val('c_r'),
+                    bank: $('c_b') ? val('c_b') : '',
                     catatan: val('c_c')
                 });
                 closeModal();
@@ -983,10 +990,146 @@
                 r.valid ? toast(`Asli: dibuat oleh ${r.user}, ${r.waktu}`) : toast('Kode tidak ditemukan, laporan tidak terverifikasi', false);
             } catch (e) {}
         }
+        /* ===== Form nomor tujuan: bank, panjang digit, dan validasi otomatis per jenis ===== */
+        const BANKS = {
+            'BRI': [15, 15],
+            'BNI': [10, 10],
+            'Mandiri': [13, 13],
+            'BCA': [10, 10],
+            'BSI': [10, 10],
+            'BTN': [16, 16],
+            'CIMB Niaga': [12, 14],
+            'Permata': [10, 10],
+            'Danamon': [10, 12],
+            'Bank lain': [6, 20]
+        };
+        const EWALLET = ['DANA', 'OVO', 'GoPay', 'ShopeePay', 'LinkAja'];
+
+        function fieldCfg(j, bank) {
+            switch (j) {
+                case 'Transfer':
+                case 'Setor Tunai': {
+                    const r = BANKS[bank] || [6, 20];
+                    return {
+                        label: 'No. rekening tujuan',
+                        pick: Object.keys(BANKS),
+                        pickLabel: 'Pilih bank tujuan',
+                        min: r[0],
+                        max: r[1],
+                        mode: 'digits',
+                        req: true
+                    };
+                }
+                case 'BRIVA':
+                    return {
+                        label: 'No. BRIVA / Virtual Account', min: 10, max: 20, mode: 'digits', req: true
+                    };
+                case 'Top Up E-Wallet':
+                    return {
+                        label: 'No. HP akun e-wallet', pick: EWALLET, pickLabel: 'Pilih e-wallet', min: 10, max: 14, mode: 'hp', req: true
+                    };
+                case 'Pulsa':
+                    return {
+                        label: 'No. HP tujuan', min: 10, max: 14, mode: 'hp', req: true
+                    };
+                case 'Token PLN':
+                    return {
+                        label: 'No. meter / ID pelanggan PLN', min: 11, max: 12, mode: 'digits', req: true
+                    };
+                case 'Pembayaran Tagihan':
+                    return {
+                        label: 'ID pelanggan / no. tagihan', min: 5, max: 20, mode: 'digits', req: true
+                    };
+                case 'Cicilan':
+                    return {
+                        label: 'No. kontrak / ID pembayaran', min: 5, max: 25, mode: 'alnum', req: true
+                    };
+                case 'QRIS':
+                    return {
+                        label: 'Nama merchant', min: 1, max: 40, mode: 'text', req: true
+                    };
+                default:
+                    return {
+                        label: 'No. rekening / nomor tujuan (opsional)', min: 0, max: 40, mode: 'text', req: false
+                    };
+            }
+        }
+
+        function onJenis(keepBank, bankVal) {
+            const j = val('f_jenis'),
+                sel = $('f_bank'),
+                cur = keepBank ? val('f_bank') : (bankVal || ''),
+                c0 = fieldCfg(j, cur);
+            if (c0.pick) {
+                sel.classList.remove('hidden');
+                sel.innerHTML = `<option value="">${c0.pickLabel}</option>` + c0.pick.map(x => `<option>${x}</option>`).join('');
+                sel.value = cur;
+            } else {
+                sel.classList.add('hidden');
+                sel.innerHTML = '';
+            }
+            const cfg = fieldCfg(j, val('f_bank')),
+                r = $('f_rek');
+            r.placeholder = cfg.label;
+            r.maxLength = cfg.max;
+            r.inputMode = cfg.mode === 'digits' || cfg.mode === 'hp' ? 'numeric' : 'text';
+            fmtRek();
+            calc();
+        }
+
+        function fmtRek() {
+            const cfg = fieldCfg(val('f_jenis'), val('f_bank')),
+                r = $('f_rek');
+            let v = r.value;
+            if (cfg.mode === 'digits') v = v.replace(/\D/g, '');
+            else if (cfg.mode === 'hp') v = v.replace(/[^\d+]/g, '').replace(/^\+62/, '0').replace(/^62/, '0').replace(/\D/g, '');
+            else if (cfg.mode === 'alnum') v = v.replace(/[^A-Za-z0-9-]/g, '');
+            v = v.slice(0, cfg.max);
+            if (v !== r.value) r.value = v;
+            const len = v.length,
+                ok = len >= cfg.min && len <= cfg.max,
+                h = $('f_hint');
+            h.textContent = cfg.mode === 'text' ? '' : `${len}/${cfg.max} digit${cfg.min === cfg.max ? '' : ' (minimal ' + cfg.min + ')'}${val('f_bank') ? ' · ' + val('f_bank') : ''}`;
+            h.className = 'text-xs -mt-1 ' + (!len ? 'text-slate-500' : ok ? 'text-emerald-500' : 'text-amber-500');
+            r.classList.toggle('!border-red-500', len > 0 && !ok);
+        }
+
+        function rekError() {
+            const cfg = fieldCfg(val('f_jenis'), val('f_bank')),
+                v = val('f_rek').trim();
+            if (cfg.pick && !val('f_bank')) return cfg.pickLabel;
+            if (!v) return cfg.req ? cfg.label + ' wajib diisi' : '';
+            if (cfg.mode === 'hp' && !/^08/.test(v)) return 'No. HP harus diawali 08';
+            if (cfg.mode !== 'text' && (v.length < cfg.min || v.length > cfg.max)) return `${cfg.label} harus ${cfg.min === cfg.max ? cfg.min : cfg.min + '-' + cfg.max} digit${val('f_bank') ? ' untuk ' + val('f_bank') : ''} (diisi ${v.length})`;
+            return '';
+        }
         const kasDelta = t => t.jenis_transaksi === 'Tarik Tunai' ? Number(t.biaya_admin) - Number(t.nominal) : Number(t.nominal) + Number(t.biaya_admin);
         const kasTxt = t => {
             const d = kasDelta(t);
             return (d >= 0 ? 'Kas masuk ' : 'Kas keluar ') + rp(Math.abs(d));
+        };
+        const onlyDigits = e => {
+            e.value = e.value.replace(/\D/g, '');
+        };
+        const lenTxt = r => r[0] === r[1] ? r[1] + ' digit' : r[0] + '-' + r[1] + ' digit';
+
+        function asalHint() {
+            const i = $('f_rasal'),
+                r = BANKS[val('f_basal')] || BANKS['Bank lain'];
+            i.value = i.value.replace(/\D/g, '').slice(0, r[1]);
+            $('f_asalhint').textContent = i.value ? `${val('f_basal') || 'Bank'}: ${lenTxt(r)} (${i.value.length}/${r[1]})` : '';
+        }
+
+        function validAsal() {
+            const r = val('f_rasal').trim();
+            if (!r) return '';
+            if (!val('f_basal')) return 'Pilih bank rekening asal';
+            const c = BANKS[val('f_basal')];
+            return r.length < c[0] || r.length > c[1] ? `Rekening asal ${val('f_basal')} harus ${lenTxt(c)} (diisi ${r.length})` : '';
+        }
+        const validHp = () => {
+            const h = val('f_hp').trim();
+            return h && !/^(08|62)\d{8,12}$/.test(h) ? 'No. HP pelanggan tidak valid (awali 08 atau 62, 10-14 digit)' : '';
         };
 
         function trxForm(t = {}) {
@@ -997,24 +1140,58 @@
             }
             openModal(`<h3 class="font-bold mb-3">${t.id ? 'Edit' : 'Tambah'} transaksi</h3><div class="space-y-2">
     <div class="grid grid-cols-2 gap-2"><input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}"><input id="f_wkt" type="time" class="inp" value="${t.waktu || new Date().toTimeString().slice(0, 5)}"></div>
-    <select id="f_jenis" class="inp" onchange="calc()">${opt(JENIS)}</select>
+    <select id="f_jenis" class="inp" onchange="onJenis()">${opt(JENIS)}</select>
     <input id="f_pel" list="dl_pel" class="inp" placeholder="Nama pelanggan" value="${escH(t.pelanggan || '')}" onchange="fillCust()"><datalist id="dl_pel"></datalist>
-    <input id="f_rek" class="inp" placeholder="No. rekening / nomor tujuan" inputmode="numeric" value="${escH(t.rekening_tujuan || '')}">
+    <input id="f_hp" class="inp" inputmode="numeric" maxlength="14" placeholder="No. HP pelanggan (opsional)" value="${escH(t.no_hp || '')}" oninput="onlyDigits(this)">
+    <select id="f_bank" class="inp hidden" onchange="onJenis(true)"></select>
+    <input id="f_rek" class="inp" autocomplete="off" value="${escH(t.rekening_tujuan || '')}" oninput="fmtRek()">
+    <p id="f_hint" class="text-xs text-slate-500 -mt-1"></p>
     <input id="f_ref" class="inp" placeholder="No. referensi / no. transaksi (struk bank)" value="${escH(t.no_referensi || '')}">
     <select id="f_met" class="inp">${opt(['Tunai', 'Transfer', 'QRIS', 'Saldo'])}</select>
     <input id="f_nom" type="number" min="1" class="inp" placeholder="Nominal" value="${t.nominal || ''}" oninput="calc()">
     <input id="f_adm" type="number" min="0" class="inp" placeholder="Biaya admin (pendapatan)" value="${t.biaya_admin ?? ''}" oninput="calc()">
     <input id="f_ops" type="number" min="0" class="inp" placeholder="Biaya operasional (opsional)" value="${t.id ? Number(t.biaya_admin) - Number(t.laba) : 0}" oninput="calc()">
-    <div class="rounded-xl bg-slate-500/10 p-3 text-sm space-y-1"><div>Laba: <b id="f_laba">-</b></div><div>Dampak kas: <b id="f_kas">-</b></div></div>
+    <div class="rounded-xl bg-slate-500/10 p-3 text-sm space-y-1"><div>Laba: <b id="f_laba">-</b></div><div>Dampak kas: <b id="f_kas">-</b></div><div class="text-xs text-slate-500">Saldo kas <b id="f_sk">-</b> · Saldo rekening BRILink <b id="f_sr">-</b></div><div id="f_warn" class="text-red-500 font-bold"></div></div>
+    <details class="rounded-xl border border-slate-500/30 p-3" ${t.rekening_asal ? 'open' : ''}><summary class="cursor-pointer text-sm font-bold">Rekening asal (opsional)</summary><div class="space-y-2 mt-2">
+      <select id="f_basal" class="inp" onchange="asalHint()"><option value="">Bank asal</option>${opt(Object.keys(BANKS))}</select>
+      <input id="f_rasal" class="inp" inputmode="numeric" placeholder="No. rekening asal" value="${escH(t.rekening_asal || '')}" oninput="asalHint()"><div id="f_asalhint" class="text-xs text-slate-500"></div>
+      <label class="flex items-center gap-2 text-sm"><input id="f_milik" type="checkbox" checked>Rekening milik pelanggan sendiri (otomatis disimpan ke data pelanggan)</label></div></details>
     <input id="f_ket" class="inp" placeholder="Keterangan" value="${escH(t.keterangan || '')}">
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveTrx('${t.id || ''}')">Simpan</button></div></div>`);
             if (t.jenis_transaksi) $('f_jenis').value = t.jenis_transaksi;
+            onJenis(false, t.bank_tujuan);
             if (t.metode_bayar) $('f_met').value = t.metode_bayar;
+            EDITT = t.id ? t : null;
+            SALDO = null;
+            api('getSaldo').then(x => {
+                SALDO = x;
+                calc();
+            }).catch(() => {});
             api('getCustomers').then(c => {
                 window.CUST = c;
                 $('dl_pel').innerHTML = c.slice(0, 200).map(x => `<option value="${escH(x.nama)}">`).join('');
             }).catch(() => {});
+            if (t.bank_asal) $('f_basal').value = t.bank_asal;
+            asalHint();
             calc();
+        }
+        let SALDO = null,
+            EDITT = null;
+        const recDelta = t => t.jenis_transaksi === 'Tarik Tunai' ? Number(t.nominal) : -Number(t.nominal);
+
+        function saldoMsg() {
+            if (!SALDO) return '';
+            const o = EDITT,
+                mulai = BR && BR.mulai ? BR.mulai : 0;
+            if (o && o.created_at && new Date(o.created_at.replace(' ', 'T') + '+07:00').getTime() < mulai) return ''; // periode tertutup tidak memengaruhi saldo
+            const t = {
+                jenis_transaksi: val('f_jenis'),
+                nominal: Number(val('f_nom') || 0),
+                biaya_admin: Number(val('f_adm') || 0)
+            };
+            const k = SALDO.kas + kasDelta(t) - (o ? kasDelta(o) : 0),
+                r = SALDO.rek + recDelta(t) - (o ? recDelta(o) : 0);
+            return k < 0 ? 'Saldo kas tidak cukup (tersedia ' + rp(SALDO.kas) + ')' : r < 0 ? 'Saldo rekening BRILink tidak cukup (tersedia ' + rp(SALDO.rek) + ')' : '';
         }
         const calc = () => {
             const a = Number(val('f_adm') || 0);
@@ -1024,17 +1201,37 @@
                 nominal: Number(val('f_nom') || 0),
                 biaya_admin: a
             });
+            if (SALDO) {
+                $('f_sk').textContent = rp(SALDO.kas);
+                $('f_sr').textContent = rp(SALDO.rek);
+            }
+            $('f_warn').textContent = saldoMsg();
         };
 
         function fillCust() {
             const c = (window.CUST || []).find(x => x.nama === val('f_pel'));
-            if (c && c.no_rekening && !val('f_rek')) $('f_rek').value = c.no_rekening;
+            if (!c) return;
+            if (c.no_hp && !val('f_hp')) $('f_hp').value = c.no_hp;
+            if (c.no_rekening && !val('f_rasal')) {
+                if (c.bank) $('f_basal').value = c.bank;
+                $('f_rasal').value = c.no_rekening;
+                asalHint();
+            }
         }
         let SAVING = false;
         async function saveTrx(id) {
             if (SAVING || !need('f_tgl', 'f_nom', 'f_adm')) return;
             if (Number(val('f_nom')) <= 0) return toast('Nominal harus lebih dari 0', false);
-            if (!['Tarik Tunai', 'Lainnya'].includes(val('f_jenis')) && !val('f_rek').trim() && !val('f_ref').trim()) return toast('Isi no. rekening tujuan atau no. referensi', false);
+            const re = rekError();
+            if (re) {
+                toast(re, false);
+                $('f_rek').focus();
+                return;
+            }
+            const ve = validHp() || validAsal();
+            if (ve) return toast(ve, false);
+            const wm = saldoMsg();
+            if (wm) return toast(wm, false);
             SAVING = true;
             try {
                 const r = await api(id ? 'updateTransaction' : 'addTransaction', {
@@ -1043,12 +1240,17 @@
                     waktu: val('f_wkt'),
                     jenis_transaksi: val('f_jenis'),
                     pelanggan: val('f_pel'),
+                    bank_tujuan: val('f_bank'),
                     rekening_tujuan: val('f_rek'),
                     no_referensi: val('f_ref'),
                     nominal: val('f_nom'),
                     biaya_admin: val('f_adm'),
                     biaya_operasional: val('f_ops'),
                     keterangan: val('f_ket'),
+                    no_hp: val('f_hp'),
+                    bank_asal: val('f_basal'),
+                    rekening_asal: val('f_rasal'),
+                    rek_milik_pelanggan: $('f_milik').checked,
                     metode_bayar: val('f_met')
                 });
                 closeModal();
@@ -1085,6 +1287,16 @@
                 route();
             } catch (e) {}
         }
+
+        function toggleAcct(e) {
+            e.stopPropagation();
+            $('acct').classList.toggle('hidden');
+            icons();
+        }
+        document.addEventListener('click', e => {
+            const a = $('acct');
+            if (a && !a.contains(e.target)) a.classList.add('hidden');
+        });
 
         function pwForm() {
             openModal(`<h3 class="font-bold mb-3">Ubah password</h3><div class="space-y-2">
@@ -1249,6 +1461,7 @@
             txt('No: ' + t.id);
             row('Jenis', t.jenis_transaksi);
             row('Pelanggan', t.pelanggan);
+            if (t.bank_tujuan) row('Bank', t.bank_tujuan);
             if (t.rekening_tujuan) row('Rek/Tujuan', t.rekening_tujuan);
             if (t.no_referensi) row('No Ref', t.no_referensi);
             line();
@@ -1389,13 +1602,13 @@
             if (MODE === 'detail') {
                 const s = t.filter(x => SEL.has(x.id));
                 if (!s.length) return toast('Centang minimal satu transaksi', false);
-                body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Pelanggan', x.pelanggan], ['No. rekening tujuan', x.rekening_tujuan || '-'], ['No. referensi', x.no_referensi || '-'], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Total dari pelanggan', Number(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) ? rp(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) : rp(0)], ['Dampak kas', kasTxt(x)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Operator', x.operator]].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
+                body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Pelanggan', x.pelanggan], ['Bank / penyedia', x.bank_tujuan || '-'], ['Bank / e-wallet tujuan', x.bank_tujuan || '-'], ['No. rekening / tujuan', x.rekening_tujuan || '-'], ['No. HP pelanggan', x.no_hp || '-'], ['Rekening asal', [x.bank_asal, x.rekening_asal].filter(Boolean).join(' ') || '-'], ['No. referensi', x.no_referensi || '-'], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Total dari pelanggan', Number(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) ? rp(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) : rp(0)], ['Dampak kas', kasTxt(x)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Operator', x.operator]].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
             } else {
                 const g = {};
                 t.forEach(x => (g[x.tanggal] = g[x.tanggal] || []).push(x));
                 body = Object.keys(g).sort().map(d => {
                         const a = g[d];
-                        return `<h3>${d}</h3><table><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Rek. tujuan / Ref</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${escH([x.rekening_tujuan, x.no_referensi].filter(Boolean).join(' / ') || '-')}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="4">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`;
+                        return `<h3>${d}</h3><table><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Rek. tujuan / Ref</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${escH([x.bank_tujuan, x.rekening_tujuan, x.no_referensi].filter(Boolean).join(' / ') || '-')}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="4">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`;
                     }).join('') +
                     `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
             }
@@ -1427,8 +1640,8 @@
             const code = sigCode();
             return `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><img src="${barcodeURL(code)}" style="height:46px;max-width:100%"><div style="font-size:9pt;letter-spacing:1px">${escH(code)}</div><div style="border-top:1px solid #000;padding-top:4px;margin-top:6px"><b>${escH(S.user.nama)}</b><br>${S.user.role}</div></div>`;
         };
-        const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.rekening_tujuan || '', t.no_referensi || '', t.nominal, t.biaya_admin, kasDelta(t), t.laba]);
-        const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Rek. Tujuan', 'No. Ref', 'Nominal', 'Biaya Admin', 'Dampak Kas', 'Laba'];
+        const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.bank_tujuan || '', t.rekening_tujuan || '', t.no_referensi || '', t.nominal, t.biaya_admin, kasDelta(t), t.laba]);
+        const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Bank', 'Rek. Tujuan', 'No. Ref', 'Nominal', 'Biaya Admin', 'Dampak Kas', 'Laba'];
         async function xlsxOut() {
             try {
                 await loadLib('xlsx');
@@ -1461,16 +1674,21 @@
                 PH = 210,
                 avail = PW - M.left - M.right,
                 fs = 11;
-            const head = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Rek. Tujuan / Ref', 'Nominal', 'Admin', 'Laba'];
-            const body = RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, [t.rekening_tujuan, t.no_referensi].filter(Boolean).join(' / ') || '-', rp(t.nominal), rp(t.biaya_admin), rp(t.laba)]);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(fs);
-            const w = head.map((h, i) => Math.max(...[h, ...body.map(r => r[i])].map(x => doc.getTextWidth(String(x)))) + 3),
-                k = avail / w.reduce((a, b) => a + b, 0);
+            const head = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Bank / Rek. Tujuan / Ref', 'Nominal', 'Admin', 'Laba'];
+            const body = RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, [
+                [t.bank_tujuan, t.rekening_tujuan].filter(Boolean).join(' '), t.no_referensi
+            ].filter(Boolean).join(' / ') || '-', rp(t.nominal), rp(t.biaya_admin), rp(t.laba)]);
             doc.setFont('helvetica', 'bold');
+            doc.setFontSize(fs);
             doc.text('Laporan Kas BRILink', M.left, M.top);
             doc.setFont('helvetica', 'normal');
             doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 5);
+            const wrap = {
+                    cellWidth: 'wrap'
+                },
+                auto = {
+                    cellWidth: 'auto'
+                };
             doc.autoTable({
                 startY: M.top + 9,
                 margin: M,
@@ -1478,20 +1696,36 @@
                 body,
                 theme: 'grid',
                 tableWidth: avail,
+                rowPageBreak: 'avoid',
                 styles: {
                     font: 'helvetica',
                     fontSize: fs,
                     cellPadding: 1,
                     overflow: 'linebreak',
-                    lineWidth: .1
+                    lineWidth: .1,
+                    valign: 'middle'
                 },
                 headStyles: {
                     fillColor: [0, 82, 156],
                     font: 'helvetica'
                 },
-                columnStyles: Object.fromEntries(w.map((x, i) => [i, {
-                    cellWidth: x * k
-                }]))
+                columnStyles: {
+                    0: wrap,
+                    1: wrap,
+                    2: auto,
+                    3: auto,
+                    4: auto,
+                    5: wrap,
+                    6: wrap,
+                    7: wrap
+                },
+                didDrawPage: () => {
+                    doc.setFontSize(9);
+                    doc.text('Hal. ' + doc.internal.getNumberOfPages(), PW - M.right, PH - 15, {
+                        align: 'right'
+                    });
+                    doc.setFontSize(fs);
+                }
             });
             let y = doc.lastAutoTable.finalY + 7;
             if (y + 24 > PH - M.bottom) {
