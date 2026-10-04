@@ -201,7 +201,7 @@
         <div class="md:ml-60">
             <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
-                <h2 id="title" class="font-bold flex-1"></h2>
+                <h2 id="title" class="font-bold flex-1"></h2><span id="brchip" onclick="location.hash='#tutup'" class="cursor-pointer text-xs font-bold px-2 py-1 rounded-full bg-slate-500/20">Cabang: ...</span>
                 <button id="who" onclick="pwForm()" title="Ubah password" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
                 <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
             </header>
@@ -248,7 +248,8 @@
                 getTutupKas: 30,
                 getAnalytics: 120,
                 getLogs: 15,
-                getSettings: 60
+                getSettings: 60,
+                getBranch: 10
             },
             CACHE = new Map();
         let OFFQ = JSON.parse(localStorage.offq || '[]');
@@ -493,7 +494,7 @@
             ['transaksi', 'Transaksi', 'credit-card'],
             ['pengeluaran', 'Pengeluaran', 'wallet'],
             ['pelanggan', 'Pelanggan', 'contact'],
-            ['tutup', 'Tutup Kas', 'calculator'],
+            ['tutup', 'Buka/Tutup Kas', 'vault'],
             ['analitik', 'Analitik', 'bar-chart-3'],
             ['laporan', 'Laporan', 'file-text'],
             ['setting', 'Pengaturan', 'settings'],
@@ -533,6 +534,7 @@
             $('title').textContent = pg[1];
             nav();
             icons();
+            loadBranch();
             if (silent !== true) {
                 $('view').innerHTML = SKEL;
                 scrollTo(0, 0);
@@ -543,7 +545,10 @@
                 if (rid !== RID || e.message === 'cancel') return;
                 $('view').innerHTML = `<div class="glass rounded-2xl p-6 text-center"><p class="text-red-500 mb-3">${escH(e.message)}</p><button class="btn" onclick="route()">Coba lagi</button></div>`;
             }
-            if (rid === RID) icons();
+            if (rid === RID) {
+                paintBanner();
+                icons();
+            }
             if (!PREF && S.token) {
                 PREF = true;
                 setTimeout(prefetch, 400);
@@ -791,16 +796,22 @@
             async tutup() {
                 const d = await api('getTutupKas'),
                     k = d.kas,
-                    row = (a, b, c = '') => `<div class="flex justify-between text-sm"><span>${a}</span><b class="${c}">${b}</b></div>`;
-                $('view').innerHTML = `<div class="grid lg:grid-cols-2 gap-3"><div class="glass rounded-2xl p-5 space-y-2"><b>Kas sistem (otomatis dari transaksi)</b>
-      ${row('Saldo awal periode', rp(k.awal))}${row(`Kas masuk (${k.trx} transaksi)`, '+' + rp(k.masuk), 'text-emerald-500')}${row('Kas keluar (tarik tunai + pengeluaran)', '-' + rp(k.keluar), 'text-red-500')}
+                    b = d.branch,
+                    row = (a, v, c = '') => `<div class="flex justify-between text-sm"><span>${a}</span><b class="${c}">${v}</b></div>`;
+                const hist = `<div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Catatan</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${x.tanggal}</td><td>${rp(x.saldo_sistem)}</td><td>${rp(x.kas_fisik)}</td><td class="${x.selisih < 0 ? 'text-red-500' : ''}">${rp(x.selisih)}</td><td>${escH(x.catatan || '-')}</td><td>${escH(x.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="6">Belum ada riwayat tutup kas.</td></tr>'}</tbody></table></div>`;
+                if (!b.open) {
+                    $('view').innerHTML = `<div class="glass rounded-2xl p-5 space-y-3 max-w-md"><b class="flex items-center gap-2"><i data-lucide="unlock" class="w-4"></i>Buka kas (Open Branch)</b><p class="text-sm text-slate-500">Hitung uang fisik di laci, lalu isi saldo kas awal. Transaksi baru hanya bisa dicatat setelah kas dibuka.</p><input id="o_saldo" type="number" min="0" class="inp" placeholder="Saldo kas awal (Rp)"><button class="btn" onclick="doBuka()"><i data-lucide="unlock" class="w-4"></i>Buka kas</button></div>` + hist;
+                    return;
+                }
+                $('view').innerHTML = `${b.basi ? `<div class="rounded-2xl p-4 mb-3 bg-amber-500/10 border border-amber-500/30 text-sm">Sesi kas tanggal <b>${b.tanggal}</b> belum ditutup. Tutup kas dulu agar transaksi hari ini bisa dicatat.</div>` : ''}
+      <div class="grid lg:grid-cols-2 gap-3"><div class="glass rounded-2xl p-5 space-y-2"><b>Kas sistem (otomatis dari transaksi)</b>
+      ${row('Dibuka oleh', escH(b.oleh || '-'))}${row('Saldo kas awal', rp(k.awal))}${row(`Kas masuk (${k.trx} transaksi)`, '+' + rp(k.masuk), 'text-emerald-500')}${row('Kas keluar (tarik tunai + pengeluaran)', '-' + rp(k.keluar), 'text-red-500')}
       <div class="border-t border-slate-500/30 pt-2 flex justify-between"><span>Saldo kas sistem</span><b class="text-xl">${rp(k.saldo)}</b></div>
-      <p class="text-xs text-slate-500">Periode berjalan sejak ${k.mulai ? new Date(k.mulai).toLocaleString('id-ID') : 'awal pencatatan'}.</p></div>
-      <div class="glass rounded-2xl p-5 space-y-3"><b>Tutup kas</b><input id="k_tgl" type="date" class="inp" value="${today()}">
+      <p class="text-xs text-slate-500">Sesi dibuka ${new Date(b.mulai).toLocaleString('id-ID')}.</p></div>
+      <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="lock" class="w-4"></i>Tutup kas (Close Branch)</b>
       <input id="k_fisik" type="number" min="0" class="inp" placeholder="Kas fisik (hasil hitung uang)" oninput="$('k_sel').textContent = rp(this.value - ${Number(k.saldo)})">
-      <p class="text-sm">Selisih fisik - sistem: <b id="k_sel">-</b></p><input id="k_next" type="number" min="0" class="inp" placeholder="Saldo awal periode berikutnya (kosong = 0)"><input id="k_cat" class="inp" placeholder="Catatan (opsional)">
-      <button class="btn" onclick="saveTutup()"><i data-lucide="lock" class="w-4"></i>Simpan tutup kas</button></div></div>
-      <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${x.tanggal}</td><td>${rp(x.saldo_sistem)}</td><td>${rp(x.kas_fisik)}</td><td class="${x.selisih < 0 ? 'text-red-500' : ''}">${rp(x.selisih)}</td><td>${escH(x.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="5">Belum ada tutup kas.</td></tr>'}</tbody></table></div>`;
+      <p class="text-sm">Selisih fisik - sistem: <b id="k_sel">-</b></p><input id="k_cat" class="inp" placeholder="Catatan (wajib bila ada selisih)">
+      <button class="btn" onclick="saveTutup()"><i data-lucide="lock" class="w-4"></i>Tutup kas</button></div></div>` + hist;
             },
 
             async analitik() {
@@ -832,18 +843,15 @@
         <input id="s_toko" class="inp" placeholder="Nama usaha" value="${escH(SET.toko)}"><input id="s_alamat" class="inp" placeholder="Alamat / telepon" value="${escH(SET.alamat)}"><input id="s_footer" class="inp" placeholder="Pesan penutup" value="${escH(SET.footer)}">
         <select id="s_lebar" class="inp"><option value="32">Kertas 58 mm (32 karakter)</option><option value="48">Kertas 80 mm (48 karakter)</option></select>
         <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak otomatis setelah simpan transaksi</label>
-        <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div>${S.user.role === 'Admin' ? `<div class="glass rounded-2xl p-5 space-y-3 md:col-span-2"><b class="flex items-center gap-2"><i data-lucide="database" class="w-4"></i>Saldo awal dan data (Admin)</b><div class="flex flex-wrap gap-2"><input id="s_saldo" type="number" min="0" class="inp !w-52" placeholder="Saldo awal kas"><button class="btn" onclick="saveSaldo()">Simpan saldo awal</button></div><div class="flex flex-wrap gap-2"><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup sekarang</button><input id="s_rst" class="inp !w-72" placeholder="Link/ID file backup"><button class="btn btn2" onclick="doRestore()">Restore</button></div><p class="text-xs text-slate-500">Backup harian otomatis: jalankan installBackupTrigger() sekali di Apps Script.</p></div>` : ''}</div>`;
+        <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div>${S.user.role === 'Admin' ? `<div class="glass rounded-2xl p-5 space-y-3 md:col-span-2"><b class="flex items-center gap-2"><i data-lucide="database" class="w-4"></i>Saldo awal dan data (Admin)</b><div class="flex flex-wrap gap-2"><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup sekarang</button><input id="s_rst" class="inp !w-72" placeholder="Link/ID file backup"><button class="btn btn2" onclick="doRestore()">Restore</button></div><p class="text-xs text-slate-500">Backup harian otomatis: jalankan installBackupTrigger() sekali di Apps Script.</p></div>` : ''}</div>`;
                 $('s_lebar').value = SET.lebar;
                 paintPrinter();
-                if (S.user.role === 'Admin') api('getSettings').then(d => {
-                    $('s_saldo').value = d.saldo_awal || 0;
-                }).catch(() => {});
             },
 
             async users() {
-                const d = await api('getUsers');
-                $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
-      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>${d.map(u => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${u.nama}</td><td>${u.username}</td><td>${u.role}</td><td>${u.status}</td></tr>`).join('')}</tbody></table></div>`;
+                const d = window.USERS = await api('getUsers');
+                $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
+      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Login terakhir</th><th></th></tr></thead><tbody>${d.map(u => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(u.nama)}</td><td>${escH(u.username)}</td><td>${u.role}</td><td><span class="px-2 py-0.5 rounded-full text-xs ${u.status === 'aktif' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-slate-500/20 text-slate-500'}">${u.status}</span></td><td>${u.last_login || '-'}</td><td class="whitespace-nowrap"><button class="btn btn2 !py-1 !px-3 text-xs" onclick="userForm('${u.id}')"><i data-lucide="pencil" class="w-3"></i>Edit</button> ${u.role === 'Operator' ? `<button class="btn !py-1 !px-3 text-xs !bg-red-600" onclick="delUser('${u.id}')"><i data-lucide="trash-2" class="w-3"></i>Hapus</button>` : ''}</td></tr>`).join('')}</tbody></table></div>`;
             }
         };
 
@@ -866,17 +874,48 @@
             };
             location.hash = '#transaksi';
         };
+        let BR = null;
+        async function loadBranch() {
+            try {
+                BR = await api('getBranch');
+            } catch (e) {
+                return;
+            }
+            const c = $('brchip'),
+                on = BR.open && !BR.basi;
+            if (!c) return;
+            c.textContent = on ? 'Cabang BUKA' : BR.basi ? 'Sesi belum ditutup' : 'Cabang TUTUP';
+            c.className = 'cursor-pointer text-xs font-bold px-2 py-1 rounded-full ' + (on ? 'bg-emerald-500/15 text-emerald-500' : 'bg-red-500/15 text-red-500');
+            paintBanner();
+        }
+
+        function paintBanner() {
+            const old = $('brbanner');
+            if (old) old.remove();
+            const v = $('view');
+            if (!v || !BR || (BR.open && !BR.basi) || location.hash === '#tutup') return;
+            v.insertAdjacentHTML('afterbegin', `<div id="brbanner" class="rounded-2xl p-4 mb-3 bg-red-500/10 border border-red-500/30 flex flex-wrap items-center gap-3"><i data-lucide="lock" class="w-5 text-red-500"></i><div class="flex-1 text-sm"><b>${BR.basi ? 'Sesi kas sebelumnya belum ditutup' : 'Cabang belum dibuka'}</b><br>Transaksi baru tidak bisa dicatat sebelum ${BR.basi ? 'tutup kas' : 'buka kas dan isi saldo kas awal'}.</div><a href="#tutup" class="btn">${BR.basi ? 'Tutup kas' : 'Buka kas'}</a></div>`);
+            icons();
+        }
+        async function doBuka() {
+            if (!need('o_saldo') || !confirm('Buka kas dengan saldo awal ' + rp(val('o_saldo')) + '?')) return;
+            try {
+                await api('bukaKas', {
+                    saldo_awal: val('o_saldo')
+                });
+                toast('Kas dibuka, transaksi dapat dimulai');
+                route();
+            } catch (e) {}
+        }
         async function saveTutup() {
-            if (!need('k_tgl', 'k_fisik')) return;
-            if (!confirm('Tutup kas akan mengatur saldo awal periode berikutnya (kosong = 0) dan memulai periode baru. Lanjutkan?')) return;
+            if (!need('k_fisik')) return;
+            if (!confirm('Tutup kas sekarang? Saldo awal akan direset ke 0 dan transaksi baru tidak bisa dicatat sampai kas dibuka lagi.')) return;
             try {
                 await api('addTutupKas', {
-                    tanggal: val('k_tgl'),
                     kas_fisik: val('k_fisik'),
-                    catatan: val('k_cat'),
-                    saldo_berikutnya: val('k_next')
+                    catatan: val('k_cat')
                 });
-                toast('Tutup kas tersimpan, periode baru dimulai');
+                toast('Kas ditutup');
                 route();
             } catch (e) {}
         }
@@ -951,6 +990,11 @@
         };
 
         function trxForm(t = {}) {
+            if (!t.id && BR && (!BR.open || BR.basi)) {
+                toast(BR.basi ? 'Tutup kas sesi sebelumnya dulu' : 'Buka kas dulu sebelum mencatat transaksi', false);
+                location.hash = '#tutup';
+                return;
+            }
             openModal(`<h3 class="font-bold mb-3">${t.id ? 'Edit' : 'Tambah'} transaksi</h3><div class="space-y-2">
     <div class="grid grid-cols-2 gap-2"><input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}"><input id="f_wkt" type="time" class="inp" value="${t.waktu || new Date().toTimeString().slice(0, 5)}"></div>
     <select id="f_jenis" class="inp" onchange="calc()">${opt(JENIS)}</select>
@@ -1017,6 +1061,11 @@
         }
 
         function expForm(e = {}) {
+            if (!e.id && BR && (!BR.open || BR.basi)) {
+                toast('Buka kas dulu sebelum mencatat pengeluaran', false);
+                location.hash = '#tutup';
+                return;
+            }
             openModal(`<h3 class="font-bold mb-3">${e.id ? 'Edit' : 'Tambah'} pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${e.tanggal || today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi" value="${escH(e.deskripsi || '')}"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${e.nominal || ''}">
   <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveExp('${e.id || ''}')">Simpan</button></div></div>`);
             if (e.kategori) $('e_kat').value = e.kategori;
@@ -1351,7 +1400,7 @@
                     `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
             }
             const w = open('', '_blank');
-            w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>@page{size:A4 landscape;margin:3cm 3cm 3cm 4cm}body{font:12pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
+            w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>@page{size:A4 landscape;margin:3cm 3cm 3cm 4cm}body{font:11pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:3px 6px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
             w.document.close();
             w.focus();
             w.print();
@@ -1410,24 +1459,20 @@
                 },
                 PW = 297,
                 PH = 210,
-                avail = PW - M.left - M.right;
+                avail = PW - M.left - M.right,
+                fs = 11;
             const head = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Rek. Tujuan / Ref', 'Nominal', 'Admin', 'Laba'];
             const body = RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, [t.rekening_tujuan, t.no_referensi].filter(Boolean).join(' / ') || '-', rp(t.nominal), rp(t.biaya_admin), rp(t.laba)]);
             doc.setFont('helvetica', 'normal');
-            let fs = 12,
-                w = [];
-            for (; fs >= 7; fs -= .5) {
-                doc.setFontSize(fs);
-                w = head.map((h, i) => Math.max(...[h, ...body.map(r => r[i])].map(x => doc.getTextWidth(String(x)))) + 4);
-                if (w.reduce((a, b) => a + b, 0) <= avail) break;
-            }
-            fs = Math.max(fs, 7);
-            const k = avail / w.reduce((a, b) => a + b, 0); // auto fit: font terbesar yang muat, lebar kolom disesuaikan
-            doc.setFontSize(12);
+            doc.setFontSize(fs);
+            const w = head.map((h, i) => Math.max(...[h, ...body.map(r => r[i])].map(x => doc.getTextWidth(String(x)))) + 3),
+                k = avail / w.reduce((a, b) => a + b, 0);
+            doc.setFont('helvetica', 'bold');
             doc.text('Laporan Kas BRILink', M.left, M.top);
-            doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 6);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 5);
             doc.autoTable({
-                startY: M.top + 12,
+                startY: M.top + 9,
                 margin: M,
                 head: [head],
                 body,
@@ -1436,36 +1481,38 @@
                 styles: {
                     font: 'helvetica',
                     fontSize: fs,
-                    cellPadding: 1.5,
-                    overflow: 'linebreak'
+                    cellPadding: 1,
+                    overflow: 'linebreak',
+                    lineWidth: .1
                 },
                 headStyles: {
-                    fillColor: [0, 82, 156]
+                    fillColor: [0, 82, 156],
+                    font: 'helvetica'
                 },
                 columnStyles: Object.fromEntries(w.map((x, i) => [i, {
                     cellWidth: x * k
                 }]))
             });
-            const L = [`Total transaksi : ${RPT.totalTransaksi}`, `Total nominal : ${rp(RPT.totalNominal)}`, `Total laba : ${rp(RPT.totalLaba)}`, `Total pengeluaran : ${rp(RPT.totalPengeluaran)}`, `Saldo akhir : ${rp(RPT.saldoAkhir)}`];
-            let y = doc.lastAutoTable.finalY + 8;
-            if (y + 34 > PH - M.bottom) {
+            let y = doc.lastAutoTable.finalY + 7;
+            if (y + 24 > PH - M.bottom) {
                 doc.addPage();
                 y = M.top;
-            }
-            doc.setFontSize(12);
-            L.forEach((l, i) => doc.text(l, M.left, y + i * 6));
+            } // halaman baru hanya bila tidak muat
+            doc.setFontSize(fs);
+            doc.text(`Transaksi: ${RPT.totalTransaksi}  |  Nominal: ${rp(RPT.totalNominal)}  |  Laba: ${rp(RPT.totalLaba)}`, M.left, y + 3);
+            doc.text(`Pengeluaran: ${rp(RPT.totalPengeluaran)}  |  Saldo akhir: ${rp(RPT.saldoAkhir)}`, M.left, y + 9);
             const code = sigCode(),
-                x = PW - M.right - 60;
-            doc.text('Dibuat oleh,', x + 30, y, {
+                x = PW - M.right - 50;
+            doc.text('Dibuat oleh,', x + 25, y, {
                 align: 'center'
             });
-            doc.addImage(barcodeURL(code), 'PNG', x, y + 3, 60, 14);
-            doc.setFontSize(9);
-            doc.text(code, x + 30, y + 21, {
+            doc.addImage(barcodeURL(code), 'PNG', x, y + 2, 50, 9);
+            doc.setFontSize(8);
+            doc.text(code, x + 25, y + 14, {
                 align: 'center'
             });
-            doc.setFontSize(12);
-            doc.text(`${S.user.nama} (${S.user.role})`, x + 30, y + 28, {
+            doc.setFontSize(fs);
+            doc.text(`${S.user.nama} (${S.user.role})`, x + 25, y + 19, {
                 align: 'center'
             });
             doc.save(`laporan-${val('rd')}_${val('rs')}.pdf`);
