@@ -11,10 +11,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']},colors:{bri:'#00529C',oren:'#F37021'}}}}</script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" onerror="this.onerror=null;var x=document.createElement('script');x.src='https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js';x.onload=function(){window.icons&&icons()};document.head.appendChild(x)"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{color-scheme:light}.dark{color-scheme:dark}
 body{min-height:100vh;background:radial-gradient(900px 400px at 85% -10%,rgba(14,165,233,.14),transparent),radial-gradient(700px 400px at -10% 110%,rgba(243,112,33,.10),transparent),#f1f5f9;transition:background .3s}
@@ -41,6 +37,7 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
     <input id="lu" class="inp mb-3" placeholder="Username" autocomplete="username">
     <input id="lp" type="password" class="inp mb-4" placeholder="Password" autocomplete="current-password">
     <button class="btn w-full justify-center" onclick="doLogin()"><i data-lucide="log-in" class="w-4"></i>Masuk</button>
+    <p class="text-center text-xs text-slate-500 mt-6">MHC Media • ©2026</p>
   </div>
 </section>
 
@@ -55,10 +52,11 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
     <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
       <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
       <h2 id="title" class="font-bold flex-1"></h2>
-      <span id="who" class="text-sm text-slate-500"></span>
+      <button id="who" onclick="pwForm()" title="Ubah password" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
       <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
     </header>
     <main id="view" class="p-4 max-w-6xl mx-auto"></main>
+    <footer class="text-center text-xs text-slate-500 py-6 noprint">MHC Media • ©2026</footer>
   </div>
 </div>
 
@@ -69,7 +67,7 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
 <script>
 /* ===== Konfigurasi: tempel URL Web App Apps Script di sini ===== */
 const LOGO_SVG = '<svg viewBox="0 0 190 48" class="h-12 mb-4 text-bri dark:text-white" role="img" aria-label="BRILink"><rect y="2" width="44" height="44" rx="12" fill="#00529C"/><path d="M12 24h20M26 15l9 9-9 9" stroke="#F37021" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="currentColor">BRI</text><text x="106" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="#F37021">Link</text></svg>';
-const API_URL = 'https://script.google.com/macros/s/AKfycbzhJwiVrDXYcRVxr7Q8vD3AkI3WpkO38mnkKrGxUB4vfFsE6b_8uJ_BWm5D9LTppQGtqQ/exec';
+const API_URL = 'GANTI_DENGAN_URL_WEB_APP';
 
 /* ===== services/api.js (retry + loading + token) ===== */
 const S = { token: localStorage.token, user: JSON.parse(localStorage.user || 'null'), last: Date.now() };
@@ -81,7 +79,16 @@ function toast(m, ok = true) {
   d.className = 'px-4 py-2 rounded-xl text-white shadow ' + (ok ? 'bg-emerald-600' : 'bg-red-600'); d.textContent = m;
   $('toast').append(d); setTimeout(() => d.remove(), 3500);
 }
+const READ = { getDashboard: 60, getTransactions: 30, getExpenses: 30, getReports: 30, getUsers: 30 }, CACHE = new Map();
 async function api(action, payload = {}, tries = 3) {
+  if (API_URL.startsWith('GANTI')) { toast('API_URL belum diisi di index.html', false); throw new Error('API_URL belum diisi'); }
+  const ttl = READ[action], key = action + JSON.stringify(payload), hit = ttl && CACHE.get(key);
+  if (hit && Date.now() - hit.t < ttl * 1000) return JSON.parse(hit.v);
+  const d = await apiRaw(action, payload, tries);
+  if (ttl && d !== undefined) CACHE.set(key, { t: Date.now(), v: JSON.stringify(d) }); else if (action !== 'logError') CACHE.clear();
+  return d;
+}
+async function apiRaw(action, payload = {}, tries = 3) {
   $('spin').classList.remove('hidden');
   try {
     for (let i = 0; i < tries; i++) {
@@ -97,27 +104,34 @@ async function api(action, payload = {}, tries = 3) {
 }
 
 /* ===== services/auth.js ===== */
+let LOGGING = false;
 async function doLogin() {
+  if (LOGGING) return; if (!val('lu') || !val('lp')) return toast('Isi username dan password', false);
+  LOGGING = true; try { await doLogin0(); } finally { LOGGING = false; $('lp').value = ''; }
+}
+async function doLogin0() {
   try {
     const d = await api('login', { username: $('lu').value, password: $('lp').value });
     S.token = localStorage.token = d.token; S.user = d.user; localStorage.user = JSON.stringify(d.user); boot();
   } catch (e) {}
 }
-function logoutLocal() { localStorage.removeItem('token'); localStorage.removeItem('user'); S.token = null; boot(); }
+function logoutLocal() { CACHE.clear(); localStorage.removeItem('token'); localStorage.removeItem('user'); S.token = null; location.hash = ''; location.reload(); }
 async function doLogout() { try { await api('logout', { token: S.token }); } catch (e) {} logoutLocal(); }
 setInterval(() => { if (S.token && Date.now() - S.last > 30 * 60000) { toast('Logout otomatis: tidak aktif', false); logoutLocal(); } }, 30000);
 
 /* ===== components/modal.js ===== */
 function openModal(html) { $('mbody').innerHTML = html; $('modal').classList.replace('hidden', 'flex'); icons(); }
 function closeModal() { $('modal').classList.replace('flex', 'hidden'); }
+const LIB = { chart: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js', xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', atable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js', barcode: 'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js' }, LOADED = {};
+const loadLib = k => LOADED[k] = LOADED[k] || new Promise((ok, no) => { const e = document.createElement('script'); e.src = LIB[k]; e.onload = ok; e.onerror = () => { delete LOADED[k]; no(new Error('Gagal memuat pustaka ' + k + ', periksa koneksi')); }; document.head.appendChild(e); });
 const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
 
 /* ===== components/sidebar.js ===== */
 const PAGES = [
   ['dashboard', 'Dashboard', 'home'], ['transaksi', 'Transaksi', 'credit-card'], ['pengeluaran', 'Pengeluaran', 'wallet'],
-  ['laporan', 'Laporan', 'file-text'], ['users', 'Pengguna', 'users', 'Admin']
+  ['laporan', 'Laporan', 'file-text'], ['setting', 'Pengaturan', 'settings'], ['users', 'Pengguna', 'users', 'Admin']
 ];
-const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500' };
+const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500', setting: 'bg-teal-500/15 text-teal-500' };
 function nav() {
   const cur = location.hash.slice(1) || 'dashboard';
   $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
@@ -137,7 +151,7 @@ async function route() {
 function boot() {
   const ok = !!S.token;
   $('login').classList.toggle('hidden', ok); $('login').classList.toggle('flex', !ok); $('app').classList.toggle('hidden', !ok);
-  if (ok) { $('who').textContent = S.user.nama + ' (' + S.user.role + ')'; route(); } paintTheme();
+  if (ok) { $('who').innerHTML = `<i data-lucide="key-round" class="w-4"></i>${escH(S.user.nama)} (${S.user.role})`; route(); } paintTheme();
 }
 addEventListener('hashchange', () => S.token && route());
 window.onerror = (m) => { if (S.token) api('logError', { m }, 1).catch(() => {}); };
@@ -174,7 +188,7 @@ function chart(id, type, labels, data, label) {
 const VIEWS = {
   async dashboard() {
     charts.forEach(c => c.destroy()); charts = [];
-    const d = await api('getDashboard');
+    const [d] = await Promise.all([api('getDashboard'), loadLib('chart')]);
     $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
       ${card('Transaksi hari ini', d.trxHari, 'receipt')}${card('Laba hari ini', rp(d.labaHari), 'trending-up')}
       ${card('Transaksi bulan ini', d.trxBulan, 'calendar')}${card('Laba bulan ini', rp(d.labaBulan), 'trending-up')}
@@ -221,6 +235,20 @@ const VIEWS = {
     runReport();
   },
 
+  async setting() {
+    $('view').innerHTML = `<div class="grid md:grid-cols-2 gap-3">
+      <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="bluetooth" class="w-4"></i>Printer thermal Bluetooth</b>
+        <p id="btst" class="text-sm"></p>
+        <div class="flex flex-wrap gap-2"><button class="btn" onclick="btPair()"><i data-lucide="bluetooth-searching" class="w-4"></i>Hubungkan</button><button class="btn btn2" onclick="btTest()"><i data-lucide="printer" class="w-4"></i>Tes cetak</button><button class="btn btn2" onclick="btOff()"><i data-lucide="bluetooth-off" class="w-4"></i>Putuskan</button></div>
+        <p class="text-xs text-slate-500">Nyalakan printer dan Bluetooth HP, lalu tekan Hubungkan. Butuh Chrome/Edge di Android, Windows, atau macOS. iPhone/Safari tidak mendukung Web Bluetooth, struk akan dicetak lewat dialog cetak browser. Setelah halaman dimuat ulang, sambungan perlu dipilih lagi.</p></div>
+      <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="receipt" class="w-4"></i>Struk</b>
+        <input id="s_toko" class="inp" placeholder="Nama usaha" value="${escH(SET.toko)}"><input id="s_alamat" class="inp" placeholder="Alamat / telepon" value="${escH(SET.alamat)}"><input id="s_footer" class="inp" placeholder="Pesan penutup" value="${escH(SET.footer)}">
+        <select id="s_lebar" class="inp"><option value="32">Kertas 58 mm (32 karakter)</option><option value="48">Kertas 80 mm (48 karakter)</option></select>
+        <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak otomatis setelah simpan transaksi</label>
+        <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div></div>`;
+    $('s_lebar').value = SET.lebar; paintPrinter();
+  },
+
   async users() {
     const d = await api('getUsers');
     $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
@@ -249,7 +277,7 @@ function trxForm(t = {}) {
 const calc = () => $('f_laba').textContent = rp(val('f_adm') - (val('f_ops') || 0));
 async function saveTrx(id) {
   if (!need('f_tgl', 'f_nom', 'f_adm')) return;
-  try { await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }); closeModal(); toast('Transaksi disimpan'); route(); } catch (e) {}
+  try { const r = await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }); closeModal(); toast('Transaksi disimpan'); route(); if (!id && SET.auto && r) struk(r); } catch (e) {}
 }
 function expForm() {
   openModal(`<h3 class="font-bold mb-3">Tambah pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal">
@@ -258,6 +286,19 @@ function expForm() {
 async function saveExp() {
   if (!need('e_tgl', 'e_nom')) return;
   try { await api('addExpense', { tanggal: val('e_tgl'), kategori: val('e_kat'), deskripsi: val('e_des'), nominal: val('e_nom') }); closeModal(); toast('Pengeluaran disimpan'); route(); } catch (e) {}
+}
+function pwForm() {
+  openModal(`<h3 class="font-bold mb-3">Ubah password</h3><div class="space-y-2">
+    <input id="pw_o" type="password" class="inp" placeholder="Password lama" autocomplete="current-password">
+    <input id="pw_n" type="password" class="inp" placeholder="Password baru (min 6)" autocomplete="new-password">
+    <input id="pw_c" type="password" class="inp" placeholder="Ulangi password baru" autocomplete="new-password">
+    <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="savePw()">Simpan</button></div></div>`);
+}
+async function savePw() {
+  if (!need('pw_o', 'pw_n')) return;
+  if (val('pw_n').length < 6) return toast('Password baru minimal 6 karakter', false);
+  if (val('pw_n') !== val('pw_c')) return toast('Konfirmasi password tidak sama', false);
+  try { await api('changePassword', { oldPassword: val('pw_o'), newPassword: val('pw_n') }); closeModal(); toast('Password diperbarui'); } catch (e) {}
 }
 function userForm(id) {
   const u = (window.USERS || []).find(x => x.id === id) || {};
@@ -275,11 +316,59 @@ async function delUser(id) { if (!confirm('Hapus pengguna ini?')) return; try { 
 async function del(a, id) { if (!confirm('Hapus data ini?')) return; try { await api(a, { id }); toast('Terhapus'); route(); } catch (e) {} }
 async function doBackup() { try { const d = await api('backup'); toast('Backup dibuat di Google Drive'); window.open(d.url); } catch (e) {} }
 
-function struk(t) {
-  const w = open('', '', 'width=300,height=400');
-  w.document.write(`<pre style="font:12px monospace">KAS BRILINK\n${t.tanggal} ${t.waktu}\n--------------------\n${t.jenis_transaksi}\n${t.pelanggan}\nNominal : ${rp(t.nominal)}\nAdmin   : ${rp(t.biaya_admin)}\nTOTAL   : ${rp(Number(t.nominal) + Number(t.biaya_admin))}\n--------------------\nTerima kasih</pre>`);
-  w.print();
+/* ===== Printer thermal Bluetooth (ESC/POS via Web Bluetooth) ===== */
+const SET = Object.assign({ toko: 'AGEN BRILINK', alamat: '', footer: 'Terima kasih', lebar: 32, auto: false }, JSON.parse(localStorage.setting || '{}'));
+const BT = { dev: null, ch: null, chunk: 100 };
+const BT_SVC = ['000018f0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb', '0000fff0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2'];
+const btOn = () => !!(BT.ch && BT.dev && BT.dev.gatt.connected);
+function paintPrinter() { const e = $('btst'); if (e) e.innerHTML = btOn() ? `<span class="text-emerald-500 font-bold">Terhubung:</span> ${escH(BT.dev.name)}` : 'Belum terhubung' + (localStorage.btName ? ` (terakhir: ${escH(localStorage.btName)})` : ''); }
+async function btConnect(pick) {
+  if (!navigator.bluetooth) throw new Error('Browser tidak mendukung Bluetooth. Pakai Chrome/Edge (Android atau komputer).');
+  if (!BT.dev || pick) {
+    BT.dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: BT_SVC });
+    BT.dev.addEventListener('gattserverdisconnected', () => { BT.ch = null; paintPrinter(); toast('Printer terputus', false); });
+  }
+  BT.ch = null;
+  const srv = await BT.dev.gatt.connect();
+  for (const sv of await srv.getPrimaryServices()) {
+    const w = (await sv.getCharacteristics()).find(c => c.properties.write || c.properties.writeWithoutResponse);
+    if (w) { BT.ch = w; break; }
+  }
+  if (!BT.ch) throw new Error('Printer ini tidak dikenali (tidak ada jalur tulis data). Coba printer ESC/POS BLE lain.');
+  localStorage.btName = BT.dev.name || 'Printer'; return BT.dev.name || 'Printer';
 }
+async function btSend(bytes) {
+  if (!btOn()) await btConnect(false);
+  for (let n = BT.chunk, i = 0; i < bytes.length;) {
+    try { BT.ch.properties.writeWithoutResponse ? await BT.ch.writeValueWithoutResponse(bytes.slice(i, i + n)) : await BT.ch.writeValue(bytes.slice(i, i + n)); i += n; }
+    catch (e) { if (n > 20) { n = BT.chunk = 20; continue; } throw e; }
+    await new Promise(r => setTimeout(r, 20));
+  }
+}
+const enc = x => Array.from(String(x ?? '').normalize('NFD').replace(/[^\x20-\x7E]/g, ''), c => c.charCodeAt(0));
+function escpos(t) {
+  const W = Number(SET.lebar) || 32, B = [], txt = x => B.push(...enc(x), 10), line = () => txt('-'.repeat(W));
+  const row = (a, b) => { a = String(a); b = String(b); const l = a.slice(0, Math.max(1, W - b.length - 1)); txt(l + ' '.repeat(Math.max(1, W - l.length - b.length)) + b); };
+  B.push(27, 64, 27, 97, 1, 27, 69, 1); txt(SET.toko); B.push(27, 69, 0); if (SET.alamat) txt(SET.alamat);
+  B.push(27, 97, 0); line(); txt(t.tanggal + ' ' + t.waktu); txt('No: ' + t.id); row('Jenis', t.jenis_transaksi); row('Pelanggan', t.pelanggan);
+  line(); row('Nominal', rp(t.nominal)); row('Biaya admin', rp(t.biaya_admin));
+  B.push(27, 69, 1); row('TOTAL', rp(Number(t.nominal) + Number(t.biaya_admin))); B.push(27, 69, 0);
+  line(); txt('Operator: ' + t.operator); B.push(27, 97, 1); txt(SET.footer); B.push(10, 10, 10, 29, 86, 66, 0);
+  return new Uint8Array(B);
+}
+async function struk(t) {
+  if (navigator.bluetooth && (BT.dev || localStorage.btName)) {
+    try { await btSend(escpos(t)); return toast('Struk dikirim ke printer'); }
+    catch (e) { if (e.name === 'NotFoundError') return; toast('Printer gagal: ' + e.message + '. Memakai cetak browser.', false); }
+  }
+  const w = open('', '', 'width=320,height=480'); if (!w) return toast('Pop-up diblokir, izinkan pop-up untuk mencetak', false);
+  w.document.write(`<pre style="font:12px monospace;width:58mm">${escH(SET.toko)}\n${escH(SET.alamat)}\n--------------------------------\n${t.tanggal} ${t.waktu}\nNo: ${t.id}\n${escH(t.jenis_transaksi)}\n${escH(t.pelanggan)}\nNominal : ${rp(t.nominal)}\nAdmin   : ${rp(t.biaya_admin)}\nTOTAL   : ${rp(Number(t.nominal) + Number(t.biaya_admin))}\n--------------------------------\n${escH(SET.footer)}</pre>`);
+  w.document.close(); w.print();
+}
+async function btPair() { try { toast('Terhubung ke ' + await btConnect(true)); } catch (e) { if (e.name !== 'NotFoundError') toast(e.message, false); } paintPrinter(); }
+async function btTest() { try { await btSend(escpos({ tanggal: today(), waktu: 'TES', id: 'TES', jenis_transaksi: 'Tes cetak', pelanggan: '-', nominal: 0, biaya_admin: 0, operator: S.user.username })); toast('Tes cetak dikirim'); } catch (e) { if (e.name !== 'NotFoundError') toast(e.message, false); } paintPrinter(); }
+function btOff() { try { if (btOn()) BT.dev.gatt.disconnect(); } catch (e) {} BT.ch = null; localStorage.removeItem('btName'); paintPrinter(); toast('Printer diputuskan'); }
+function saveSetting() { Object.assign(SET, { toko: val('s_toko'), alamat: val('s_alamat'), footer: val('s_footer'), lebar: Number(val('s_lebar')), auto: $('s_auto').checked }); localStorage.setting = JSON.stringify(SET); toast('Pengaturan disimpan'); }
 
 /* ===== Laporan ===== */
 function setRange(n) {
@@ -289,6 +378,7 @@ const escH = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': 
 const sumK = (a, k) => a.reduce((t, x) => t + Number(x[k] || 0), 0);
 let RPT = null, SEL = new Set(), MODE = 'all';
 async function runReport() {
+  loadLib('barcode').catch(() => {});
   if (val('rd') > val('rs')) return toast('Tanggal awal melebihi tanggal akhir', false);
   RPT = await api('getReports', { dari: val('rd'), sampai: val('rs') }); SEL.clear();
   if (val('rj')) RPT.transaksi = RPT.transaksi.filter(x => x.jenis_transaksi === val('rj'));
@@ -305,7 +395,8 @@ async function runReport() {
   icons();
 }
 function selAll(on) { RPT.transaksi.forEach(x => on ? SEL.add(x.id) : SEL.delete(x.id)); document.querySelectorAll('.sel').forEach(c => c.checked = on); }
-function printReport() {
+async function printReport() {
+  try { await loadLib('barcode'); } catch (e) { return toast(e.message, false); }
   const t = RPT.transaksi; if (!t.length) return toast('Tidak ada data untuk dicetak', false);
   let body;
   if (MODE === 'detail') {
@@ -317,25 +408,34 @@ function printReport() {
       + `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
   }
   const w = open('', '_blank');
-  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>body{font:13px sans-serif;padding:24px;color:#0f172a}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
+  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>@page{size:A4;margin:3cm 3cm 3cm 4cm}body{font:12pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
   w.document.close(); w.focus(); w.print();
 }
-const sigHtml = () => `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><div style="height:56px;font:italic 26px 'Brush Script MT',cursive;color:#1e3a8a">${escH(S.user.nama)}</div><div style="border-top:1px solid #000;padding-top:4px"><b>${escH(S.user.nama)}</b><br>${S.user.role} (@${escH(S.user.username)})</div></div>`;
+const barcodeURL = txt => { const c = document.createElement('canvas'); JsBarcode(c, txt, { format: 'CODE128', width: 1.6, height: 46, displayValue: false, margin: 0 }); return c.toDataURL('image/png'); };
+const sigCode = () => ('BRL-' + S.user.username + '-' + new Date().toISOString().slice(2, 16).replace(/\D/g, '')).toUpperCase();
+const sigHtml = () => { const code = sigCode(); return `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><img src="${barcodeURL(code)}" style="height:46px;max-width:100%"><div style="font-size:9pt;letter-spacing:1px">${escH(code)}</div><div style="border-top:1px solid #000;padding-top:4px;margin-top:6px"><b>${escH(S.user.nama)}</b><br>${S.user.role}</div></div>`; };
 const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.nominal, t.biaya_admin, t.laba]);
 const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'];
-function xlsxOut() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([HEAD, ...rptRows()]), 'Laporan'); XLSX.writeFile(wb, `laporan-${val('rd')}_${val('rs')}.xlsx`); }
-function pdfOut() {
-  const doc = new jspdf.jsPDF(); doc.text(`Laporan Kas BRILink ${val('rd')} s/d ${val('rs')}`, 14, 14);
-  doc.autoTable({ startY: 20, head: [HEAD], body: rptRows() });
-  doc.text(`Laba ${rp(RPT.totalLaba)} | Pengeluaran ${rp(RPT.totalPengeluaran)} | Saldo ${rp(RPT.saldoAkhir)}`, 14, doc.lastAutoTable.finalY + 10);
-  let y = doc.lastAutoTable.finalY + 24; if (y > 245) { doc.addPage(); y = 30; }
-  doc.setFontSize(11); doc.text('Dibuat oleh,', 150, y, { align: 'center' });
-  doc.setFont('times', 'italic'); doc.setFontSize(18); doc.text(S.user.nama, 150, y + 20, { align: 'center' });
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.line(120, y + 25, 180, y + 25); doc.text(`${S.user.nama} (${S.user.role})`, 150, y + 31, { align: 'center' });
+async function xlsxOut() { try { await loadLib('xlsx'); } catch (e) { return toast(e.message, false); } const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([HEAD, ...rptRows()]), 'Laporan'); XLSX.writeFile(wb, `laporan-${val('rd')}_${val('rs')}.xlsx`); }
+async function pdfOut() {
+  try { await Promise.all([loadLib('jspdf'), loadLib('barcode')]); await loadLib('atable'); } catch (e) { return toast(e.message, false); }
+  const doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' }), M = { top: 30, left: 40, right: 30, bottom: 30 };
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
+  doc.text('Laporan Kas BRILink', M.left, M.top); doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 6);
+  doc.autoTable({ startY: M.top + 12, margin: M, head: [['Tanggal', 'Jenis', 'Pelanggan', 'Nominal', 'Laba']], body: RPT.transaksi.map(t => [t.tanggal, t.jenis_transaksi, t.pelanggan, rp(t.nominal), rp(t.laba)]), styles: { font: 'helvetica', fontSize: 12, cellPadding: 1.5 }, headStyles: { fillColor: [0, 82, 156] } });
+  const L = [`Total transaksi : ${RPT.totalTransaksi}`, `Total nominal : ${rp(RPT.totalNominal)}`, `Total laba : ${rp(RPT.totalLaba)}`, `Total pengeluaran : ${rp(RPT.totalPengeluaran)}`, `Saldo akhir : ${rp(RPT.saldoAkhir)}`];
+  let y = doc.lastAutoTable.finalY + 8; if (y + L.length * 6 + 45 > 297 - M.bottom) { doc.addPage(); y = M.top; }
+  L.forEach((l, i) => doc.text(l, M.left, y + i * 6));
+  y += L.length * 6 + 6; const code = sigCode(), x = 210 - M.right - 60;
+  doc.text('Dibuat oleh,', x + 30, y, { align: 'center' }); doc.addImage(barcodeURL(code), 'PNG', x, y + 3, 60, 14);
+  doc.setFontSize(9); doc.text(code, x + 30, y + 21, { align: 'center' }); doc.setFontSize(12);
+  doc.text(`${S.user.nama} (${S.user.role})`, x + 30, y + 28, { align: 'center' });
   doc.save(`laporan-${val('rd')}_${val('rs')}.pdf`);
 }
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+['lu', 'lp'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+addEventListener('offline', () => toast('Tidak ada koneksi internet', false)); addEventListener('online', () => toast('Koneksi kembali'));
 boot();
 </script>
 </body>
