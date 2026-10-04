@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kas BRILink</title>
 <meta name="theme-color" content="#00529C">
+<script>document.documentElement.classList.toggle('dark',(localStorage.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark')</script>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -15,38 +16,47 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-.glass{background:rgba(255,255,255,.75);backdrop-filter:blur(10px)}.dark .glass{background:rgba(30,41,59,.7)}
-.inp{width:100%;border-radius:.75rem;border:1px solid #cbd5e1;padding:.55rem .75rem;background:transparent}.dark .inp{border-color:#475569}
-.btn{border-radius:.75rem;padding:.55rem 1rem;font-weight:700;background:#00529C;color:#fff}.btn2{background:#e2e8f0;color:#0f172a}
+:root{color-scheme:light}.dark{color-scheme:dark}
+body{min-height:100vh;background:radial-gradient(900px 400px at 85% -10%,rgba(14,165,233,.14),transparent),radial-gradient(700px 400px at -10% 110%,rgba(243,112,33,.10),transparent),#f1f5f9;transition:background .3s}
+.dark body{background:radial-gradient(900px 400px at 85% -10%,rgba(14,165,233,.16),transparent),radial-gradient(700px 400px at -10% 110%,rgba(243,112,33,.09),transparent),#0b1220}
+.glass{background:rgba(255,255,255,.8);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.25);box-shadow:0 1px 2px rgba(15,23,42,.04),0 12px 28px -14px rgba(15,23,42,.18)}
+.dark .glass{background:rgba(30,41,59,.62);border-color:rgba(148,163,184,.16);box-shadow:0 12px 28px -14px rgba(0,0,0,.6)}
+.inp{width:100%;border-radius:.75rem;border:1px solid #cbd5e1;padding:.6rem .8rem;background:rgba(255,255,255,.6);transition:.15s}.dark .inp{border-color:#475569;background:rgba(15,23,42,.5)}
+.inp:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.25)}.dark .inp option{background:#1e293b}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border-radius:.75rem;padding:.55rem 1rem;font-weight:700;background:linear-gradient(135deg,#00529C,#0a74d4);color:#fff;box-shadow:0 6px 16px -8px #00529C;transition:.15s}.btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.4;pointer-events:none}
+.btn2{background:#e2e8f0;color:#0f172a;box-shadow:none}.dark .btn2{background:#334155;color:#e2e8f0}
+.icon-btn{width:2.25rem;height:2.25rem;border-radius:.75rem;display:grid;place-items:center;transition:.15s}.icon-btn:hover{background:rgba(148,163,184,.2)}
+th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}tbody tr:hover{background:rgba(14,165,233,.07)}
+.dark ::-webkit-calendar-picker-indicator{filter:invert(.8)}
 @media print{aside,header,.noprint{display:none!important}}
 </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans">
+<body class="text-slate-800 dark:text-slate-100 font-sans antialiased">
 
 <!-- LOGIN -->
-<section id="login" class="min-h-screen hidden items-center justify-center p-4 bg-gradient-to-br from-bri to-slate-900">
+<section id="login" class="relative min-h-screen hidden items-center justify-center p-4 bg-gradient-to-br from-bri via-sky-700 to-slate-900"><button class="themeBtn icon-btn absolute top-4 right-4 text-white" onclick="toggleTheme()" aria-label="Ganti tema"></button>
   <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-xl">
-    <h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
+    <div class="w-12 h-12 rounded-2xl bg-bri text-white grid place-items-center mb-4 shadow-lg"><i data-lucide="landmark"></i></div><h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
     <p class="text-sm text-slate-500 mb-6">Masuk untuk mencatat transaksi hari ini.</p>
     <input id="lu" class="inp mb-3" placeholder="Username" autocomplete="username">
     <input id="lp" type="password" class="inp mb-4" placeholder="Password" autocomplete="current-password">
-    <button class="btn w-full" onclick="doLogin()">Masuk</button>
+    <button class="btn w-full justify-center" onclick="doLogin()"><i data-lucide="log-in" class="w-4"></i>Masuk</button>
   </div>
 </section>
 
 <!-- APP -->
 <div id="app" class="hidden min-h-screen">
   <aside id="side" class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full md:translate-x-0 transition-transform glass border-r border-slate-200 dark:border-slate-700 p-4 flex flex-col">
-    <div class="text-xl font-bold text-bri dark:text-white mb-6 px-2">Kas BRILink</div>
+    <div class="flex items-center gap-2 text-xl font-bold text-bri dark:text-white mb-6 px-2"><span class="w-9 h-9 rounded-xl bg-bri text-white grid place-items-center"><i data-lucide="landmark" class="w-5"></i></span>Kas BRILink</div>
     <nav id="nav" class="space-y-1 flex-1"></nav>
-    <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-50"><i data-lucide="log-out"></i>Keluar</button>
+    <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-500/10"><i data-lucide="log-out"></i>Keluar</button>
   </aside>
   <div class="md:ml-60">
     <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
       <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
       <h2 id="title" class="font-bold flex-1"></h2>
       <span id="who" class="text-sm text-slate-500"></span>
-      <button onclick="document.documentElement.classList.toggle('dark')"><i data-lucide="moon"></i></button>
+      <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
     </header>
     <main id="view" class="p-4 max-w-6xl mx-auto"></main>
   </div>
@@ -92,7 +102,7 @@ async function doLogin() {
     S.token = localStorage.token = d.token; S.user = d.user; localStorage.user = JSON.stringify(d.user); boot();
   } catch (e) {}
 }
-function logoutLocal() { localStorage.clear(); S.token = null; boot(); }
+function logoutLocal() { localStorage.removeItem('token'); localStorage.removeItem('user'); S.token = null; boot(); }
 async function doLogout() { try { await api('logout', { token: S.token }); } catch (e) {} logoutLocal(); }
 setInterval(() => { if (S.token && Date.now() - S.last > 30 * 60000) { toast('Logout otomatis: tidak aktif', false); logoutLocal(); } }, 30000);
 
@@ -108,7 +118,7 @@ const PAGES = [
 ];
 function nav() {
   $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
-    `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-bri/10 ${location.hash.slice(1) === p[0] ? 'bg-bri/10 text-bri font-bold' : ''}"><i data-lucide="${p[2]}"></i>${p[1]}</a>`).join('');
+    `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-3 py-2 rounded-xl transition hover:bg-slate-500/10 ${location.hash.slice(1) === p[0] ? 'bg-bri text-white font-bold shadow-md' : ''}"><i data-lucide="${p[2]}"></i>${p[1]}</a>`).join('');
 }
 
 /* ===== Router ===== */
@@ -124,16 +134,33 @@ async function route() {
 function boot() {
   const ok = !!S.token;
   $('login').classList.toggle('hidden', ok); $('login').classList.toggle('flex', !ok); $('app').classList.toggle('hidden', !ok);
-  if (ok) { $('who').textContent = S.user.nama + ' (' + S.user.role + ')'; route(); } icons();
+  if (ok) { $('who').textContent = S.user.nama + ' (' + S.user.role + ')'; route(); } paintTheme();
 }
 addEventListener('hashchange', () => S.token && route());
 window.onerror = (m) => { if (S.token) api('logError', { m }, 1).catch(() => {}); };
 
-const card = (l, v, i) => `<div class="glass rounded-2xl p-4 shadow-sm"><div class="flex justify-between text-slate-500 text-sm">${l}<i data-lucide="${i}" class="w-4"></i></div><div class="text-xl font-bold mt-1">${v}</div></div>`;
+const isDark = () => document.documentElement.classList.contains('dark');
+function paintTheme() { document.querySelectorAll('.themeBtn').forEach(b => b.innerHTML = `<i data-lucide="${isDark() ? 'sun' : 'moon'}"></i>`); icons(); }
+function toggleTheme() { const d = document.documentElement.classList.toggle('dark'); localStorage.theme = d ? 'dark' : 'light'; paintTheme(); if (S.token) route(); }
+const TONE = { sky: 'bg-sky-500/15 text-sky-500', emerald: 'bg-emerald-500/15 text-emerald-500', violet: 'bg-violet-500/15 text-violet-500', orange: 'bg-orange-500/15 text-orange-500', rose: 'bg-rose-500/15 text-rose-500' };
+const ICON_TONE = { receipt: 'sky', 'trending-up': 'emerald', calendar: 'violet', users: 'orange', wallet: 'rose', banknote: 'sky', landmark: 'violet' };
+const card = (l, v, i) => `<div class="glass rounded-2xl p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grid place-items-center shrink-0 ${TONE[ICON_TONE[i] || 'sky']}"><i data-lucide="${i}" class="w-5 h-5"></i></div><div class="min-w-0"><div class="text-xs text-slate-500">${l}</div><div class="text-lg font-bold truncate">${v}</div></div></div>`;
 let charts = [];
 function chart(id, type, labels, data, label) {
-  const c = new Chart($(id), { type, data: { labels, datasets: [{ label, data, backgroundColor: ['#00529C', '#F37021', '#0ea5e9', '#22c55e', '#a855f7', '#eab308', '#ef4444', '#14b8a6', '#64748b', '#ec4899', '#84cc16'], borderColor: '#00529C', tension: .3 }] }, options: { plugins: { legend: { display: type === 'doughnut' } } } });
-  charts.push(c);
+  const dk = isDark(), txt = dk ? '#94a3b8' : '#64748b', grid = dk ? 'rgba(148,163,184,.12)' : 'rgba(100,116,139,.14)', ctx = $(id).getContext('2d');
+  const pal = ['#38bdf8', '#F37021', '#818cf8', '#34d399', '#f472b6', '#facc15', '#fb7185', '#2dd4bf', '#a78bfa', '#94a3b8', '#a3e635'];
+  const ds = { label, data };
+  if (type === 'line') {
+    const g = ctx.createLinearGradient(0, 0, 0, 260); g.addColorStop(0, 'rgba(56,189,248,.5)'); g.addColorStop(1, 'rgba(56,189,248,0)');
+    Object.assign(ds, { fill: true, backgroundColor: g, borderColor: '#38bdf8', borderWidth: 3, tension: .4, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#38bdf8', pointHoverBorderWidth: 3 });
+  } else if (type === 'bar') Object.assign(ds, { backgroundColor: '#F37021', borderRadius: 8, borderSkipped: false, maxBarThickness: 28 });
+  else Object.assign(ds, { backgroundColor: pal, borderWidth: 0, spacing: 4, borderRadius: 8, hoverOffset: 8 });
+  const o = { responsive: true, maintainAspectRatio: false, animation: { duration: 900, easing: 'easeOutQuart' }, interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: type === 'doughnut', position: 'bottom', labels: { color: txt, usePointStyle: true, boxWidth: 8, padding: 14, font: { family: 'Plus Jakarta Sans' } } },
+      tooltip: { backgroundColor: dk ? '#0f172a' : '#fff', titleColor: dk ? '#f1f5f9' : '#0f172a', bodyColor: txt, borderColor: grid, borderWidth: 1, padding: 10, cornerRadius: 10, displayColors: type === 'doughnut', boxPadding: 4 } } };
+  if (type === 'doughnut') o.cutout = '72%';
+  else o.scales = { x: { grid: { display: false }, border: { display: false }, ticks: { color: txt } }, y: { beginAtZero: true, grid: { color: grid }, border: { display: false }, ticks: { color: txt, precision: 0 } } };
+  charts.push(new Chart(ctx, { type, data: { labels, datasets: [ds] }, options: o }));
 }
 
 /* ===== Pages ===== */
@@ -145,11 +172,14 @@ const VIEWS = {
       ${card('Transaksi hari ini', d.trxHari, 'receipt')}${card('Laba hari ini', rp(d.labaHari), 'trending-up')}
       ${card('Transaksi bulan ini', d.trxBulan, 'calendar')}${card('Laba bulan ini', rp(d.labaBulan), 'trending-up')}
       ${card('Pelanggan', d.pelanggan, 'users')}${card('Pengeluaran bulan ini', rp(d.pengeluaranBulan), 'wallet')}
-      <div class="col-span-2">${card('Saldo kas', rp(d.saldoKas), 'banknote')}</div></div>
+      <div class="col-span-2 rounded-2xl p-5 text-white shadow-lg flex items-center justify-between" style="background:linear-gradient(135deg,#00529C,#0ea5e9 70%,#F37021 150%)"><div><div class="text-sm opacity-80">Saldo kas saat ini</div><div class="text-2xl font-bold">${rp(d.saldoKas)}</div></div><i data-lucide="landmark" class="w-10 h-10 opacity-70"></i></div></div>
       <div class="grid md:grid-cols-2 gap-3 mt-3">
-      <div class="glass rounded-2xl p-4"><b>Transaksi harian</b><canvas id="c1"></canvas></div>
-      <div class="glass rounded-2xl p-4"><b>Jenis transaksi</b><canvas id="c2"></canvas></div></div>`;
-    chart('c1', 'line', Object.keys(d.harian), Object.values(d.harian), 'Transaksi');
+      <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="activity" class="w-4 text-sky-500"></i>Transaksi harian bulan ini</div><div class="h-64"><canvas id="c1"></canvas></div></div>
+      <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="pie-chart" class="w-4 text-orange-500"></i>Jenis transaksi</div><div class="relative h-64"><canvas id="c2"></canvas><div class="absolute inset-x-0 top-0 flex flex-col items-center justify-center pointer-events-none" style="height:78%"><b class="text-2xl">${Object.values(d.jenis).reduce((a, b) => a + b, 0)}</b><span class="text-xs text-slate-500">transaksi</span></div></div></div></div>`;
+    const ks = Object.keys(d.harian).sort(), lh = d.labaHarian || {};
+    $('view').insertAdjacentHTML('beforeend', `<div class="glass rounded-2xl p-5 mt-3"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="bar-chart-3" class="w-4 text-orange-500"></i>Laba harian bulan ini</div><div class="h-64"><canvas id="c3"></canvas></div></div>`);
+    chart('c1', 'line', ks, ks.map(k => d.harian[k]), 'Transaksi');
+    chart('c3', 'bar', ks, ks.map(k => lh[k] || 0), 'Laba');
     chart('c2', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
   },
 
@@ -161,17 +191,17 @@ const VIEWS = {
       <select class="inp !w-40" onchange="VIEWS.f.jenis=this.value;VIEWS.transaksi()"><option value="">Semua jenis</option>${opt(JENIS)}</select>
       <input type="date" class="inp !w-40" value="${f.dari}" onchange="VIEWS.f.dari=this.value;VIEWS.transaksi()">
       <input type="date" class="inp !w-40" value="${f.sampai}" onchange="VIEWS.f.sampai=this.value;VIEWS.transaksi()">
-      <button class="btn ml-auto" onclick="trxForm()">+ Transaksi</button></div>
+      <button class="btn ml-auto" onclick="trxForm()"><i data-lucide="plus" class="w-4"></i>Transaksi</button></div>
       <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Admin</th><th>Laba</th><th></th></tr></thead><tbody>
       ${d.items.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${t.tanggal}<br><small>${t.waktu}</small></td><td>${t.jenis_transaksi}</td><td>${t.pelanggan}</td><td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td>${rp(t.laba)}</td>
       <td class="whitespace-nowrap noprint"><button onclick='struk(${JSON.stringify(t)})'><i data-lucide="printer" class="w-4"></i></button> <button onclick='trxForm(${JSON.stringify(t)})'><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteTransaction','${t.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Belum ada transaksi. Klik "+ Transaksi" untuk mulai.</td></tr>'}
       </tbody></table></div>
-      <div class="flex justify-between mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="VIEWS.transaksi(${page - 1})">Sebelumnya</button><span>Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="VIEWS.transaksi(${page + 1})">Berikutnya</button></div>`;
+      <div class="flex justify-between mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="VIEWS.transaksi(${page - 1})"><i data-lucide="chevron-left" class="w-4"></i>Sebelumnya</button><span>Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="VIEWS.transaksi(${page + 1})">Berikutnya<i data-lucide="chevron-right" class="w-4"></i></button></div>`;
   },
 
   async pengeluaran() {
     const d = await api('getExpenses');
-    $('view').innerHTML = `<button class="btn mb-3" onclick="expForm()">+ Pengeluaran</button><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>
+    $('view').innerHTML = `<button class="btn mb-3" onclick="expForm()"><i data-lucide="plus" class="w-4"></i>Pengeluaran</button><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>
       ${d.map(e => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${e.tanggal}</td><td>${e.kategori}</td><td>${e.deskripsi}</td><td>${rp(e.nominal)}</td><td>${S.user.role === 'Admin' ? `<button onclick="del('deleteExpense','${e.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500">Belum ada pengeluaran.</td></tr>'}</tbody></table></div>`;
   },
 
@@ -180,13 +210,13 @@ const VIEWS = {
     $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
       <select id="rp" class="inp !w-36" onchange="setRange(this.value)"><option value="0">Harian</option><option value="6">Mingguan</option><option value="30">Bulanan</option><option value="365">Tahunan</option><option value="x">Custom</option></select>
       <input id="rd" type="date" class="inp !w-40" value="${t}"><input id="rs" type="date" class="inp !w-40" value="${t}">
-      <button class="btn" onclick="runReport()">Tampilkan</button></div><div id="rout"></div>`;
+      <select id="rj" class="inp !w-44"><option value="">Semua jenis</option>${opt(JENIS)}</select><button class="btn" onclick="runReport()"><i data-lucide="search" class="w-4"></i>Tampilkan</button></div><div id="rout"></div>`;
     runReport();
   },
 
   async users() {
     const d = await api('getUsers');
-    $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()">+ Pengguna</button><button class="btn btn2" onclick="doBackup()">Backup spreadsheet</button></div>
+    $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
       <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>${d.map(u => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${u.nama}</td><td>${u.username}</td><td>${u.role}</td><td>${u.status}</td></tr>`).join('')}</tbody></table></div>`;
   }
 };
@@ -238,13 +268,40 @@ function struk(t) {
 function setRange(n) {
   if (n === 'x') return; const d = new Date(); d.setDate(d.getDate() - Number(n)); $('rd').value = d.toLocaleDateString('sv-SE'); $('rs').value = today();
 }
-let RPT = null;
+const escH = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sumK = (a, k) => a.reduce((t, x) => t + Number(x[k] || 0), 0);
+let RPT = null, SEL = new Set(), MODE = 'all';
 async function runReport() {
   if (val('rd') > val('rs')) return toast('Tanggal awal melebihi tanggal akhir', false);
-  RPT = await api('getReports', { dari: val('rd'), sampai: val('rs') });
-  $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">${card('Transaksi', RPT.totalTransaksi, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir', rp(RPT.saldoAkhir), 'landmark')}</div>
-  <div class="flex gap-2 mt-3 noprint"><button class="btn" onclick="xlsxOut()">Excel</button><button class="btn" onclick="pdfOut()">PDF</button><button class="btn btn2" onclick="print()">Print</button></div>`;
+  RPT = await api('getReports', { dari: val('rd'), sampai: val('rs') }); SEL.clear();
+  if (val('rj')) RPT.transaksi = RPT.transaksi.filter(x => x.jenis_transaksi === val('rj'));
+  const t = RPT.transaksi; RPT.totalTransaksi = t.length; RPT.totalNominal = sumK(t, 'nominal'); RPT.totalLaba = sumK(t, 'laba'); RPT.saldoAkhir = RPT.totalLaba - RPT.totalPengeluaran;
+  $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">${card('Transaksi', t.length, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir', rp(RPT.saldoAkhir), 'landmark')}</div>
+  <div class="glass rounded-2xl p-4 mt-3 noprint"><div class="font-bold mb-2 flex items-center gap-2"><i data-lucide="printer" class="w-4"></i>Cetak laporan</div><div class="flex flex-wrap gap-3 items-center">
+    <label class="flex items-center gap-2"><input type="radio" name="pm" checked onchange="MODE='all'">Semua data per tanggal</label>
+    <label class="flex items-center gap-2"><input type="radio" name="pm" onchange="MODE='detail'">Detail per transaksi (centang di tabel)</label>
+    <button class="btn ml-auto" onclick="printReport()"><i data-lucide="printer" class="w-4"></i>Cetak</button>
+    <button class="btn btn2" onclick="xlsxOut()"><i data-lucide="file-spreadsheet" class="w-4"></i>Excel</button>
+    <button class="btn btn2" onclick="pdfOut()"><i data-lucide="file-down" class="w-4"></i>PDF</button></div></div>
+  <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3"><input type="checkbox" onchange="selAll(this.checked)"></th><th>Tanggal</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Laba</th></tr></thead><tbody>
+  ${t.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3"><input type="checkbox" class="sel" onchange="this.checked?SEL.add('${x.id}'):SEL.delete('${x.id}')"></td><td>${x.tanggal} ${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.laba)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="6">Tidak ada transaksi pada rentang ini.</td></tr>'}</tbody></table></div>`;
   icons();
+}
+function selAll(on) { RPT.transaksi.forEach(x => on ? SEL.add(x.id) : SEL.delete(x.id)); document.querySelectorAll('.sel').forEach(c => c.checked = on); }
+function printReport() {
+  const t = RPT.transaksi; if (!t.length) return toast('Tidak ada data untuk dicetak', false);
+  let body;
+  if (MODE === 'detail') {
+    const s = t.filter(x => SEL.has(x.id)); if (!s.length) return toast('Centang minimal satu transaksi', false);
+    body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Pelanggan', x.pelanggan], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Operator', x.operator]].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
+  } else {
+    const g = {}; t.forEach(x => (g[x.tanggal] = g[x.tanggal] || []).push(x));
+    body = Object.keys(g).sort().map(d => { const a = g[d]; return `<h3>${d}</h3><table><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="3">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`; }).join('')
+      + `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
+  }
+  const w = open('', '_blank');
+  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>body{font:13px sans-serif;padding:24px;color:#0f172a}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}</body></html>`);
+  w.document.close(); w.focus(); w.print();
 }
 const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.nominal, t.biaya_admin, t.laba]);
 const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'];
