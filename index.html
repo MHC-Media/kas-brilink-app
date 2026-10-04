@@ -25,6 +25,7 @@ body{min-height:100vh;background:radial-gradient(900px 400px at 85% -10%,rgba(14
 th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}tbody tr:hover{background:rgba(14,165,233,.07)}
 .dark ::-webkit-calendar-picker-indicator{filter:invert(.8)}
 @media print{aside,header,.noprint{display:none!important}}
+@keyframes fi{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}#view>*{animation:fi .18s ease-out}
 </style>
 </head>
 <body class="text-slate-800 dark:text-slate-100 font-sans antialiased">
@@ -45,7 +46,7 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
 <div id="app" class="hidden min-h-screen">
   <aside id="side" class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full md:translate-x-0 transition-transform glass border-r border-slate-200 dark:border-slate-700 p-4 flex flex-col">
     <div class="flex items-center gap-2 text-xl font-bold text-bri dark:text-white mb-6 px-2"><span class="w-9 h-9 rounded-xl bg-bri text-white grid place-items-center"><i data-lucide="landmark" class="w-5"></i></span>Kas BRILink</div>
-    <nav id="nav" class="space-y-1 flex-1"></nav>
+    <nav id="nav" class="space-y-1 flex-1 overflow-y-auto"></nav>
     <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-500/10"><i data-lucide="log-out"></i>Keluar</button>
   </aside>
   <div class="md:ml-60">
@@ -79,16 +80,54 @@ function toast(m, ok = true) {
   d.className = 'px-4 py-2 rounded-xl text-white shadow ' + (ok ? 'bg-emerald-600' : 'bg-red-600'); d.textContent = m;
   $('toast').append(d); setTimeout(() => d.remove(), 3500);
 }
-const READ = { getDashboard: 60, getTransactions: 30, getExpenses: 30, getReports: 30, getUsers: 30 }, CACHE = new Map();
+const READ = { getDashboard: 60, getTransactions: 30, getExpenses: 30, getReports: 30, getUsers: 30, getCustomers: 60, getTutupKas: 30, getAnalytics: 120, getLogs: 15, getSettings: 60 }, CACHE = new Map();
+let OFFQ = JSON.parse(localStorage.offq || '[]');
+const saveQ = () => localStorage.offq = JSON.stringify(OFFQ);
+async function syncQueue() {
+  while (OFFQ.length && navigator.onLine && S.token) {
+    try { await apiRaw('addTransaction', OFFQ[0], 1); OFFQ.shift(); saveQ(); CACHE.clear(); toast('Transaksi offline terkirim'); }
+    catch (e) { if (e.app) { OFFQ.shift(); saveQ(); continue; } break; }
+  }
+}
+const INFLIGHT = new Set();
+function revalidate(action, payload, key) {
+  if (INFLIGHT.has(key)) return; INFLIGHT.add(key);
+  apiRaw(action, payload, 1, true).then(d => {
+    if (d === undefined) return; const v = JSON.stringify(d), old = CACHE.get(key);
+    CACHE.set(key, { t: Date.now(), v }); if (!old || old.v !== v) softRefresh();
+  }).catch(() => {}).finally(() => INFLIGHT.delete(key));
+}
+function softRefresh() { const a = document.activeElement; if (S.token && !$('modal').classList.contains('flex') && !(a && /INPUT|SELECT|TEXTAREA/.test(a.tagName))) route(true); }
+async function prefetch() { // hangatkan cache halaman lain agar klik menu terasa instan
+  if (!S.token || !navigator.onLine) return;
+  loadLib('chart').catch(() => {});
+  const jobs = [['getDashboard', {}], ['getTransactions', { q: '', jenis: '', dari: '', sampai: '', page: 1, size: 10 }], ['getExpenses', {}], ['getCustomers', {}], ['getTutupKas', {}]];
+  for (const [a, p] of jobs) {
+    const k = a + JSON.stringify(p), h = CACHE.get(k); if (h && Date.now() - h.t < READ[a] * 1000) continue;
+    try { const d = await apiRaw(a, p, 1, true); if (d !== undefined) CACHE.set(k, { t: Date.now(), v: JSON.stringify(d) }); } catch (e) { return; }
+  }
+}
 async function api(action, payload = {}, tries = 3) {
+  if (action === 'addTransaction' && !navigator.onLine) {
+    const w = new Date().toTimeString().slice(0, 5); OFFQ.push({ ...payload, waktu: w }); saveQ();
+    toast('Offline: transaksi disimpan di perangkat, dikirim otomatis saat online');
+    return { ...payload, id: 'OFFLINE', waktu: w, laba: Number(payload.biaya_admin) - Number(payload.biaya_operasional || 0), operator: S.user.username };
+  }
   if (API_URL.startsWith('GANTI')) { toast('API_URL belum diisi di index.html', false); throw new Error('API_URL belum diisi'); }
   const ttl = READ[action], key = action + JSON.stringify(payload), hit = ttl && CACHE.get(key);
-  if (hit && Date.now() - hit.t < ttl * 1000) return JSON.parse(hit.v);
+  const rid = RID;
+  if (hit) {
+    const age = Date.now() - hit.t;
+    if (age < ttl * 1000) return JSON.parse(hit.v);
+    if (age < 600000) { revalidate(action, payload, key); return JSON.parse(hit.v); } // tampil instan, segarkan di latar
+  }
   const d = await apiRaw(action, payload, tries);
-  if (ttl && d !== undefined) CACHE.set(key, { t: Date.now(), v: JSON.stringify(d) }); else if (action !== 'logError') CACHE.clear();
+  if (ttl && d !== undefined) CACHE.set(key, { t: Date.now(), v: JSON.stringify(d) });
+  else if (action !== 'logError') { CACHE.clear(); if (!/^(login|logout)$/.test(action)) setTimeout(prefetch, 600); }
+  if (ttl && rid !== RID) throw new Error('cancel'); // pindah menu sebelum data tiba: buang hasil lama
   return d;
 }
-async function apiRaw(action, payload = {}, tries = 3) {
+async function apiRaw(action, payload = {}, tries = 3, quiet = false) {
   $('spin').classList.remove('hidden');
   try {
     for (let i = 0; i < tries; i++) {
@@ -99,7 +138,7 @@ async function apiRaw(action, payload = {}, tries = 3) {
         S.last = Date.now(); return j.data;
       } catch (e) { if (e.app || i === tries - 1) throw e; await new Promise(r => setTimeout(r, 800 * (i + 1))); }
     }
-  } catch (e) { toast(e.message || 'Gagal terhubung ke server', false); throw e; }
+  } catch (e) { if (!quiet) toast(e.message || 'Gagal terhubung ke server', false); throw e; }
   finally { $('spin').classList.add('hidden'); }
 }
 
@@ -129,9 +168,9 @@ const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {
 /* ===== components/sidebar.js ===== */
 const PAGES = [
   ['dashboard', 'Dashboard', 'home'], ['transaksi', 'Transaksi', 'credit-card'], ['pengeluaran', 'Pengeluaran', 'wallet'],
-  ['laporan', 'Laporan', 'file-text'], ['setting', 'Pengaturan', 'settings'], ['users', 'Pengguna', 'users', 'Admin']
+  ['pelanggan', 'Pelanggan', 'contact'], ['tutup', 'Tutup Kas', 'calculator'], ['analitik', 'Analitik', 'bar-chart-3'], ['laporan', 'Laporan', 'file-text'], ['setting', 'Pengaturan', 'settings'], ['users', 'Pengguna', 'users', 'Admin'], ['log', 'Log Aktivitas', 'history', 'Admin']
 ];
-const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500', setting: 'bg-teal-500/15 text-teal-500' };
+const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500', setting: 'bg-teal-500/15 text-teal-500', pelanggan: 'bg-cyan-500/15 text-cyan-500', tutup: 'bg-amber-500/15 text-amber-500', analitik: 'bg-indigo-500/15 text-indigo-500', log: 'bg-slate-500/15 text-slate-500' };
 function nav() {
   const cur = location.hash.slice(1) || 'dashboard';
   $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
@@ -142,11 +181,16 @@ function nav() {
 const JENIS = ['Transfer', 'Tarik Tunai', 'Setor Tunai', 'BRIVA', 'Pembayaran Tagihan', 'Top Up E-Wallet', 'Pulsa', 'Token PLN', 'Cicilan', 'QRIS', 'Lainnya'];
 const KAT = ['Listrik', 'Internet', 'Sewa', 'ATK', 'Operasional', 'Lainnya'];
 const opt = a => a.map(x => `<option>${x}</option>`).join('');
-async function route() {
-  const p = location.hash.slice(1) || 'dashboard', pg = PAGES.find(x => x[0] === p) || PAGES[0];
-  $('title').textContent = pg[1]; nav();
-  try { await VIEWS[pg[0]](); } catch (e) { $('view').innerHTML = `<p class="text-red-600">${e.message}</p>`; }
-  icons();
+let RID = 0, PREF = false;
+const SKEL = `<div class="animate-pulse space-y-3"><div class="h-28 rounded-3xl bg-slate-500/15"></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${'<div class="h-24 rounded-2xl bg-slate-500/15"></div>'.repeat(4)}</div><div class="h-64 rounded-2xl bg-slate-500/15"></div></div>`;
+async function route(silent) {
+  const rid = ++RID, p = location.hash.slice(1) || 'dashboard', pg = PAGES.find(x => x[0] === p) || PAGES[0];
+  $('title').textContent = pg[1]; nav(); icons();
+  if (silent !== true) { $('view').innerHTML = SKEL; scrollTo(0, 0); } // halaman langsung berganti, data menyusul
+  try { await VIEWS[pg[0]](); }
+  catch (e) { if (rid !== RID || e.message === 'cancel') return; $('view').innerHTML = `<div class="glass rounded-2xl p-6 text-center"><p class="text-red-500 mb-3">${escH(e.message)}</p><button class="btn" onclick="route()">Coba lagi</button></div>`; }
+  if (rid === RID) icons();
+  if (!PREF && S.token) { PREF = true; setTimeout(prefetch, 400); }
 }
 function boot() {
   const ok = !!S.token;
@@ -223,7 +267,7 @@ const VIEWS = {
   async pengeluaran() {
     const d = await api('getExpenses');
     $('view').innerHTML = `<button class="btn mb-3" onclick="expForm()"><i data-lucide="plus" class="w-4"></i>Pengeluaran</button><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>
-      ${d.map(e => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${e.tanggal}</td><td>${e.kategori}</td><td>${e.deskripsi}</td><td>${rp(e.nominal)}</td><td>${S.user.role === 'Admin' ? `<button onclick="del('deleteExpense','${e.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500">Belum ada pengeluaran.</td></tr>'}</tbody></table></div>`;
+      ${d.map(e => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${e.tanggal}</td><td>${e.kategori}</td><td>${e.deskripsi}</td><td>${rp(e.nominal)}</td><td class="whitespace-nowrap"><button onclick='expForm(${JSON.stringify(e)})'><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteExpense','${e.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500">Belum ada pengeluaran.</td></tr>'}</tbody></table></div>`;
   },
 
   async laporan() {
@@ -231,8 +275,39 @@ const VIEWS = {
     $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
       <select id="rp" class="inp !w-36" onchange="setRange(this.value)"><option value="0">Harian</option><option value="6">Mingguan</option><option value="30">Bulanan</option><option value="365">Tahunan</option><option value="x">Custom</option></select>
       <input id="rd" type="date" class="inp !w-40" value="${t}"><input id="rs" type="date" class="inp !w-40" value="${t}">
-      <select id="rj" class="inp !w-44"><option value="">Semua jenis</option>${opt(JENIS)}</select><button class="btn" onclick="runReport()"><i data-lucide="search" class="w-4"></i>Tampilkan</button></div><div id="rout"></div>`;
+      <select id="rj" class="inp !w-44"><option value="">Semua jenis</option>${opt(JENIS)}</select><button class="btn" onclick="runReport()"><i data-lucide="search" class="w-4"></i>Tampilkan</button></div><div id="rout"></div><div class="glass rounded-2xl p-4 mt-3 noprint"><b class="flex items-center gap-2"><i data-lucide="scan-barcode" class="w-4"></i>Verifikasi barcode laporan</b><div class="flex gap-2 mt-2"><input id="vcode" class="inp" placeholder="Ketik atau scan kode BRL-..." onkeydown="if(event.key==='Enter')verify()"><button class="btn" onclick="verify()">Periksa</button></div></div>`;
     runReport();
+  },
+
+  async pelanggan() {
+    const d = await api('getCustomers');
+    $('view').innerHTML = `<div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Pelanggan (klik untuk riwayat)</th><th>Transaksi</th><th>Total nominal</th><th>Terakhir</th></tr></thead><tbody>${d.map(c => `<tr class="border-t border-slate-200 dark:border-slate-700 cursor-pointer" data-n="${escH(c.nama)}" onclick="openCust(this.dataset.n)"><td class="p-3">${escH(c.nama)}</td><td>${c.jumlah}</td><td>${rp(c.total)}</td><td>${c.terakhir}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="4">Belum ada pelanggan.</td></tr>'}</tbody></table></div>`;
+  },
+
+  async tutup() {
+    const d = await api('getTutupKas');
+    $('view').innerHTML = `<div class="glass rounded-2xl p-5 space-y-3 max-w-md"><b>Tutup kas harian</b><p class="text-sm">Saldo sistem: <b>${rp(d.saldoSistem)}</b></p>
+      <input id="k_tgl" type="date" class="inp" value="${today()}"><input id="k_fisik" type="number" min="0" class="inp" placeholder="Kas fisik (hasil hitung)" oninput="$('k_sel').textContent = rp(this.value - ${Number(d.saldoSistem)})">
+      <p class="text-sm">Selisih: <b id="k_sel">-</b></p><input id="k_cat" class="inp" placeholder="Catatan (opsional)"><button class="btn" onclick="saveTutup()"><i data-lucide="lock" class="w-4"></i>Simpan tutup kas</button></div>
+      <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(k => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${k.tanggal}</td><td>${rp(k.saldo_sistem)}</td><td>${rp(k.kas_fisik)}</td><td class="${k.selisih < 0 ? 'text-red-500' : ''}">${rp(k.selisih)}</td><td>${escH(k.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="5">Belum ada tutup kas.</td></tr>'}</tbody></table></div>`;
+  },
+
+  async analitik() {
+    charts.forEach(c => c.destroy()); charts = [];
+    const [d] = await Promise.all([api('getAnalytics'), loadLib('chart')]), ks = Object.keys(d.labaBulanan), BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${card('Transaksi ' + d.tahun, d.trx, 'receipt')}${card('Laba', rp(d.laba), 'trending-up')}${card('Pengeluaran', rp(d.keluar), 'wallet')}${card('Laba bersih', rp(d.laba - d.keluar), 'landmark')}</div>
+      <div class="grid md:grid-cols-2 gap-3 mt-3"><div class="glass rounded-2xl p-5 md:col-span-2"><b>Laba bulanan ${d.tahun}</b><div class="h-64 mt-2"><canvas id="a1"></canvas></div></div>
+      <div class="glass rounded-2xl p-5"><b>Pengeluaran per kategori</b><div class="h-64 mt-2"><canvas id="a2"></canvas></div></div>
+      <div class="glass rounded-2xl p-5"><b>Transaksi terbanyak per jenis</b><div class="h-64 mt-2"><canvas id="a3"></canvas></div></div>
+      <div class="glass rounded-2xl p-5 md:col-span-2 overflow-x-auto"><b>5 transaksi terbesar</b><table class="w-full text-sm mt-2">${d.top.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2">${t.tanggal}</td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td><td>${rp(t.nominal)}</td></tr>`).join('')}</table></div></div>`;
+    chart('a1', 'bar', ks.map(k => BLN[Number(k.slice(5)) - 1]), Object.values(d.labaBulanan), 'Laba');
+    chart('a2', 'doughnut', Object.keys(d.pengeluaranKategori), Object.values(d.pengeluaranKategori), 'Pengeluaran');
+    chart('a3', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
+  },
+
+  async log() {
+    const d = await api('getLogs');
+    $('view').innerHTML = `<div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Pengguna</th><th>Aktivitas</th></tr></thead><tbody>${d.map(l => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${l.timestamp}</td><td>${escH(l.user)}</td><td>${escH(l.aktivitas)}</td></tr>`).join('')}</tbody></table></div>`;
   },
 
   async setting() {
@@ -245,8 +320,9 @@ const VIEWS = {
         <input id="s_toko" class="inp" placeholder="Nama usaha" value="${escH(SET.toko)}"><input id="s_alamat" class="inp" placeholder="Alamat / telepon" value="${escH(SET.alamat)}"><input id="s_footer" class="inp" placeholder="Pesan penutup" value="${escH(SET.footer)}">
         <select id="s_lebar" class="inp"><option value="32">Kertas 58 mm (32 karakter)</option><option value="48">Kertas 80 mm (48 karakter)</option></select>
         <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak otomatis setelah simpan transaksi</label>
-        <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div></div>`;
+        <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div>${S.user.role === 'Admin' ? `<div class="glass rounded-2xl p-5 space-y-3 md:col-span-2"><b class="flex items-center gap-2"><i data-lucide="database" class="w-4"></i>Saldo awal dan data (Admin)</b><div class="flex flex-wrap gap-2"><input id="s_saldo" type="number" min="0" class="inp !w-52" placeholder="Saldo awal kas"><button class="btn" onclick="saveSaldo()">Simpan saldo awal</button></div><div class="flex flex-wrap gap-2"><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup sekarang</button><input id="s_rst" class="inp !w-72" placeholder="Link/ID file backup"><button class="btn btn2" onclick="doRestore()">Restore</button></div><p class="text-xs text-slate-500">Backup harian otomatis: jalankan installBackupTrigger() sekali di Apps Script.</p></div>` : ''}</div>`;
     $('s_lebar').value = SET.lebar; paintPrinter();
+    if (S.user.role === 'Admin') api('getSettings').then(d => { $('s_saldo').value = d.saldo_awal || 0; }).catch(() => {});
   },
 
   async users() {
@@ -259,11 +335,25 @@ const VIEWS = {
 /* ===== Aksi ===== */
 const val = id => $(id).value;
 function need(...ids) { for (const i of ids) if (!val(i)) { toast('Lengkapi isian wajib', false); return false; } return true; }
+const openCust = n => { VIEWS.f = { q: n, jenis: '', dari: '', sampai: '' }; location.hash = '#transaksi'; };
+async function saveTutup() {
+  if (!need('k_tgl', 'k_fisik')) return;
+  try { await api('addTutupKas', { tanggal: val('k_tgl'), kas_fisik: val('k_fisik'), catatan: val('k_cat') }); toast('Tutup kas tersimpan'); route(); } catch (e) {}
+}
+async function saveSaldo() { if (!need('s_saldo')) return; try { await api('saveSettings', { saldo_awal: val('s_saldo') }); toast('Saldo awal disimpan'); } catch (e) {} }
+async function doRestore() {
+  if (!need('s_rst') || !confirm('Data saat ini akan DITIMPA oleh isi file backup (cadangan otomatis dibuat dulu). Lanjutkan?')) return;
+  try { await api('restoreBackup', { fileId: val('s_rst') }); toast('Restore berhasil, memuat ulang...'); setTimeout(logoutLocal, 1500); } catch (e) {}
+}
+async function verify() {
+  if (!val('vcode').trim()) return toast('Masukkan kode barcode', false);
+  try { const r = await api('getVerify', { code: val('vcode').trim() }); r.valid ? toast(`Asli: dibuat oleh ${r.user}, ${r.waktu}`) : toast('Kode tidak ditemukan, laporan tidak terverifikasi', false); } catch (e) {}
+}
 function trxForm(t = {}) {
   openModal(`<h3 class="font-bold mb-3">${t.id ? 'Edit' : 'Tambah'} transaksi</h3><div class="space-y-2">
     <input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}">
     <select id="f_jenis" class="inp">${opt(JENIS)}</select>
-    <input id="f_pel" class="inp" placeholder="Nama pelanggan" value="${t.pelanggan || ''}">
+    <input id="f_pel" list="dl_pel" class="inp" placeholder="Nama pelanggan" value="${t.pelanggan || ''}">
     <select id="f_met" class="inp">${opt(['Tunai', 'Transfer', 'QRIS', 'Saldo'])}</select>
     <input id="f_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${t.nominal || ''}">
     <input id="f_adm" type="number" min="0" class="inp" placeholder="Biaya admin (pendapatan)" value="${t.biaya_admin || ''}" oninput="calc()">
@@ -273,19 +363,22 @@ function trxForm(t = {}) {
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveTrx('${t.id || ''}')">Simpan</button></div></div>`);
   if (t.jenis_transaksi) $('f_jenis').value = t.jenis_transaksi;
   if (t.metode_bayar) $('f_met').value = t.metode_bayar;
+  $('f_pel').insertAdjacentHTML('afterend', '<datalist id="dl_pel"></datalist>');
+  api('getCustomers').then(c => { $('dl_pel').innerHTML = c.slice(0, 200).map(x => `<option value="${escH(x.nama)}">`).join(''); }).catch(() => {});
 }
 const calc = () => $('f_laba').textContent = rp(val('f_adm') - (val('f_ops') || 0));
 async function saveTrx(id) {
   if (!need('f_tgl', 'f_nom', 'f_adm')) return;
   try { const r = await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }); closeModal(); toast('Transaksi disimpan'); route(); if (!id && SET.auto && r) struk(r); } catch (e) {}
 }
-function expForm() {
-  openModal(`<h3 class="font-bold mb-3">Tambah pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal">
-  <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveExp()">Simpan</button></div></div>`);
+function expForm(e = {}) {
+  openModal(`<h3 class="font-bold mb-3">${e.id ? 'Edit' : 'Tambah'} pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${e.tanggal || today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi" value="${escH(e.deskripsi || '')}"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${e.nominal || ''}">
+  <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveExp('${e.id || ''}')">Simpan</button></div></div>`);
+  if (e.kategori) $('e_kat').value = e.kategori;
 }
-async function saveExp() {
+async function saveExp(id) {
   if (!need('e_tgl', 'e_nom')) return;
-  try { await api('addExpense', { tanggal: val('e_tgl'), kategori: val('e_kat'), deskripsi: val('e_des'), nominal: val('e_nom') }); closeModal(); toast('Pengeluaran disimpan'); route(); } catch (e) {}
+  try { await api(id ? 'updateExpense' : 'addExpense', { id, tanggal: val('e_tgl'), kategori: val('e_kat'), deskripsi: val('e_des'), nominal: val('e_nom') }); closeModal(); toast('Pengeluaran disimpan'); route(); } catch (e) {}
 }
 function pwForm() {
   openModal(`<h3 class="font-bold mb-3">Ubah password</h3><div class="space-y-2">
@@ -412,7 +505,7 @@ async function printReport() {
   w.document.close(); w.focus(); w.print();
 }
 const barcodeURL = txt => { const c = document.createElement('canvas'); JsBarcode(c, txt, { format: 'CODE128', width: 1.6, height: 46, displayValue: false, margin: 0 }); return c.toDataURL('image/png'); };
-const sigCode = () => ('BRL-' + S.user.username + '-' + new Date().toISOString().slice(2, 16).replace(/\D/g, '')).toUpperCase();
+const sigCode = () => { const c = ('BRL-' + S.user.username + '-' + new Date().toISOString().slice(2, 16).replace(/\D/g, '')).toUpperCase(); api('logPrint', { code: c }).catch(() => {}); return c; };
 const sigHtml = () => { const code = sigCode(); return `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><img src="${barcodeURL(code)}" style="height:46px;max-width:100%"><div style="font-size:9pt;letter-spacing:1px">${escH(code)}</div><div style="border-top:1px solid #000;padding-top:4px;margin-top:6px"><b>${escH(S.user.nama)}</b><br>${S.user.role}</div></div>`; };
 const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.nominal, t.biaya_admin, t.laba]);
 const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'];
@@ -435,8 +528,8 @@ async function pdfOut() {
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 ['lu', 'lp'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
-addEventListener('offline', () => toast('Tidak ada koneksi internet', false)); addEventListener('online', () => toast('Koneksi kembali'));
-boot();
+addEventListener('offline', () => toast('Tidak ada koneksi internet', false)); addEventListener('online', () => { toast('Koneksi kembali'); syncQueue(); });
+boot(); syncQueue();
 </script>
 </body>
 </html>
