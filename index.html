@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']},colors:{bri:'#00529C',oren:'#F37021'}}}}</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" onerror="this.onerror=null;var x=document.createElement('script');x.src='https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js';x.onload=function(){window.icons&&icons()};document.head.appendChild(x)"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -36,7 +36,7 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
 <!-- LOGIN -->
 <section id="login" class="relative min-h-screen hidden items-center justify-center p-4 bg-gradient-to-br from-bri via-sky-700 to-slate-900"><button class="themeBtn icon-btn absolute top-4 right-4 text-white" onclick="toggleTheme()" aria-label="Ganti tema"></button>
   <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-xl">
-    <div class="w-12 h-12 rounded-2xl bg-bri text-white grid place-items-center mb-4 shadow-lg"><i data-lucide="landmark"></i></div><h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
+    <img src="assets/logo.png" alt="BRILink" class="h-12 mb-4" onerror="this.outerHTML=LOGO_SVG"><h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
     <p class="text-sm text-slate-500 mb-6">Masuk untuk mencatat transaksi hari ini.</p>
     <input id="lu" class="inp mb-3" placeholder="Username" autocomplete="username">
     <input id="lp" type="password" class="inp mb-4" placeholder="Password" autocomplete="current-password">
@@ -68,6 +68,7 @@ th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}
 
 <script>
 /* ===== Konfigurasi: tempel URL Web App Apps Script di sini ===== */
+const LOGO_SVG = '<svg viewBox="0 0 190 48" class="h-12 mb-4 text-bri dark:text-white" role="img" aria-label="BRILink"><rect y="2" width="44" height="44" rx="12" fill="#00529C"/><path d="M12 24h20M26 15l9 9-9 9" stroke="#F37021" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="currentColor">BRI</text><text x="106" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="#F37021">Link</text></svg>';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzhJwiVrDXYcRVxr7Q8vD3AkI3WpkO38mnkKrGxUB4vfFsE6b_8uJ_BWm5D9LTppQGtqQ/exec';
 
 /* ===== services/api.js (retry + loading + token) ===== */
@@ -109,16 +110,18 @@ setInterval(() => { if (S.token && Date.now() - S.last > 30 * 60000) { toast('Lo
 /* ===== components/modal.js ===== */
 function openModal(html) { $('mbody').innerHTML = html; $('modal').classList.replace('hidden', 'flex'); icons(); }
 function closeModal() { $('modal').classList.replace('flex', 'hidden'); }
-const icons = () => lucide.createIcons();
+const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
 
 /* ===== components/sidebar.js ===== */
 const PAGES = [
   ['dashboard', 'Dashboard', 'home'], ['transaksi', 'Transaksi', 'credit-card'], ['pengeluaran', 'Pengeluaran', 'wallet'],
   ['laporan', 'Laporan', 'file-text'], ['users', 'Pengguna', 'users', 'Admin']
 ];
+const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500' };
 function nav() {
+  const cur = location.hash.slice(1) || 'dashboard';
   $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
-    `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-3 py-2 rounded-xl transition hover:bg-slate-500/10 ${location.hash.slice(1) === p[0] ? 'bg-bri text-white font-bold shadow-md' : ''}"><i data-lucide="${p[2]}"></i>${p[1]}</a>`).join('');
+    `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-2 py-2 rounded-xl transition ${cur === p[0] ? 'bg-bri text-white font-bold shadow-md' : 'hover:bg-slate-500/10'}"><span class="w-9 h-9 rounded-lg grid place-items-center ${cur === p[0] ? 'bg-white/20 text-white' : NAVC[p[0]]}"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1]}</a>`).join('');
 }
 
 /* ===== Router ===== */
@@ -140,7 +143,11 @@ addEventListener('hashchange', () => S.token && route());
 window.onerror = (m) => { if (S.token) api('logError', { m }, 1).catch(() => {}); };
 
 const isDark = () => document.documentElement.classList.contains('dark');
-function paintTheme() { document.querySelectorAll('.themeBtn').forEach(b => b.innerHTML = `<i data-lucide="${isDark() ? 'sun' : 'moon'}"></i>`); icons(); }
+function paintTheme() {
+  const sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', moon = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+  document.querySelectorAll('.themeBtn').forEach(b => { b.style.cursor = 'pointer'; b.title = isDark() ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'; b.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDark() ? sun : moon}</svg>`; });
+  icons();
+}
 function toggleTheme() { const d = document.documentElement.classList.toggle('dark'); localStorage.theme = d ? 'dark' : 'light'; paintTheme(); if (S.token) route(); }
 const TONE = { sky: 'bg-sky-500/15 text-sky-500', emerald: 'bg-emerald-500/15 text-emerald-500', violet: 'bg-violet-500/15 text-violet-500', orange: 'bg-orange-500/15 text-orange-500', rose: 'bg-rose-500/15 text-rose-500' };
 const ICON_TONE = { receipt: 'sky', 'trending-up': 'emerald', calendar: 'violet', users: 'orange', wallet: 'rose', banknote: 'sky', landmark: 'violet' };
@@ -229,18 +236,20 @@ function trxForm(t = {}) {
     <input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}">
     <select id="f_jenis" class="inp">${opt(JENIS)}</select>
     <input id="f_pel" class="inp" placeholder="Nama pelanggan" value="${t.pelanggan || ''}">
+    <select id="f_met" class="inp">${opt(['Tunai', 'Transfer', 'QRIS', 'Saldo'])}</select>
     <input id="f_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${t.nominal || ''}">
     <input id="f_adm" type="number" min="0" class="inp" placeholder="Biaya admin (pendapatan)" value="${t.biaya_admin || ''}" oninput="calc()">
-    <input id="f_ops" type="number" min="0" class="inp" placeholder="Biaya operasional (opsional)" value="0" oninput="calc()">
+    <input id="f_ops" type="number" min="0" class="inp" placeholder="Biaya operasional (opsional)" value="${t.id ? Number(t.biaya_admin) - Number(t.laba) : 0}" oninput="calc()">
     <p class="text-sm">Laba: <b id="f_laba">${rp(t.laba)}</b></p>
     <input id="f_ket" class="inp" placeholder="Keterangan" value="${t.keterangan || ''}">
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveTrx('${t.id || ''}')">Simpan</button></div></div>`);
   if (t.jenis_transaksi) $('f_jenis').value = t.jenis_transaksi;
+  if (t.metode_bayar) $('f_met').value = t.metode_bayar;
 }
 const calc = () => $('f_laba').textContent = rp(val('f_adm') - (val('f_ops') || 0));
 async function saveTrx(id) {
   if (!need('f_tgl', 'f_nom', 'f_adm')) return;
-  try { await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket') }); closeModal(); toast('Transaksi disimpan'); route(); } catch (e) {}
+  try { await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }); closeModal(); toast('Transaksi disimpan'); route(); } catch (e) {}
 }
 function expForm() {
   openModal(`<h3 class="font-bold mb-3">Tambah pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal">
@@ -250,11 +259,19 @@ async function saveExp() {
   if (!need('e_tgl', 'e_nom')) return;
   try { await api('addExpense', { tanggal: val('e_tgl'), kategori: val('e_kat'), deskripsi: val('e_des'), nominal: val('e_nom') }); closeModal(); toast('Pengeluaran disimpan'); route(); } catch (e) {}
 }
-function userForm() {
-  openModal(`<h3 class="font-bold mb-3">Tambah pengguna</h3><div class="space-y-2"><input id="u_n" class="inp" placeholder="Nama"><input id="u_u" class="inp" placeholder="Username"><input id="u_p" type="password" class="inp" placeholder="Password (min 6)"><select id="u_r" class="inp"><option>Operator</option><option>Admin</option></select>
-  <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveUser()">Simpan</button></div></div>`);
+function userForm(id) {
+  const u = (window.USERS || []).find(x => x.id === id) || {};
+  openModal(`<h3 class="font-bold mb-3">${u.id ? 'Edit' : 'Tambah'} pengguna</h3><div class="space-y-2">
+    <input id="u_n" class="inp" placeholder="Nama lengkap" value="${escH(u.nama || '')}">
+    <input id="u_u" class="inp" placeholder="Username" value="${escH(u.username || '')}" ${u.id ? 'disabled' : ''}>
+    <input id="u_p" type="password" class="inp" placeholder="${u.id ? 'Password baru (kosongkan jika tidak diganti)' : 'Password (min 6)'}">
+    <select id="u_r" class="inp"><option>Operator</option><option>Admin</option></select>
+    <select id="u_s" class="inp"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select>
+    <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveUser('${u.id || ''}')">Simpan</button></div></div>`);
+  if (u.id) { $('u_r').value = u.role; $('u_s').value = u.status; }
 }
-async function saveUser() { try { await api('addUser', { nama: val('u_n'), username: val('u_u'), password: val('u_p'), role: val('u_r') }); closeModal(); toast('Pengguna ditambahkan'); route(); } catch (e) {} }
+async function saveUser(id) { try { await api(id ? 'updateUser' : 'addUser', { id, nama: val('u_n'), username: val('u_u'), password: val('u_p'), role: val('u_r'), status: val('u_s') }); closeModal(); toast('Pengguna disimpan'); route(); } catch (e) {} }
+async function delUser(id) { if (!confirm('Hapus pengguna ini?')) return; try { await api('deleteUser', { id }); toast('Pengguna dihapus'); route(); } catch (e) {} }
 async function del(a, id) { if (!confirm('Hapus data ini?')) return; try { await api(a, { id }); toast('Terhapus'); route(); } catch (e) {} }
 async function doBackup() { try { const d = await api('backup'); toast('Backup dibuat di Google Drive'); window.open(d.url); } catch (e) {} }
 
@@ -300,9 +317,10 @@ function printReport() {
       + `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
   }
   const w = open('', '_blank');
-  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>body{font:13px sans-serif;padding:24px;color:#0f172a}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}</body></html>`);
+  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>body{font:13px sans-serif;padding:24px;color:#0f172a}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
   w.document.close(); w.focus(); w.print();
 }
+const sigHtml = () => `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><div style="height:56px;font:italic 26px 'Brush Script MT',cursive;color:#1e3a8a">${escH(S.user.nama)}</div><div style="border-top:1px solid #000;padding-top:4px"><b>${escH(S.user.nama)}</b><br>${S.user.role} (@${escH(S.user.username)})</div></div>`;
 const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.nominal, t.biaya_admin, t.laba]);
 const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'];
 function xlsxOut() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([HEAD, ...rptRows()]), 'Laporan'); XLSX.writeFile(wb, `laporan-${val('rd')}_${val('rs')}.xlsx`); }
@@ -310,6 +328,10 @@ function pdfOut() {
   const doc = new jspdf.jsPDF(); doc.text(`Laporan Kas BRILink ${val('rd')} s/d ${val('rs')}`, 14, 14);
   doc.autoTable({ startY: 20, head: [HEAD], body: rptRows() });
   doc.text(`Laba ${rp(RPT.totalLaba)} | Pengeluaran ${rp(RPT.totalPengeluaran)} | Saldo ${rp(RPT.saldoAkhir)}`, 14, doc.lastAutoTable.finalY + 10);
+  let y = doc.lastAutoTable.finalY + 24; if (y > 245) { doc.addPage(); y = 30; }
+  doc.setFontSize(11); doc.text('Dibuat oleh,', 150, y, { align: 'center' });
+  doc.setFont('times', 'italic'); doc.setFontSize(18); doc.text(S.user.nama, 150, y + 20, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.line(120, y + 25, 180, y + 25); doc.text(`${S.user.nama} (${S.user.role})`, 150, y + 31, { align: 'center' });
   doc.save(`laporan-${val('rd')}_${val('rs')}.pdf`);
 }
 
