@@ -1,239 +1,732 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kas BRILink</title>
-<meta name="theme-color" content="#00529C">
-<script>document.documentElement.classList.toggle('dark',(localStorage.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark')</script>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']},colors:{bri:'#00529C',oren:'#F37021'}}}}</script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" onerror="this.onerror=null;var x=document.createElement('script');x.src='https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js';x.onload=function(){window.icons&&icons()};document.head.appendChild(x)"></script>
-<style>
-:root{color-scheme:light}.dark{color-scheme:dark}
-body{min-height:100vh;background:radial-gradient(900px 400px at 85% -10%,rgba(14,165,233,.14),transparent),radial-gradient(700px 400px at -10% 110%,rgba(243,112,33,.10),transparent),#f1f5f9;transition:background .3s}
-.dark body{background:radial-gradient(900px 400px at 85% -10%,rgba(14,165,233,.16),transparent),radial-gradient(700px 400px at -10% 110%,rgba(243,112,33,.09),transparent),#0b1220}
-.glass{background:rgba(255,255,255,.8);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.25);box-shadow:0 1px 2px rgba(15,23,42,.04),0 12px 28px -14px rgba(15,23,42,.18)}
-.dark .glass{background:rgba(30,41,59,.62);border-color:rgba(148,163,184,.16);box-shadow:0 12px 28px -14px rgba(0,0,0,.6)}
-.inp{width:100%;border-radius:.75rem;border:1px solid #cbd5e1;padding:.6rem .8rem;background:rgba(255,255,255,.6);transition:.15s}.dark .inp{border-color:#475569;background:rgba(15,23,42,.5)}
-.inp:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.25)}.dark .inp option{background:#1e293b}
-.btn{display:inline-flex;align-items:center;gap:.4rem;border-radius:.75rem;padding:.55rem 1rem;font-weight:700;background:linear-gradient(135deg,#00529C,#0a74d4);color:#fff;box-shadow:0 6px 16px -8px #00529C;transition:.15s}.btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.4;pointer-events:none}
-.btn2{background:#e2e8f0;color:#0f172a;box-shadow:none}.dark .btn2{background:#334155;color:#e2e8f0}
-.icon-btn{width:2.25rem;height:2.25rem;border-radius:.75rem;display:grid;place-items:center;transition:.15s}.icon-btn:hover{background:rgba(148,163,184,.2)}
-th{font-weight:600;padding:.75rem 0;white-space:nowrap}tbody td{padding:.7rem 0}tbody tr:hover{background:rgba(14,165,233,.07)}
-.dark ::-webkit-calendar-picker-indicator{filter:invert(.8)}
-@media print{aside,header,.noprint{display:none!important}}
-@keyframes fi{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}#view>*{animation:fi .18s ease-out}
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kas BRILink</title>
+    <meta name="theme-color" content="#00529C">
+    <script>
+        document.documentElement.classList.toggle('dark', (localStorage.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark')
+    </script>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    },
+                    colors: {
+                        bri: '#00529C',
+                        oren: '#F37021'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" onerror="this.onerror=null;var x=document.createElement('script');x.src='https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js';x.onload=function(){window.icons&&icons()};document.head.appendChild(x)"></script>
+    <style>
+        :root {
+            color-scheme: light
+        }
+
+        .dark {
+            color-scheme: dark
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(900px 400px at 85% -10%, rgba(14, 165, 233, .14), transparent), radial-gradient(700px 400px at -10% 110%, rgba(243, 112, 33, .10), transparent), #f1f5f9;
+            transition: background .3s
+        }
+
+        .dark body {
+            background: radial-gradient(900px 400px at 85% -10%, rgba(14, 165, 233, .16), transparent), radial-gradient(700px 400px at -10% 110%, rgba(243, 112, 33, .09), transparent), #0b1220
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, .8);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(148, 163, 184, .25);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 28px -14px rgba(15, 23, 42, .18)
+        }
+
+        .dark .glass {
+            background: rgba(30, 41, 59, .62);
+            border-color: rgba(148, 163, 184, .16);
+            box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .6)
+        }
+
+        .inp {
+            width: 100%;
+            border-radius: .75rem;
+            border: 1px solid #cbd5e1;
+            padding: .6rem .8rem;
+            background: rgba(255, 255, 255, .6);
+            transition: .15s
+        }
+
+        .dark .inp {
+            border-color: #475569;
+            background: rgba(15, 23, 42, .5)
+        }
+
+        .inp:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .25)
+        }
+
+        .dark .inp option {
+            background: #1e293b
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            border-radius: .75rem;
+            padding: .55rem 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00529C, #0a74d4);
+            color: #fff;
+            box-shadow: 0 6px 16px -8px #00529C;
+            transition: .15s
+        }
+
+        .btn:hover {
+            transform: translateY(-1px)
+        }
+
+        .btn:disabled {
+            opacity: .4;
+            pointer-events: none
+        }
+
+        .btn2 {
+            background: #e2e8f0;
+            color: #0f172a;
+            box-shadow: none
+        }
+
+        .dark .btn2 {
+            background: #334155;
+            color: #e2e8f0
+        }
+
+        .icon-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: .75rem;
+            display: grid;
+            place-items: center;
+            transition: .15s
+        }
+
+        .icon-btn:hover {
+            background: rgba(148, 163, 184, .2)
+        }
+
+        th {
+            font-weight: 600;
+            padding: .75rem 0;
+            white-space: nowrap
+        }
+
+        tbody td {
+            padding: .7rem 0
+        }
+
+        tbody tr:hover {
+            background: rgba(14, 165, 233, .07)
+        }
+
+        .dark ::-webkit-calendar-picker-indicator {
+            filter: invert(.8)
+        }
+
+        @media print {
+
+            aside,
+            header,
+            .noprint {
+                display: none !important
+            }
+        }
+
+        @keyframes fi {
+            from {
+                opacity: .4;
+                transform: translateY(4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        #view>* {
+            animation: fi .18s ease-out
+        }
+    </style>
 </head>
+
 <body class="text-slate-800 dark:text-slate-100 font-sans antialiased">
 
-<!-- LOGIN -->
-<section id="login" class="relative min-h-screen hidden items-center justify-center p-4 bg-gradient-to-br from-bri via-sky-700 to-slate-900"><button class="themeBtn icon-btn absolute top-4 right-4 text-white" onclick="toggleTheme()" aria-label="Ganti tema"></button>
-  <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-xl">
-    <img src="assets/logo.png" alt="BRILink" class="h-12 mb-4" onerror="this.outerHTML=LOGO_SVG"><h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
-    <p class="text-sm text-slate-500 mb-6">Masuk untuk mencatat transaksi hari ini.</p>
-    <input id="lu" class="inp mb-3" placeholder="Username" autocomplete="username">
-    <input id="lp" type="password" class="inp mb-4" placeholder="Password" autocomplete="current-password">
-    <button class="btn w-full justify-center" onclick="doLogin()"><i data-lucide="log-in" class="w-4"></i>Masuk</button>
-    <p class="text-center text-xs text-slate-500 mt-6">MHC Media • ©2026</p>
-  </div>
-</section>
+    <!-- LOGIN -->
+    <section id="login" class="relative min-h-screen hidden items-center justify-center p-4 bg-gradient-to-br from-bri via-sky-700 to-slate-900"><button class="themeBtn icon-btn absolute top-4 right-4 text-white" onclick="toggleTheme()" aria-label="Ganti tema"></button>
+        <div class="glass w-full max-w-sm rounded-3xl p-8 shadow-xl">
+            <img src="assets/logo.png" alt="BRILink" class="h-12 mb-4" onerror="this.outerHTML=LOGO_SVG">
+            <h1 class="text-2xl font-bold text-bri dark:text-white">Kas BRILink</h1>
+            <p class="text-sm text-slate-500 mb-6">Masuk untuk mencatat transaksi hari ini.</p>
+            <input id="lu" class="inp mb-3" placeholder="Username" autocomplete="username">
+            <input id="lp" type="password" class="inp mb-4" placeholder="Password" autocomplete="current-password">
+            <button class="btn w-full justify-center" onclick="doLogin()"><i data-lucide="log-in" class="w-4"></i>Masuk</button>
+            <p class="text-center text-xs text-slate-500 mt-6">MHC Media • ©2026</p>
+        </div>
+    </section>
 
-<!-- APP -->
-<div id="app" class="hidden min-h-screen">
-  <aside id="side" class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full md:translate-x-0 transition-transform glass border-r border-slate-200 dark:border-slate-700 p-4 flex flex-col">
-    <div class="flex items-center gap-2 text-xl font-bold text-bri dark:text-white mb-6 px-2"><span class="w-9 h-9 rounded-xl bg-bri text-white grid place-items-center"><i data-lucide="landmark" class="w-5"></i></span>Kas BRILink</div>
-    <nav id="nav" class="space-y-1 flex-1 overflow-y-auto"></nav>
-    <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-500/10"><i data-lucide="log-out"></i>Keluar</button>
-  </aside>
-  <div class="md:ml-60">
-    <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-      <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
-      <h2 id="title" class="font-bold flex-1"></h2>
-      <button id="who" onclick="pwForm()" title="Ubah password" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
-      <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
-    </header>
-    <main id="view" class="p-4 max-w-6xl mx-auto"></main>
-    <footer class="text-center text-xs text-slate-500 py-6 noprint">MHC Media • ©2026</footer>
-  </div>
-</div>
+    <!-- APP -->
+    <div id="app" class="hidden min-h-screen">
+        <aside id="side" class="fixed inset-y-0 left-0 z-30 w-60 -translate-x-full md:translate-x-0 transition-transform glass border-r border-slate-200 dark:border-slate-700 p-4 flex flex-col">
+            <div class="flex items-center gap-2 text-xl font-bold text-bri dark:text-white mb-6 px-2"><span class="w-9 h-9 rounded-xl bg-bri text-white grid place-items-center"><i data-lucide="landmark" class="w-5"></i></span>Kas BRILink</div>
+            <nav id="nav" class="space-y-1 flex-1 overflow-y-auto"></nav>
+            <button onclick="doLogout()" class="flex items-center gap-3 px-3 py-2 rounded-xl text-red-600 hover:bg-red-500/10"><i data-lucide="log-out"></i>Keluar</button>
+        </aside>
+        <div class="md:ml-60">
+            <header class="sticky top-0 z-20 glass flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                <button class="md:hidden" onclick="side.classList.toggle('-translate-x-full')"><i data-lucide="menu"></i></button>
+                <h2 id="title" class="font-bold flex-1"></h2>
+                <button id="who" onclick="pwForm()" title="Ubah password" class="text-sm text-slate-500 hover:text-bri flex items-center gap-1"></button>
+                <button class="themeBtn icon-btn" onclick="toggleTheme()" aria-label="Ganti tema"></button>
+            </header>
+            <main id="view" class="p-4 max-w-6xl mx-auto"></main>
+            <footer class="text-center text-xs text-slate-500 py-6 noprint">MHC Media • ©2026</footer>
+        </div>
+    </div>
 
-<div id="modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/50 p-4"><div id="mbody" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-auto"></div></div>
-<div id="toast" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
-<div id="spin" class="fixed top-0 inset-x-0 h-1 bg-oren hidden"></div>
+    <div id="modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/50 p-4">
+        <div id="mbody" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-auto"></div>
+    </div>
+    <div id="toast" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    <div id="spin" class="fixed top-0 inset-x-0 h-1 bg-oren hidden"></div>
 
-<script>
-/* ===== Konfigurasi: tempel URL Web App Apps Script di sini ===== */
-const LOGO_SVG = '<svg viewBox="0 0 190 48" class="h-12 mb-4 text-bri dark:text-white" role="img" aria-label="BRILink"><rect y="2" width="44" height="44" rx="12" fill="#00529C"/><path d="M12 24h20M26 15l9 9-9 9" stroke="#F37021" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="currentColor">BRI</text><text x="106" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="#F37021">Link</text></svg>';
-const API_URL = 'https://script.google.com/macros/s/AKfycbzhJwiVrDXYcRVxr7Q8vD3AkI3WpkO38mnkKrGxUB4vfFsE6b_8uJ_BWm5D9LTppQGtqQ/exec';
+    <script>
+        /* ===== Konfigurasi: tempel URL Web App Apps Script di sini ===== */
+        const LOGO_SVG = '<svg viewBox="0 0 190 48" class="h-12 mb-4 text-bri dark:text-white" role="img" aria-label="BRILink"><rect y="2" width="44" height="44" rx="12" fill="#00529C"/><path d="M12 24h20M26 15l9 9-9 9" stroke="#F37021" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="currentColor">BRI</text><text x="106" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="#F37021">Link</text></svg>';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzhJwiVrDXYcRVxr7Q8vD3AkI3WpkO38mnkKrGxUB4vfFsE6b_8uJ_BWm5D9LTppQGtqQ/exec';
 
-/* ===== services/api.js (retry + loading + token) ===== */
-const S = { token: localStorage.token, user: JSON.parse(localStorage.user || 'null'), last: Date.now() };
-const $ = id => document.getElementById(id);
-const rp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-const today = () => new Date().toLocaleDateString('sv-SE');
-function toast(m, ok = true) {
-  const d = document.createElement('div');
-  d.className = 'px-4 py-2 rounded-xl text-white shadow ' + (ok ? 'bg-emerald-600' : 'bg-red-600'); d.textContent = m;
-  $('toast').append(d); setTimeout(() => d.remove(), 3500);
-}
-const READ = { getDashboard: 60, getTransactions: 30, getExpenses: 30, getReports: 30, getUsers: 30, getCustomers: 60, getTutupKas: 30, getAnalytics: 120, getLogs: 15, getSettings: 60 }, CACHE = new Map();
-let OFFQ = JSON.parse(localStorage.offq || '[]');
-const saveQ = () => localStorage.offq = JSON.stringify(OFFQ);
-async function syncQueue() {
-  while (OFFQ.length && navigator.onLine && S.token) {
-    try { await apiRaw('addTransaction', OFFQ[0], 1); OFFQ.shift(); saveQ(); CACHE.clear(); toast('Transaksi offline terkirim'); }
-    catch (e) { if (e.app) { OFFQ.shift(); saveQ(); continue; } break; }
-  }
-}
-const INFLIGHT = new Set();
-function revalidate(action, payload, key) {
-  if (INFLIGHT.has(key)) return; INFLIGHT.add(key);
-  apiRaw(action, payload, 1, true).then(d => {
-    if (d === undefined) return; const v = JSON.stringify(d), old = CACHE.get(key);
-    CACHE.set(key, { t: Date.now(), v }); if (!old || old.v !== v) softRefresh();
-  }).catch(() => {}).finally(() => INFLIGHT.delete(key));
-}
-function softRefresh() { const a = document.activeElement; if (S.token && !$('modal').classList.contains('flex') && !(a && /INPUT|SELECT|TEXTAREA/.test(a.tagName))) route(true); }
-async function prefetch() { // hangatkan cache halaman lain agar klik menu terasa instan
-  if (!S.token || !navigator.onLine) return;
-  loadLib('chart').catch(() => {});
-  const jobs = [['getDashboard', {}], ['getTransactions', { q: '', jenis: '', dari: '', sampai: '', page: 1, size: 10 }], ['getExpenses', {}], ['getCustomers', {}], ['getTutupKas', {}]];
-  for (const [a, p] of jobs) {
-    const k = a + JSON.stringify(p), h = CACHE.get(k); if (h && Date.now() - h.t < READ[a] * 1000) continue;
-    try { const d = await apiRaw(a, p, 1, true); if (d !== undefined) CACHE.set(k, { t: Date.now(), v: JSON.stringify(d) }); } catch (e) { return; }
-  }
-}
-async function api(action, payload = {}, tries = 3) {
-  if (action === 'addTransaction' && !navigator.onLine) {
-    const w = new Date().toTimeString().slice(0, 5); OFFQ.push({ ...payload, waktu: w }); saveQ();
-    toast('Offline: transaksi disimpan di perangkat, dikirim otomatis saat online');
-    return { ...payload, id: 'OFFLINE', waktu: w, laba: Number(payload.biaya_admin) - Number(payload.biaya_operasional || 0), operator: S.user.username };
-  }
-  if (API_URL.startsWith('GANTI')) { toast('API_URL belum diisi di index.html', false); throw new Error('API_URL belum diisi'); }
-  const ttl = READ[action], key = action + JSON.stringify(payload), hit = ttl && CACHE.get(key);
-  const rid = RID;
-  if (hit) {
-    const age = Date.now() - hit.t;
-    if (age < ttl * 1000) return JSON.parse(hit.v);
-    if (age < 600000) { revalidate(action, payload, key); return JSON.parse(hit.v); } // tampil instan, segarkan di latar
-  }
-  const d = await apiRaw(action, payload, tries);
-  if (ttl && d !== undefined) CACHE.set(key, { t: Date.now(), v: JSON.stringify(d) });
-  else if (action !== 'logError') { CACHE.clear(); if (!/^(login|logout)$/.test(action)) setTimeout(prefetch, 600); }
-  if (ttl && rid !== RID) throw new Error('cancel'); // pindah menu sebelum data tiba: buang hasil lama
-  return d;
-}
-async function apiRaw(action, payload = {}, tries = 3, quiet = false) {
-  $('spin').classList.remove('hidden');
-  try {
-    for (let i = 0; i < tries; i++) {
-      try {
-        const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, token: S.token, payload }) }); // text/plain: tanpa preflight CORS
-        const j = await r.json();
-        if (!j.success) { if (j.data && j.data.expired) return logoutLocal(); throw Object.assign(new Error(j.message), { app: true }); }
-        S.last = Date.now(); return j.data;
-      } catch (e) { if (e.app || i === tries - 1) throw e; await new Promise(r => setTimeout(r, 800 * (i + 1))); }
-    }
-  } catch (e) { if (!quiet) toast(e.message || 'Gagal terhubung ke server', false); throw e; }
-  finally { $('spin').classList.add('hidden'); }
-}
+        /* ===== services/api.js (retry + loading + token) ===== */
+        const S = {
+            token: localStorage.token,
+            user: JSON.parse(localStorage.user || 'null'),
+            last: Date.now()
+        };
+        const $ = id => document.getElementById(id);
+        const rp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+        const today = () => new Date().toLocaleDateString('sv-SE');
 
-/* ===== services/auth.js ===== */
-let LOGGING = false;
-async function doLogin() {
-  if (LOGGING) return; if (!val('lu') || !val('lp')) return toast('Isi username dan password', false);
-  LOGGING = true; try { await doLogin0(); } finally { LOGGING = false; $('lp').value = ''; }
-}
-async function doLogin0() {
-  try {
-    const d = await api('login', { username: $('lu').value, password: $('lp').value });
-    S.token = localStorage.token = d.token; S.user = d.user; localStorage.user = JSON.stringify(d.user); boot();
-  } catch (e) {}
-}
-function logoutLocal() { CACHE.clear(); localStorage.removeItem('token'); localStorage.removeItem('user'); S.token = null; location.hash = ''; location.reload(); }
-async function doLogout() { try { await api('logout', { token: S.token }); } catch (e) {} logoutLocal(); }
-setInterval(() => { if (S.token && Date.now() - S.last > 30 * 60000) { toast('Logout otomatis: tidak aktif', false); logoutLocal(); } }, 30000);
+        function toast(m, ok = true) {
+            const d = document.createElement('div');
+            d.className = 'px-4 py-2 rounded-xl text-white shadow ' + (ok ? 'bg-emerald-600' : 'bg-red-600');
+            d.textContent = m;
+            $('toast').append(d);
+            setTimeout(() => d.remove(), 3500);
+        }
+        const READ = {
+                getDashboard: 60,
+                getTransactions: 30,
+                getExpenses: 30,
+                getReports: 30,
+                getUsers: 30,
+                getCustomers: 60,
+                getTutupKas: 30,
+                getAnalytics: 120,
+                getLogs: 15,
+                getSettings: 60
+            },
+            CACHE = new Map();
+        let OFFQ = JSON.parse(localStorage.offq || '[]');
+        const saveQ = () => localStorage.offq = JSON.stringify(OFFQ);
+        async function syncQueue() {
+            while (OFFQ.length && navigator.onLine && S.token) {
+                try {
+                    await apiRaw('addTransaction', OFFQ[0], 1);
+                    OFFQ.shift();
+                    saveQ();
+                    CACHE.clear();
+                    toast('Transaksi offline terkirim');
+                } catch (e) {
+                    if (e.app) {
+                        OFFQ.shift();
+                        saveQ();
+                        continue;
+                    }
+                    break;
+                }
+            }
+        }
+        const INFLIGHT = new Set();
 
-/* ===== components/modal.js ===== */
-function openModal(html) { $('mbody').innerHTML = html; $('modal').classList.replace('hidden', 'flex'); icons(); }
-function closeModal() { $('modal').classList.replace('flex', 'hidden'); }
-const LIB = { chart: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js', xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', atable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js', barcode: 'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js' }, LOADED = {};
-const loadLib = k => LOADED[k] = LOADED[k] || new Promise((ok, no) => { const e = document.createElement('script'); e.src = LIB[k]; e.onload = ok; e.onerror = () => { delete LOADED[k]; no(new Error('Gagal memuat pustaka ' + k + ', periksa koneksi')); }; document.head.appendChild(e); });
-const icons = () => { try { window.lucide && lucide.createIcons(); } catch (e) {} };
+        function revalidate(action, payload, key) {
+            if (INFLIGHT.has(key)) return;
+            INFLIGHT.add(key);
+            apiRaw(action, payload, 1, true).then(d => {
+                if (d === undefined) return;
+                const v = JSON.stringify(d),
+                    old = CACHE.get(key);
+                CACHE.set(key, {
+                    t: Date.now(),
+                    v
+                });
+                if (!old || old.v !== v) softRefresh();
+            }).catch(() => {}).finally(() => INFLIGHT.delete(key));
+        }
 
-/* ===== components/sidebar.js ===== */
-const PAGES = [
-  ['dashboard', 'Dashboard', 'home'], ['transaksi', 'Transaksi', 'credit-card'], ['pengeluaran', 'Pengeluaran', 'wallet'],
-  ['pelanggan', 'Pelanggan', 'contact'], ['tutup', 'Tutup Kas', 'calculator'], ['analitik', 'Analitik', 'bar-chart-3'], ['laporan', 'Laporan', 'file-text'], ['setting', 'Pengaturan', 'settings'], ['users', 'Pengguna', 'users', 'Admin'], ['log', 'Log Aktivitas', 'history', 'Admin']
-];
-const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500', setting: 'bg-teal-500/15 text-teal-500', pelanggan: 'bg-cyan-500/15 text-cyan-500', tutup: 'bg-amber-500/15 text-amber-500', analitik: 'bg-indigo-500/15 text-indigo-500', log: 'bg-slate-500/15 text-slate-500' };
-function nav() {
-  const cur = location.hash.slice(1) || 'dashboard';
-  $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
-    `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-2 py-2 rounded-xl transition ${cur === p[0] ? 'bg-bri text-white font-bold shadow-md' : 'hover:bg-slate-500/10'}"><span class="w-9 h-9 rounded-lg grid place-items-center ${cur === p[0] ? 'bg-white/20 text-white' : NAVC[p[0]]}"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1]}</a>`).join('');
-}
+        function softRefresh() {
+            const a = document.activeElement;
+            if (S.token && !$('modal').classList.contains('flex') && !(a && /INPUT|SELECT|TEXTAREA/.test(a.tagName))) route(true);
+        }
+        async function prefetch() { // hangatkan cache halaman lain agar klik menu terasa instan
+            if (!S.token || !navigator.onLine) return;
+            loadLib('chart').catch(() => {});
+            const jobs = [
+                ['getDashboard', {}],
+                ['getTransactions', {
+                    q: '',
+                    jenis: '',
+                    dari: '',
+                    sampai: '',
+                    page: 1,
+                    size: 10
+                }],
+                ['getExpenses', {}],
+                ['getCustomers', {}],
+                ['getTutupKas', {}]
+            ];
+            for (const [a, p] of jobs) {
+                const k = a + JSON.stringify(p),
+                    h = CACHE.get(k);
+                if (h && Date.now() - h.t < READ[a] * 1000) continue;
+                try {
+                    const d = await apiRaw(a, p, 1, true);
+                    if (d !== undefined) CACHE.set(k, {
+                        t: Date.now(),
+                        v: JSON.stringify(d)
+                    });
+                } catch (e) {
+                    return;
+                }
+            }
+        }
+        async function api(action, payload = {}, tries = 3) {
+            if (action === 'addTransaction' && !navigator.onLine) {
+                const w = new Date().toTimeString().slice(0, 5);
+                OFFQ.push({
+                    ...payload,
+                    waktu: w
+                });
+                saveQ();
+                toast('Offline: transaksi disimpan di perangkat, dikirim otomatis saat online');
+                return {
+                    ...payload,
+                    id: 'OFFLINE',
+                    waktu: w,
+                    laba: Number(payload.biaya_admin) - Number(payload.biaya_operasional || 0),
+                    operator: S.user.username
+                };
+            }
+            if (API_URL.startsWith('GANTI')) {
+                toast('API_URL belum diisi di index.html', false);
+                throw new Error('API_URL belum diisi');
+            }
+            const ttl = READ[action],
+                key = action + JSON.stringify(payload),
+                hit = ttl && CACHE.get(key);
+            const rid = RID;
+            if (hit) {
+                const age = Date.now() - hit.t;
+                if (age < ttl * 1000) return JSON.parse(hit.v);
+                if (age < 600000) {
+                    revalidate(action, payload, key);
+                    return JSON.parse(hit.v);
+                } // tampil instan, segarkan di latar
+            }
+            const d = await apiRaw(action, payload, tries);
+            if (ttl && d !== undefined) CACHE.set(key, {
+                t: Date.now(),
+                v: JSON.stringify(d)
+            });
+            else if (action !== 'logError') {
+                CACHE.clear();
+                if (!/^(login|logout)$/.test(action)) setTimeout(prefetch, 600);
+            }
+            if (ttl && rid !== RID) throw new Error('cancel'); // pindah menu sebelum data tiba: buang hasil lama
+            return d;
+        }
+        async function apiRaw(action, payload = {}, tries = 3, quiet = false) {
+            $('spin').classList.remove('hidden');
+            try {
+                for (let i = 0; i < tries; i++) {
+                    try {
+                        const r = await fetch(API_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action,
+                                token: S.token,
+                                payload
+                            })
+                        }); // text/plain: tanpa preflight CORS
+                        const j = await r.json();
+                        if (!j.success) {
+                            if (j.data && j.data.expired) return logoutLocal();
+                            throw Object.assign(new Error(j.message), {
+                                app: true
+                            });
+                        }
+                        S.last = Date.now();
+                        return j.data;
+                    } catch (e) {
+                        if (e.app || i === tries - 1) throw e;
+                        await new Promise(r => setTimeout(r, 800 * (i + 1)));
+                    }
+                }
+            } catch (e) {
+                if (!quiet) toast(e.message || 'Gagal terhubung ke server', false);
+                throw e;
+            } finally {
+                $('spin').classList.add('hidden');
+            }
+        }
 
-/* ===== Router ===== */
-const JENIS = ['Transfer', 'Tarik Tunai', 'Setor Tunai', 'BRIVA', 'Pembayaran Tagihan', 'Top Up E-Wallet', 'Pulsa', 'Token PLN', 'Cicilan', 'QRIS', 'Lainnya'];
-const KAT = ['Listrik', 'Internet', 'Sewa', 'ATK', 'Operasional', 'Lainnya'];
-const opt = a => a.map(x => `<option>${x}</option>`).join('');
-let RID = 0, PREF = false;
-const SKEL = `<div class="animate-pulse space-y-3"><div class="h-28 rounded-3xl bg-slate-500/15"></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${'<div class="h-24 rounded-2xl bg-slate-500/15"></div>'.repeat(4)}</div><div class="h-64 rounded-2xl bg-slate-500/15"></div></div>`;
-async function route(silent) {
-  const rid = ++RID, p = location.hash.slice(1) || 'dashboard', pg = PAGES.find(x => x[0] === p) || PAGES[0];
-  $('title').textContent = pg[1]; nav(); icons();
-  if (silent !== true) { $('view').innerHTML = SKEL; scrollTo(0, 0); } // halaman langsung berganti, data menyusul
-  try { await VIEWS[pg[0]](); }
-  catch (e) { if (rid !== RID || e.message === 'cancel') return; $('view').innerHTML = `<div class="glass rounded-2xl p-6 text-center"><p class="text-red-500 mb-3">${escH(e.message)}</p><button class="btn" onclick="route()">Coba lagi</button></div>`; }
-  if (rid === RID) icons();
-  if (!PREF && S.token) { PREF = true; setTimeout(prefetch, 400); }
-}
-function boot() {
-  const ok = !!S.token;
-  $('login').classList.toggle('hidden', ok); $('login').classList.toggle('flex', !ok); $('app').classList.toggle('hidden', !ok);
-  if (ok) { $('who').innerHTML = `<i data-lucide="key-round" class="w-4"></i>${escH(S.user.nama)} (${S.user.role})`; route(); } paintTheme();
-}
-addEventListener('hashchange', () => S.token && route());
-window.onerror = (m) => { if (S.token) api('logError', { m }, 1).catch(() => {}); };
+        /* ===== services/auth.js ===== */
+        let LOGGING = false;
+        async function doLogin() {
+            if (LOGGING) return;
+            if (!val('lu') || !val('lp')) return toast('Isi username dan password', false);
+            LOGGING = true;
+            try {
+                await doLogin0();
+            } finally {
+                LOGGING = false;
+                $('lp').value = '';
+            }
+        }
+        async function doLogin0() {
+            try {
+                const d = await api('login', {
+                    username: $('lu').value,
+                    password: $('lp').value
+                });
+                S.token = localStorage.token = d.token;
+                S.user = d.user;
+                localStorage.user = JSON.stringify(d.user);
+                boot();
+            } catch (e) {}
+        }
 
-const isDark = () => document.documentElement.classList.contains('dark');
-function paintTheme() {
-  const sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', moon = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
-  document.querySelectorAll('.themeBtn').forEach(b => { b.style.cursor = 'pointer'; b.title = isDark() ? 'Ganti ke tema terang' : 'Ganti ke tema gelap'; b.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDark() ? sun : moon}</svg>`; });
-  icons();
-}
-function toggleTheme() { const d = document.documentElement.classList.toggle('dark'); localStorage.theme = d ? 'dark' : 'light'; paintTheme(); if (S.token) route(); }
-const TONE = { sky: 'bg-sky-500/15 text-sky-500', emerald: 'bg-emerald-500/15 text-emerald-500', violet: 'bg-violet-500/15 text-violet-500', orange: 'bg-orange-500/15 text-orange-500', rose: 'bg-rose-500/15 text-rose-500' };
-const ICON_TONE = { receipt: 'sky', 'trending-up': 'emerald', calendar: 'violet', users: 'orange', wallet: 'rose', banknote: 'sky', landmark: 'violet' };
-const card = (l, v, i) => `<div class="glass rounded-2xl p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grid place-items-center shrink-0 ${TONE[ICON_TONE[i] || 'sky']}"><i data-lucide="${i}" class="w-5 h-5"></i></div><div class="min-w-0"><div class="text-xs text-slate-500">${l}</div><div class="text-lg font-bold truncate">${v}</div></div></div>`;
-let charts = [];
-function chart(id, type, labels, data, label) {
-  const dk = isDark(), txt = dk ? '#94a3b8' : '#64748b', grid = dk ? 'rgba(148,163,184,.12)' : 'rgba(100,116,139,.14)', ctx = $(id).getContext('2d');
-  const pal = ['#38bdf8', '#F37021', '#818cf8', '#34d399', '#f472b6', '#facc15', '#fb7185', '#2dd4bf', '#a78bfa', '#94a3b8', '#a3e635'];
-  const ds = { label, data };
-  if (type === 'line') {
-    const g = ctx.createLinearGradient(0, 0, 0, 260); g.addColorStop(0, 'rgba(56,189,248,.5)'); g.addColorStop(1, 'rgba(56,189,248,0)');
-    Object.assign(ds, { fill: true, backgroundColor: g, borderColor: '#38bdf8', borderWidth: 3, tension: .4, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#38bdf8', pointHoverBorderWidth: 3 });
-  } else if (type === 'bar') Object.assign(ds, { backgroundColor: '#F37021', borderRadius: 8, borderSkipped: false, maxBarThickness: 28 });
-  else Object.assign(ds, { backgroundColor: pal, borderWidth: 0, spacing: 4, borderRadius: 8, hoverOffset: 8 });
-  const o = { responsive: true, maintainAspectRatio: false, animation: { duration: 900, easing: 'easeOutQuart' }, interaction: { mode: 'index', intersect: false },
-    plugins: { legend: { display: type === 'doughnut', position: 'bottom', labels: { color: txt, usePointStyle: true, boxWidth: 8, padding: 14, font: { family: 'Plus Jakarta Sans' } } },
-      tooltip: { backgroundColor: dk ? '#0f172a' : '#fff', titleColor: dk ? '#f1f5f9' : '#0f172a', bodyColor: txt, borderColor: grid, borderWidth: 1, padding: 10, cornerRadius: 10, displayColors: type === 'doughnut', boxPadding: 4 } } };
-  if (type === 'doughnut') o.cutout = '72%';
-  else o.scales = { x: { grid: { display: false }, border: { display: false }, ticks: { color: txt } }, y: { beginAtZero: true, grid: { color: grid }, border: { display: false }, ticks: { color: txt, precision: 0 } } };
-  charts.push(new Chart(ctx, { type, data: { labels, datasets: [ds] }, options: o }));
-}
+        function logoutLocal() {
+            CACHE.clear();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            S.token = null;
+            location.hash = '';
+            location.reload();
+        }
+        async function doLogout() {
+            try {
+                await api('logout', {
+                    token: S.token
+                });
+            } catch (e) {}
+            logoutLocal();
+        }
+        setInterval(() => {
+            if (S.token && Date.now() - S.last > 30 * 60000) {
+                toast('Logout otomatis: tidak aktif', false);
+                logoutLocal();
+            }
+        }, 30000);
 
-/* ===== Pages ===== */
-const VIEWS = {
-  async dashboard() {
-    charts.forEach(c => c.destroy()); charts = [];
-    const [d] = await Promise.all([api('getDashboard'), loadLib('chart')]);
-    $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        /* ===== components/modal.js ===== */
+        function openModal(html) {
+            $('mbody').innerHTML = html;
+            $('modal').classList.replace('hidden', 'flex');
+            icons();
+        }
+
+        function closeModal() {
+            $('modal').classList.replace('flex', 'hidden');
+        }
+        const LIB = {
+                chart: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+                xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+                atable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
+                barcode: 'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js'
+            },
+            LOADED = {};
+        const loadLib = k => LOADED[k] = LOADED[k] || new Promise((ok, no) => {
+            const e = document.createElement('script');
+            e.src = LIB[k];
+            e.onload = ok;
+            e.onerror = () => {
+                delete LOADED[k];
+                no(new Error('Gagal memuat pustaka ' + k + ', periksa koneksi'));
+            };
+            document.head.appendChild(e);
+        });
+        const icons = () => {
+            try {
+                window.lucide && lucide.createIcons();
+            } catch (e) {}
+        };
+
+        /* ===== components/sidebar.js ===== */
+        const PAGES = [
+            ['dashboard', 'Dashboard', 'home'],
+            ['transaksi', 'Transaksi', 'credit-card'],
+            ['pengeluaran', 'Pengeluaran', 'wallet'],
+            ['pelanggan', 'Pelanggan', 'contact'],
+            ['tutup', 'Tutup Kas', 'calculator'],
+            ['analitik', 'Analitik', 'bar-chart-3'],
+            ['laporan', 'Laporan', 'file-text'],
+            ['setting', 'Pengaturan', 'settings'],
+            ['users', 'Pengguna', 'users', 'Admin'],
+            ['log', 'Log Aktivitas', 'history', 'Admin']
+        ];
+        const NAVC = {
+            dashboard: 'bg-sky-500/15 text-sky-500',
+            transaksi: 'bg-emerald-500/15 text-emerald-500',
+            pengeluaran: 'bg-rose-500/15 text-rose-500',
+            laporan: 'bg-violet-500/15 text-violet-500',
+            users: 'bg-orange-500/15 text-orange-500',
+            setting: 'bg-teal-500/15 text-teal-500',
+            pelanggan: 'bg-cyan-500/15 text-cyan-500',
+            tutup: 'bg-amber-500/15 text-amber-500',
+            analitik: 'bg-indigo-500/15 text-indigo-500',
+            log: 'bg-slate-500/15 text-slate-500'
+        };
+
+        function nav() {
+            const cur = location.hash.slice(1) || 'dashboard';
+            $('nav').innerHTML = PAGES.filter(p => !p[3] || p[3] === S.user.role).map(p =>
+                `<a href="#${p[0]}" onclick="side.classList.add('-translate-x-full')" class="flex items-center gap-3 px-2 py-2 rounded-xl transition ${cur === p[0] ? 'bg-bri text-white font-bold shadow-md' : 'hover:bg-slate-500/10'}"><span class="w-9 h-9 rounded-lg grid place-items-center ${cur === p[0] ? 'bg-white/20 text-white' : NAVC[p[0]]}"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1]}</a>`).join('');
+        }
+
+        /* ===== Router ===== */
+        const JENIS = ['Transfer', 'Tarik Tunai', 'Setor Tunai', 'BRIVA', 'Pembayaran Tagihan', 'Top Up E-Wallet', 'Pulsa', 'Token PLN', 'Cicilan', 'QRIS', 'Lainnya'];
+        const KAT = ['Listrik', 'Internet', 'Sewa', 'ATK', 'Operasional', 'Lainnya'];
+        const opt = a => a.map(x => `<option>${x}</option>`).join('');
+        let RID = 0,
+            PREF = false;
+        const SKEL = `<div class="animate-pulse space-y-3"><div class="h-28 rounded-3xl bg-slate-500/15"></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${'<div class="h-24 rounded-2xl bg-slate-500/15"></div>'.repeat(4)}</div><div class="h-64 rounded-2xl bg-slate-500/15"></div></div>`;
+        async function route(silent) {
+            const rid = ++RID,
+                p = location.hash.slice(1) || 'dashboard',
+                pg = PAGES.find(x => x[0] === p) || PAGES[0];
+            $('title').textContent = pg[1];
+            nav();
+            icons();
+            if (silent !== true) {
+                $('view').innerHTML = SKEL;
+                scrollTo(0, 0);
+            } // halaman langsung berganti, data menyusul
+            try {
+                await VIEWS[pg[0]]();
+            } catch (e) {
+                if (rid !== RID || e.message === 'cancel') return;
+                $('view').innerHTML = `<div class="glass rounded-2xl p-6 text-center"><p class="text-red-500 mb-3">${escH(e.message)}</p><button class="btn" onclick="route()">Coba lagi</button></div>`;
+            }
+            if (rid === RID) icons();
+            if (!PREF && S.token) {
+                PREF = true;
+                setTimeout(prefetch, 400);
+            }
+        }
+
+        function boot() {
+            const ok = !!S.token;
+            $('login').classList.toggle('hidden', ok);
+            $('login').classList.toggle('flex', !ok);
+            $('app').classList.toggle('hidden', !ok);
+            if (ok) {
+                $('who').innerHTML = `<i data-lucide="key-round" class="w-4"></i>${escH(S.user.nama)} (${S.user.role})`;
+                route();
+            }
+            paintTheme();
+        }
+        addEventListener('hashchange', () => S.token && route());
+        window.onerror = (m) => {
+            if (S.token) api('logError', {
+                m
+            }, 1).catch(() => {});
+        };
+
+        const isDark = () => document.documentElement.classList.contains('dark');
+
+        function paintTheme() {
+            const sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+                moon = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+            document.querySelectorAll('.themeBtn').forEach(b => {
+                b.style.cursor = 'pointer';
+                b.title = isDark() ? 'Ganti ke tema terang' : 'Ganti ke tema gelap';
+                b.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${isDark() ? sun : moon}</svg>`;
+            });
+            icons();
+        }
+
+        function toggleTheme() {
+            const d = document.documentElement.classList.toggle('dark');
+            localStorage.theme = d ? 'dark' : 'light';
+            paintTheme();
+            if (S.token) route();
+        }
+        const TONE = {
+            sky: 'bg-sky-500/15 text-sky-500',
+            emerald: 'bg-emerald-500/15 text-emerald-500',
+            violet: 'bg-violet-500/15 text-violet-500',
+            orange: 'bg-orange-500/15 text-orange-500',
+            rose: 'bg-rose-500/15 text-rose-500'
+        };
+        const ICON_TONE = {
+            receipt: 'sky',
+            'trending-up': 'emerald',
+            calendar: 'violet',
+            users: 'orange',
+            wallet: 'rose',
+            banknote: 'sky',
+            landmark: 'violet'
+        };
+        const card = (l, v, i) => `<div class="glass rounded-2xl p-4 flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grid place-items-center shrink-0 ${TONE[ICON_TONE[i] || 'sky']}"><i data-lucide="${i}" class="w-5 h-5"></i></div><div class="min-w-0"><div class="text-xs text-slate-500">${l}</div><div class="text-lg font-bold truncate">${v}</div></div></div>`;
+        let charts = [];
+
+        function chart(id, type, labels, data, label) {
+            const dk = isDark(),
+                txt = dk ? '#94a3b8' : '#64748b',
+                grid = dk ? 'rgba(148,163,184,.12)' : 'rgba(100,116,139,.14)',
+                ctx = $(id).getContext('2d');
+            const pal = ['#38bdf8', '#F37021', '#818cf8', '#34d399', '#f472b6', '#facc15', '#fb7185', '#2dd4bf', '#a78bfa', '#94a3b8', '#a3e635'];
+            const ds = {
+                label,
+                data
+            };
+            if (type === 'line') {
+                const g = ctx.createLinearGradient(0, 0, 0, 260);
+                g.addColorStop(0, 'rgba(56,189,248,.5)');
+                g.addColorStop(1, 'rgba(56,189,248,0)');
+                Object.assign(ds, {
+                    fill: true,
+                    backgroundColor: g,
+                    borderColor: '#38bdf8',
+                    borderWidth: 3,
+                    tension: .4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#38bdf8',
+                    pointHoverBorderWidth: 3
+                });
+            } else if (type === 'bar') Object.assign(ds, {
+                backgroundColor: '#F37021',
+                borderRadius: 8,
+                borderSkipped: false,
+                maxBarThickness: 28
+            });
+            else Object.assign(ds, {
+                backgroundColor: pal,
+                borderWidth: 0,
+                spacing: 4,
+                borderRadius: 8,
+                hoverOffset: 8
+            });
+            const o = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 900,
+                    easing: 'easeOutQuart'
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: type === 'doughnut',
+                        position: 'bottom',
+                        labels: {
+                            color: txt,
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            padding: 14,
+                            font: {
+                                family: 'Plus Jakarta Sans'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: dk ? '#0f172a' : '#fff',
+                        titleColor: dk ? '#f1f5f9' : '#0f172a',
+                        bodyColor: txt,
+                        borderColor: grid,
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: type === 'doughnut',
+                        boxPadding: 4
+                    }
+                }
+            };
+            if (type === 'doughnut') o.cutout = '72%';
+            else o.scales = {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: txt
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: grid
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: txt,
+                        precision: 0
+                    }
+                }
+            };
+            charts.push(new Chart(ctx, {
+                type,
+                data: {
+                    labels,
+                    datasets: [ds]
+                },
+                options: o
+            }));
+        }
+
+        /* ===== Pages ===== */
+        const VIEWS = {
+            async dashboard() {
+                charts.forEach(c => c.destroy());
+                charts = [];
+                const [d] = await Promise.all([api('getDashboard'), loadLib('chart')]);
+                $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
       ${card('Transaksi hari ini', d.trxHari, 'receipt')}${card('Laba hari ini', rp(d.labaHari), 'trending-up')}
       ${card('Transaksi bulan ini', d.trxBulan, 'calendar')}${card('Laba bulan ini', rp(d.labaBulan), 'trending-up')}
       ${card('Pelanggan', d.pelanggan, 'users')}${card('Pengeluaran bulan ini', rp(d.pengeluaranBulan), 'wallet')}
@@ -241,77 +734,96 @@ const VIEWS = {
       <div class="grid md:grid-cols-2 gap-3 mt-3">
       <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="activity" class="w-4 text-sky-500"></i>Transaksi harian bulan ini</div><div class="h-64"><canvas id="c1"></canvas></div></div>
       <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="pie-chart" class="w-4 text-orange-500"></i>Jenis transaksi</div><div class="relative h-64"><canvas id="c2"></canvas><div class="absolute inset-x-0 top-0 flex flex-col items-center justify-center pointer-events-none" style="height:78%"><b class="text-2xl">${Object.values(d.jenis).reduce((a, b) => a + b, 0)}</b><span class="text-xs text-slate-500">transaksi</span></div></div></div></div>`;
-    const ks = Object.keys(d.harian).sort(), lh = d.labaHarian || {};
-    $('view').insertAdjacentHTML('beforeend', `<div class="glass rounded-2xl p-5 mt-3"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="bar-chart-3" class="w-4 text-orange-500"></i>Laba harian bulan ini</div><div class="h-64"><canvas id="c3"></canvas></div></div>`);
-    chart('c1', 'line', ks, ks.map(k => d.harian[k]), 'Transaksi');
-    chart('c3', 'bar', ks, ks.map(k => lh[k] || 0), 'Laba');
-    chart('c2', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
-  },
+                const ks = Object.keys(d.harian).sort(),
+                    lh = d.labaHarian || {};
+                $('view').insertAdjacentHTML('beforeend', `<div class="glass rounded-2xl p-5 mt-3"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="bar-chart-3" class="w-4 text-orange-500"></i>Laba harian bulan ini</div><div class="h-64"><canvas id="c3"></canvas></div></div>`);
+                chart('c1', 'line', ks, ks.map(k => d.harian[k]), 'Transaksi');
+                chart('c3', 'bar', ks, ks.map(k => lh[k] || 0), 'Laba');
+                chart('c2', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
+            },
 
-  async transaksi(page = 1) {
-    const f = this.f = this.f || { q: '', jenis: '', dari: '', sampai: '' };
-    const d = await api('getTransactions', { ...f, page, size: 10 });
-    $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
-      <input class="inp !w-40" placeholder="Cari..." value="${f.q}" onchange="VIEWS.f.q=this.value;VIEWS.transaksi()">
-      <select class="inp !w-40" onchange="VIEWS.f.jenis=this.value;VIEWS.transaksi()"><option value="">Semua jenis</option>${opt(JENIS)}</select>
-      <input type="date" class="inp !w-40" value="${f.dari}" onchange="VIEWS.f.dari=this.value;VIEWS.transaksi()">
-      <input type="date" class="inp !w-40" value="${f.sampai}" onchange="VIEWS.f.sampai=this.value;VIEWS.transaksi()">
+            async transaksi(page = 1) {
+                const f = this.f = this.f || {
+                    q: '',
+                    jenis: '',
+                    dari: '',
+                    sampai: ''
+                };
+                const d = await api('getTransactions', {
+                    ...f,
+                    page,
+                    size: 10
+                });
+                window.TRX = d.items;
+                $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
+      <input class="inp !w-44" placeholder="Cari nama / rekening..." value="${escH(f.q)}" onchange="VIEWS.f.q=this.value;VIEWS.transaksi()">
+      <select id="fj" class="inp !w-40" onchange="VIEWS.f.jenis=this.value;VIEWS.transaksi()"><option value="">Semua jenis</option>${opt(JENIS)}</select>
+      <input type="date" class="inp !w-40" value="${f.dari}" onchange="VIEWS.f.dari=this.value;VIEWS.transaksi()"><input type="date" class="inp !w-40" value="${f.sampai}" onchange="VIEWS.f.sampai=this.value;VIEWS.transaksi()">
       <button class="btn ml-auto" onclick="trxForm()"><i data-lucide="plus" class="w-4"></i>Transaksi</button></div>
-      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Admin</th><th>Laba</th><th></th></tr></thead><tbody>
-      ${d.items.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${t.tanggal}<br><small>${t.waktu}</small></td><td>${t.jenis_transaksi}</td><td>${t.pelanggan}</td><td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td>${rp(t.laba)}</td>
-      <td class="whitespace-nowrap noprint"><button onclick='struk(${JSON.stringify(t)})'><i data-lucide="printer" class="w-4"></i></button> <button onclick='trxForm(${JSON.stringify(t)})'><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteTransaction','${t.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Belum ada transaksi. Klik "+ Transaksi" untuk mulai.</td></tr>'}
+      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal / Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Rek. tujuan / Ref</th><th>Nominal</th><th>Admin</th><th>Kas</th><th>Laba</th><th></th></tr></thead><tbody>
+      ${d.items.map((t, i) => { const k = kasDelta(t); return `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${t.tanggal}<br><small>${t.waktu}</small></td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td><td>${escH(t.rekening_tujuan || '-')}<br><small>${escH(t.no_referensi || '')}</small></td><td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td class="${k < 0 ? 'text-red-500' : 'text-emerald-500'}">${k < 0 ? '-' : '+'}${rp(Math.abs(k))}</td><td>${rp(t.laba)}</td>
+      <td class="whitespace-nowrap noprint"><button onclick="struk(TRX[${i}])"><i data-lucide="printer" class="w-4"></i></button> <button onclick="trxForm(TRX[${i}])"><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteTransaction','${t.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`; }).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="9">Belum ada transaksi.</td></tr>'}
       </tbody></table></div>
-      <div class="flex justify-between mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="VIEWS.transaksi(${page - 1})"><i data-lucide="chevron-left" class="w-4"></i>Sebelumnya</button><span>Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="VIEWS.transaksi(${page + 1})">Berikutnya<i data-lucide="chevron-right" class="w-4"></i></button></div>`;
-  },
+      <div class="flex justify-between mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="VIEWS.transaksi(${page - 1})">Sebelumnya</button><span>Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="VIEWS.transaksi(${page + 1})">Berikutnya</button></div>`;
+                $('fj').value = f.jenis;
+            },
 
-  async pengeluaran() {
-    const d = await api('getExpenses');
-    $('view').innerHTML = `<button class="btn mb-3" onclick="expForm()"><i data-lucide="plus" class="w-4"></i>Pengeluaran</button><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>
+            async pengeluaran() {
+                const d = await api('getExpenses');
+                $('view').innerHTML = `<button class="btn mb-3" onclick="expForm()"><i data-lucide="plus" class="w-4"></i>Pengeluaran</button><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>
       ${d.map(e => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${e.tanggal}</td><td>${e.kategori}</td><td>${e.deskripsi}</td><td>${rp(e.nominal)}</td><td class="whitespace-nowrap"><button onclick='expForm(${JSON.stringify(e)})'><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="del('deleteExpense','${e.id}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500">Belum ada pengeluaran.</td></tr>'}</tbody></table></div>`;
-  },
+            },
 
-  async laporan() {
-    const t = today();
-    $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
+            async laporan() {
+                const t = today();
+                $('view').innerHTML = `<div class="flex flex-wrap gap-2 mb-3 noprint">
       <select id="rp" class="inp !w-36" onchange="setRange(this.value)"><option value="0">Harian</option><option value="6">Mingguan</option><option value="30">Bulanan</option><option value="365">Tahunan</option><option value="x">Custom</option></select>
       <input id="rd" type="date" class="inp !w-40" value="${t}"><input id="rs" type="date" class="inp !w-40" value="${t}">
       <select id="rj" class="inp !w-44"><option value="">Semua jenis</option>${opt(JENIS)}</select><button class="btn" onclick="runReport()"><i data-lucide="search" class="w-4"></i>Tampilkan</button></div><div id="rout"></div><div class="glass rounded-2xl p-4 mt-3 noprint"><b class="flex items-center gap-2"><i data-lucide="scan-barcode" class="w-4"></i>Verifikasi barcode laporan</b><div class="flex gap-2 mt-2"><input id="vcode" class="inp" placeholder="Ketik atau scan kode BRL-..." onkeydown="if(event.key==='Enter')verify()"><button class="btn" onclick="verify()">Periksa</button></div></div>`;
-    runReport();
-  },
+                runReport();
+            },
 
-  async pelanggan() {
-    const d = await api('getCustomers');
-    $('view').innerHTML = `<div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Pelanggan (klik untuk riwayat)</th><th>Transaksi</th><th>Total nominal</th><th>Terakhir</th></tr></thead><tbody>${d.map(c => `<tr class="border-t border-slate-200 dark:border-slate-700 cursor-pointer" data-n="${escH(c.nama)}" onclick="openCust(this.dataset.n)"><td class="p-3">${escH(c.nama)}</td><td>${c.jumlah}</td><td>${rp(c.total)}</td><td>${c.terakhir}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="4">Belum ada pelanggan.</td></tr>'}</tbody></table></div>`;
-  },
+            async pelanggan() {
+                const d = window.CUST = await api('getCustomers');
+                $('view').innerHTML = `<div class="mb-3"><button class="btn" onclick="custForm()"><i data-lucide="user-plus" class="w-4"></i>Pelanggan</button></div><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Pelanggan (klik: riwayat)</th><th>No. HP</th><th>No. rekening</th><th>Transaksi</th><th>Total nominal</th><th>Terakhir</th><th></th></tr></thead><tbody>${d.map((c, i) => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 cursor-pointer text-bri dark:text-sky-300" onclick="openCust(CUST[${i}].nama)">${escH(c.nama)}</td><td>${escH(c.no_hp || '-')}</td><td>${escH(c.no_rekening || '-')}</td><td>${c.jumlah}</td><td>${rp(c.total)}</td><td>${c.terakhir || '-'}</td><td class="whitespace-nowrap"><button onclick="custForm(${i})"><i data-lucide="pencil" class="w-4"></i></button> ${S.user.role === 'Admin' ? `<button onclick="delCust(${i})"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : ''}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Belum ada pelanggan.</td></tr>'}</tbody></table></div>`;
+            },
 
-  async tutup() {
-    const d = await api('getTutupKas');
-    $('view').innerHTML = `<div class="glass rounded-2xl p-5 space-y-3 max-w-md"><b>Tutup kas harian</b><p class="text-sm">Saldo sistem: <b>${rp(d.saldoSistem)}</b></p>
-      <input id="k_tgl" type="date" class="inp" value="${today()}"><input id="k_fisik" type="number" min="0" class="inp" placeholder="Kas fisik (hasil hitung)" oninput="$('k_sel').textContent = rp(this.value - ${Number(d.saldoSistem)})">
-      <p class="text-sm">Selisih: <b id="k_sel">-</b></p><input id="k_cat" class="inp" placeholder="Catatan (opsional)"><button class="btn" onclick="saveTutup()"><i data-lucide="lock" class="w-4"></i>Simpan tutup kas</button></div>
-      <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(k => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${k.tanggal}</td><td>${rp(k.saldo_sistem)}</td><td>${rp(k.kas_fisik)}</td><td class="${k.selisih < 0 ? 'text-red-500' : ''}">${rp(k.selisih)}</td><td>${escH(k.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="5">Belum ada tutup kas.</td></tr>'}</tbody></table></div>`;
-  },
+            async tutup() {
+                const d = await api('getTutupKas'),
+                    k = d.kas,
+                    row = (a, b, c = '') => `<div class="flex justify-between text-sm"><span>${a}</span><b class="${c}">${b}</b></div>`;
+                $('view').innerHTML = `<div class="grid lg:grid-cols-2 gap-3"><div class="glass rounded-2xl p-5 space-y-2"><b>Kas sistem (otomatis dari transaksi)</b>
+      ${row('Saldo awal periode', rp(k.awal))}${row(`Kas masuk (${k.trx} transaksi)`, '+' + rp(k.masuk), 'text-emerald-500')}${row('Kas keluar (tarik tunai + pengeluaran)', '-' + rp(k.keluar), 'text-red-500')}
+      <div class="border-t border-slate-500/30 pt-2 flex justify-between"><span>Saldo kas sistem</span><b class="text-xl">${rp(k.saldo)}</b></div>
+      <p class="text-xs text-slate-500">Periode berjalan sejak ${k.mulai ? new Date(k.mulai).toLocaleString('id-ID') : 'awal pencatatan'}.</p></div>
+      <div class="glass rounded-2xl p-5 space-y-3"><b>Tutup kas</b><input id="k_tgl" type="date" class="inp" value="${today()}">
+      <input id="k_fisik" type="number" min="0" class="inp" placeholder="Kas fisik (hasil hitung uang)" oninput="$('k_sel').textContent = rp(this.value - ${Number(k.saldo)})">
+      <p class="text-sm">Selisih fisik - sistem: <b id="k_sel">-</b></p><input id="k_next" type="number" min="0" class="inp" placeholder="Saldo awal periode berikutnya (kosong = 0)"><input id="k_cat" class="inp" placeholder="Catatan (opsional)">
+      <button class="btn" onclick="saveTutup()"><i data-lucide="lock" class="w-4"></i>Simpan tutup kas</button></div></div>
+      <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th><th>Operator</th></tr></thead><tbody>${d.riwayat.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${x.tanggal}</td><td>${rp(x.saldo_sistem)}</td><td>${rp(x.kas_fisik)}</td><td class="${x.selisih < 0 ? 'text-red-500' : ''}">${rp(x.selisih)}</td><td>${escH(x.operator)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="5">Belum ada tutup kas.</td></tr>'}</tbody></table></div>`;
+            },
 
-  async analitik() {
-    charts.forEach(c => c.destroy()); charts = [];
-    const [d] = await Promise.all([api('getAnalytics'), loadLib('chart')]), ks = Object.keys(d.labaBulanan), BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${card('Transaksi ' + d.tahun, d.trx, 'receipt')}${card('Laba', rp(d.laba), 'trending-up')}${card('Pengeluaran', rp(d.keluar), 'wallet')}${card('Laba bersih', rp(d.laba - d.keluar), 'landmark')}</div>
+            async analitik() {
+                charts.forEach(c => c.destroy());
+                charts = [];
+                const [d] = await Promise.all([api('getAnalytics'), loadLib('chart')]), ks = Object.keys(d.labaBulanan), BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                $('view').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${card('Transaksi ' + d.tahun, d.trx, 'receipt')}${card('Laba', rp(d.laba), 'trending-up')}${card('Pengeluaran', rp(d.keluar), 'wallet')}${card('Laba bersih', rp(d.laba - d.keluar), 'landmark')}</div>
       <div class="grid md:grid-cols-2 gap-3 mt-3"><div class="glass rounded-2xl p-5 md:col-span-2"><b>Laba bulanan ${d.tahun}</b><div class="h-64 mt-2"><canvas id="a1"></canvas></div></div>
       <div class="glass rounded-2xl p-5"><b>Pengeluaran per kategori</b><div class="h-64 mt-2"><canvas id="a2"></canvas></div></div>
       <div class="glass rounded-2xl p-5"><b>Transaksi terbanyak per jenis</b><div class="h-64 mt-2"><canvas id="a3"></canvas></div></div>
       <div class="glass rounded-2xl p-5 md:col-span-2 overflow-x-auto"><b>5 transaksi terbesar</b><table class="w-full text-sm mt-2">${d.top.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="py-2">${t.tanggal}</td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td><td>${rp(t.nominal)}</td></tr>`).join('')}</table></div></div>`;
-    chart('a1', 'bar', ks.map(k => BLN[Number(k.slice(5)) - 1]), Object.values(d.labaBulanan), 'Laba');
-    chart('a2', 'doughnut', Object.keys(d.pengeluaranKategori), Object.values(d.pengeluaranKategori), 'Pengeluaran');
-    chart('a3', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
-  },
+                chart('a1', 'bar', ks.map(k => BLN[Number(k.slice(5)) - 1]), Object.values(d.labaBulanan), 'Laba');
+                chart('a2', 'doughnut', Object.keys(d.pengeluaranKategori), Object.values(d.pengeluaranKategori), 'Pengeluaran');
+                chart('a3', 'doughnut', Object.keys(d.jenis), Object.values(d.jenis), 'Jenis');
+            },
 
-  async log() {
-    const d = await api('getLogs');
-    $('view').innerHTML = `<div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Pengguna</th><th>Aktivitas</th></tr></thead><tbody>${d.map(l => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${l.timestamp}</td><td>${escH(l.user)}</td><td>${escH(l.aktivitas)}</td></tr>`).join('')}</tbody></table></div>`;
-  },
+            async log() {
+                const d = await api('getLogs');
+                $('view').innerHTML = `<div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Pengguna</th><th>Aktivitas</th></tr></thead><tbody>${d.map(l => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3 whitespace-nowrap">${l.timestamp}</td><td>${escH(l.user)}</td><td>${escH(l.aktivitas)}</td></tr>`).join('')}</tbody></table></div>`;
+            },
 
-  async setting() {
-    $('view').innerHTML = `<div class="grid md:grid-cols-2 gap-3">
+            async setting() {
+                $('view').innerHTML = `<div class="grid md:grid-cols-2 gap-3">
       <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="bluetooth" class="w-4"></i>Printer thermal Bluetooth</b>
         <p id="btst" class="text-sm"></p>
         <div class="flex flex-wrap gap-2"><button class="btn" onclick="btPair()"><i data-lucide="bluetooth-searching" class="w-4"></i>Hubungkan</button><button class="btn btn2" onclick="btTest()"><i data-lucide="printer" class="w-4"></i>Tes cetak</button><button class="btn btn2" onclick="btOff()"><i data-lucide="bluetooth-off" class="w-4"></i>Putuskan</button></div>
@@ -321,162 +833,486 @@ const VIEWS = {
         <select id="s_lebar" class="inp"><option value="32">Kertas 58 mm (32 karakter)</option><option value="48">Kertas 80 mm (48 karakter)</option></select>
         <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak otomatis setelah simpan transaksi</label>
         <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div>${S.user.role === 'Admin' ? `<div class="glass rounded-2xl p-5 space-y-3 md:col-span-2"><b class="flex items-center gap-2"><i data-lucide="database" class="w-4"></i>Saldo awal dan data (Admin)</b><div class="flex flex-wrap gap-2"><input id="s_saldo" type="number" min="0" class="inp !w-52" placeholder="Saldo awal kas"><button class="btn" onclick="saveSaldo()">Simpan saldo awal</button></div><div class="flex flex-wrap gap-2"><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup sekarang</button><input id="s_rst" class="inp !w-72" placeholder="Link/ID file backup"><button class="btn btn2" onclick="doRestore()">Restore</button></div><p class="text-xs text-slate-500">Backup harian otomatis: jalankan installBackupTrigger() sekali di Apps Script.</p></div>` : ''}</div>`;
-    $('s_lebar').value = SET.lebar; paintPrinter();
-    if (S.user.role === 'Admin') api('getSettings').then(d => { $('s_saldo').value = d.saldo_awal || 0; }).catch(() => {});
-  },
+                $('s_lebar').value = SET.lebar;
+                paintPrinter();
+                if (S.user.role === 'Admin') api('getSettings').then(d => {
+                    $('s_saldo').value = d.saldo_awal || 0;
+                }).catch(() => {});
+            },
 
-  async users() {
-    const d = await api('getUsers');
-    $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
+            async users() {
+                const d = await api('getUsers');
+                $('view').innerHTML = `<div class="flex gap-2 mb-3"><button class="btn" onclick="userForm()"><i data-lucide="user-plus" class="w-4"></i>Pengguna</button><button class="btn btn2" onclick="doBackup()"><i data-lucide="database-backup" class="w-4"></i>Backup spreadsheet</button></div>
       <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><tbody>${d.map(u => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${u.nama}</td><td>${u.username}</td><td>${u.role}</td><td>${u.status}</td></tr>`).join('')}</tbody></table></div>`;
-  }
-};
+            }
+        };
 
-/* ===== Aksi ===== */
-const val = id => $(id).value;
-function need(...ids) { for (const i of ids) if (!val(i)) { toast('Lengkapi isian wajib', false); return false; } return true; }
-const openCust = n => { VIEWS.f = { q: n, jenis: '', dari: '', sampai: '' }; location.hash = '#transaksi'; };
-async function saveTutup() {
-  if (!need('k_tgl', 'k_fisik')) return;
-  try { await api('addTutupKas', { tanggal: val('k_tgl'), kas_fisik: val('k_fisik'), catatan: val('k_cat') }); toast('Tutup kas tersimpan'); route(); } catch (e) {}
-}
-async function saveSaldo() { if (!need('s_saldo')) return; try { await api('saveSettings', { saldo_awal: val('s_saldo') }); toast('Saldo awal disimpan'); } catch (e) {} }
-async function doRestore() {
-  if (!need('s_rst') || !confirm('Data saat ini akan DITIMPA oleh isi file backup (cadangan otomatis dibuat dulu). Lanjutkan?')) return;
-  try { await api('restoreBackup', { fileId: val('s_rst') }); toast('Restore berhasil, memuat ulang...'); setTimeout(logoutLocal, 1500); } catch (e) {}
-}
-async function verify() {
-  if (!val('vcode').trim()) return toast('Masukkan kode barcode', false);
-  try { const r = await api('getVerify', { code: val('vcode').trim() }); r.valid ? toast(`Asli: dibuat oleh ${r.user}, ${r.waktu}`) : toast('Kode tidak ditemukan, laporan tidak terverifikasi', false); } catch (e) {}
-}
-function trxForm(t = {}) {
-  openModal(`<h3 class="font-bold mb-3">${t.id ? 'Edit' : 'Tambah'} transaksi</h3><div class="space-y-2">
-    <input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}">
-    <select id="f_jenis" class="inp">${opt(JENIS)}</select>
-    <input id="f_pel" list="dl_pel" class="inp" placeholder="Nama pelanggan" value="${t.pelanggan || ''}">
+        /* ===== Aksi ===== */
+        const val = id => $(id).value;
+
+        function need(...ids) {
+            for (const i of ids)
+                if (!val(i)) {
+                    toast('Lengkapi isian wajib', false);
+                    return false;
+                } return true;
+        }
+        const openCust = n => {
+            VIEWS.f = {
+                q: n,
+                jenis: '',
+                dari: '',
+                sampai: ''
+            };
+            location.hash = '#transaksi';
+        };
+        async function saveTutup() {
+            if (!need('k_tgl', 'k_fisik')) return;
+            if (!confirm('Tutup kas akan mengatur saldo awal periode berikutnya (kosong = 0) dan memulai periode baru. Lanjutkan?')) return;
+            try {
+                await api('addTutupKas', {
+                    tanggal: val('k_tgl'),
+                    kas_fisik: val('k_fisik'),
+                    catatan: val('k_cat'),
+                    saldo_berikutnya: val('k_next')
+                });
+                toast('Tutup kas tersimpan, periode baru dimulai');
+                route();
+            } catch (e) {}
+        }
+
+        function custForm(i) {
+            const c = i === undefined ? {} : CUST[i];
+            openModal(`<h3 class="font-bold mb-3">${c.nama ? 'Edit' : 'Tambah'} pelanggan</h3><div class="space-y-2"><input id="c_n" class="inp" placeholder="Nama" value="${escH(c.nama || '')}"><input id="c_h" class="inp" placeholder="No. HP" inputmode="tel" value="${escH(c.no_hp || '')}"><input id="c_r" class="inp" placeholder="No. rekening utama" value="${escH(c.no_rekening || '')}"><input id="c_c" class="inp" placeholder="Catatan" value="${escH(c.catatan || '')}">
+  ${c.nama && c.jumlah ? '<p class="text-xs text-slate-500">Mengubah nama ikut memperbarui seluruh riwayat transaksi pelanggan ini.</p>' : ''}
+  <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveCust(${i === undefined ? -1 : i})">Simpan</button></div></div>`);
+        }
+        async function saveCust(i) {
+            if (!need('c_n')) return;
+            const c = i < 0 ? {} : CUST[i];
+            try {
+                await api('updateCustomer', {
+                    id: c.id || '',
+                    nama_lama: c.nama || '',
+                    nama: val('c_n'),
+                    no_hp: val('c_h'),
+                    no_rekening: val('c_r'),
+                    catatan: val('c_c')
+                });
+                closeModal();
+                toast('Pelanggan disimpan');
+                route();
+            } catch (e) {}
+        }
+        async function delCust(i) {
+            const c = CUST[i];
+            if (!confirm('Hapus pelanggan ' + c.nama + '?')) return;
+            try {
+                await api('deleteCustomer', {
+                    id: c.id,
+                    nama: c.nama
+                });
+                toast('Pelanggan dihapus');
+                route();
+            } catch (e) {}
+        }
+        async function saveSaldo() {
+            if (!need('s_saldo')) return;
+            try {
+                await api('saveSettings', {
+                    saldo_awal: val('s_saldo')
+                });
+                toast('Saldo awal disimpan');
+            } catch (e) {}
+        }
+        async function doRestore() {
+            if (!need('s_rst') || !confirm('Data saat ini akan DITIMPA oleh isi file backup (cadangan otomatis dibuat dulu). Lanjutkan?')) return;
+            try {
+                await api('restoreBackup', {
+                    fileId: val('s_rst')
+                });
+                toast('Restore berhasil, memuat ulang...');
+                setTimeout(logoutLocal, 1500);
+            } catch (e) {}
+        }
+        async function verify() {
+            if (!val('vcode').trim()) return toast('Masukkan kode barcode', false);
+            try {
+                const r = await api('getVerify', {
+                    code: val('vcode').trim()
+                });
+                r.valid ? toast(`Asli: dibuat oleh ${r.user}, ${r.waktu}`) : toast('Kode tidak ditemukan, laporan tidak terverifikasi', false);
+            } catch (e) {}
+        }
+        const kasDelta = t => t.jenis_transaksi === 'Tarik Tunai' ? Number(t.biaya_admin) - Number(t.nominal) : Number(t.nominal) + Number(t.biaya_admin);
+        const kasTxt = t => {
+            const d = kasDelta(t);
+            return (d >= 0 ? 'Kas masuk ' : 'Kas keluar ') + rp(Math.abs(d));
+        };
+
+        function trxForm(t = {}) {
+            openModal(`<h3 class="font-bold mb-3">${t.id ? 'Edit' : 'Tambah'} transaksi</h3><div class="space-y-2">
+    <div class="grid grid-cols-2 gap-2"><input id="f_tgl" type="date" class="inp" value="${t.tanggal || today()}"><input id="f_wkt" type="time" class="inp" value="${t.waktu || new Date().toTimeString().slice(0, 5)}"></div>
+    <select id="f_jenis" class="inp" onchange="calc()">${opt(JENIS)}</select>
+    <input id="f_pel" list="dl_pel" class="inp" placeholder="Nama pelanggan" value="${escH(t.pelanggan || '')}" onchange="fillCust()"><datalist id="dl_pel"></datalist>
+    <input id="f_rek" class="inp" placeholder="No. rekening / nomor tujuan" inputmode="numeric" value="${escH(t.rekening_tujuan || '')}">
+    <input id="f_ref" class="inp" placeholder="No. referensi / no. transaksi (struk bank)" value="${escH(t.no_referensi || '')}">
     <select id="f_met" class="inp">${opt(['Tunai', 'Transfer', 'QRIS', 'Saldo'])}</select>
-    <input id="f_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${t.nominal || ''}">
-    <input id="f_adm" type="number" min="0" class="inp" placeholder="Biaya admin (pendapatan)" value="${t.biaya_admin || ''}" oninput="calc()">
+    <input id="f_nom" type="number" min="1" class="inp" placeholder="Nominal" value="${t.nominal || ''}" oninput="calc()">
+    <input id="f_adm" type="number" min="0" class="inp" placeholder="Biaya admin (pendapatan)" value="${t.biaya_admin ?? ''}" oninput="calc()">
     <input id="f_ops" type="number" min="0" class="inp" placeholder="Biaya operasional (opsional)" value="${t.id ? Number(t.biaya_admin) - Number(t.laba) : 0}" oninput="calc()">
-    <p class="text-sm">Laba: <b id="f_laba">${rp(t.laba)}</b></p>
-    <input id="f_ket" class="inp" placeholder="Keterangan" value="${t.keterangan || ''}">
+    <div class="rounded-xl bg-slate-500/10 p-3 text-sm space-y-1"><div>Laba: <b id="f_laba">-</b></div><div>Dampak kas: <b id="f_kas">-</b></div></div>
+    <input id="f_ket" class="inp" placeholder="Keterangan" value="${escH(t.keterangan || '')}">
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveTrx('${t.id || ''}')">Simpan</button></div></div>`);
-  if (t.jenis_transaksi) $('f_jenis').value = t.jenis_transaksi;
-  if (t.metode_bayar) $('f_met').value = t.metode_bayar;
-  $('f_pel').insertAdjacentHTML('afterend', '<datalist id="dl_pel"></datalist>');
-  api('getCustomers').then(c => { $('dl_pel').innerHTML = c.slice(0, 200).map(x => `<option value="${escH(x.nama)}">`).join(''); }).catch(() => {});
-}
-const calc = () => $('f_laba').textContent = rp(val('f_adm') - (val('f_ops') || 0));
-async function saveTrx(id) {
-  if (!need('f_tgl', 'f_nom', 'f_adm')) return;
-  try { const r = await api(id ? 'updateTransaction' : 'addTransaction', { id, tanggal: val('f_tgl'), jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: val('f_nom'), biaya_admin: val('f_adm'), biaya_operasional: val('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }); closeModal(); toast('Transaksi disimpan'); route(); if (!id && SET.auto && r) struk(r); } catch (e) {}
-}
-function expForm(e = {}) {
-  openModal(`<h3 class="font-bold mb-3">${e.id ? 'Edit' : 'Tambah'} pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${e.tanggal || today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi" value="${escH(e.deskripsi || '')}"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${e.nominal || ''}">
+            if (t.jenis_transaksi) $('f_jenis').value = t.jenis_transaksi;
+            if (t.metode_bayar) $('f_met').value = t.metode_bayar;
+            api('getCustomers').then(c => {
+                window.CUST = c;
+                $('dl_pel').innerHTML = c.slice(0, 200).map(x => `<option value="${escH(x.nama)}">`).join('');
+            }).catch(() => {});
+            calc();
+        }
+        const calc = () => {
+            const a = Number(val('f_adm') || 0);
+            $('f_laba').textContent = rp(a - Number(val('f_ops') || 0));
+            $('f_kas').textContent = kasTxt({
+                jenis_transaksi: val('f_jenis'),
+                nominal: Number(val('f_nom') || 0),
+                biaya_admin: a
+            });
+        };
+
+        function fillCust() {
+            const c = (window.CUST || []).find(x => x.nama === val('f_pel'));
+            if (c && c.no_rekening && !val('f_rek')) $('f_rek').value = c.no_rekening;
+        }
+        let SAVING = false;
+        async function saveTrx(id) {
+            if (SAVING || !need('f_tgl', 'f_nom', 'f_adm')) return;
+            if (Number(val('f_nom')) <= 0) return toast('Nominal harus lebih dari 0', false);
+            if (!['Tarik Tunai', 'Lainnya'].includes(val('f_jenis')) && !val('f_rek').trim() && !val('f_ref').trim()) return toast('Isi no. rekening tujuan atau no. referensi', false);
+            SAVING = true;
+            try {
+                const r = await api(id ? 'updateTransaction' : 'addTransaction', {
+                    id,
+                    tanggal: val('f_tgl'),
+                    waktu: val('f_wkt'),
+                    jenis_transaksi: val('f_jenis'),
+                    pelanggan: val('f_pel'),
+                    rekening_tujuan: val('f_rek'),
+                    no_referensi: val('f_ref'),
+                    nominal: val('f_nom'),
+                    biaya_admin: val('f_adm'),
+                    biaya_operasional: val('f_ops'),
+                    keterangan: val('f_ket'),
+                    metode_bayar: val('f_met')
+                });
+                closeModal();
+                toast('Transaksi disimpan');
+                route();
+                if (!id && SET.auto && r) struk(r);
+            } catch (e) {} finally {
+                SAVING = false;
+            }
+        }
+
+        function expForm(e = {}) {
+            openModal(`<h3 class="font-bold mb-3">${e.id ? 'Edit' : 'Tambah'} pengeluaran</h3><div class="space-y-2"><input id="e_tgl" type="date" class="inp" value="${e.tanggal || today()}"><select id="e_kat" class="inp">${opt(KAT)}</select><input id="e_des" class="inp" placeholder="Deskripsi" value="${escH(e.deskripsi || '')}"><input id="e_nom" type="number" min="0" class="inp" placeholder="Nominal" value="${e.nominal || ''}">
   <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveExp('${e.id || ''}')">Simpan</button></div></div>`);
-  if (e.kategori) $('e_kat').value = e.kategori;
-}
-async function saveExp(id) {
-  if (!need('e_tgl', 'e_nom')) return;
-  try { await api(id ? 'updateExpense' : 'addExpense', { id, tanggal: val('e_tgl'), kategori: val('e_kat'), deskripsi: val('e_des'), nominal: val('e_nom') }); closeModal(); toast('Pengeluaran disimpan'); route(); } catch (e) {}
-}
-function pwForm() {
-  openModal(`<h3 class="font-bold mb-3">Ubah password</h3><div class="space-y-2">
+            if (e.kategori) $('e_kat').value = e.kategori;
+        }
+        async function saveExp(id) {
+            if (!need('e_tgl', 'e_nom')) return;
+            try {
+                await api(id ? 'updateExpense' : 'addExpense', {
+                    id,
+                    tanggal: val('e_tgl'),
+                    kategori: val('e_kat'),
+                    deskripsi: val('e_des'),
+                    nominal: val('e_nom')
+                });
+                closeModal();
+                toast('Pengeluaran disimpan');
+                route();
+            } catch (e) {}
+        }
+
+        function pwForm() {
+            openModal(`<h3 class="font-bold mb-3">Ubah password</h3><div class="space-y-2">
     <input id="pw_o" type="password" class="inp" placeholder="Password lama" autocomplete="current-password">
     <input id="pw_n" type="password" class="inp" placeholder="Password baru (min 6)" autocomplete="new-password">
     <input id="pw_c" type="password" class="inp" placeholder="Ulangi password baru" autocomplete="new-password">
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="savePw()">Simpan</button></div></div>`);
-}
-async function savePw() {
-  if (!need('pw_o', 'pw_n')) return;
-  if (val('pw_n').length < 6) return toast('Password baru minimal 6 karakter', false);
-  if (val('pw_n') !== val('pw_c')) return toast('Konfirmasi password tidak sama', false);
-  try { await api('changePassword', { oldPassword: val('pw_o'), newPassword: val('pw_n') }); closeModal(); toast('Password diperbarui'); } catch (e) {}
-}
-function userForm(id) {
-  const u = (window.USERS || []).find(x => x.id === id) || {};
-  openModal(`<h3 class="font-bold mb-3">${u.id ? 'Edit' : 'Tambah'} pengguna</h3><div class="space-y-2">
+        }
+        async function savePw() {
+            if (!need('pw_o', 'pw_n')) return;
+            if (val('pw_n').length < 6) return toast('Password baru minimal 6 karakter', false);
+            if (val('pw_n') !== val('pw_c')) return toast('Konfirmasi password tidak sama', false);
+            try {
+                await api('changePassword', {
+                    oldPassword: val('pw_o'),
+                    newPassword: val('pw_n')
+                });
+                closeModal();
+                toast('Password diperbarui');
+            } catch (e) {}
+        }
+
+        function userForm(id) {
+            const u = (window.USERS || []).find(x => x.id === id) || {};
+            openModal(`<h3 class="font-bold mb-3">${u.id ? 'Edit' : 'Tambah'} pengguna</h3><div class="space-y-2">
     <input id="u_n" class="inp" placeholder="Nama lengkap" value="${escH(u.nama || '')}">
     <input id="u_u" class="inp" placeholder="Username" value="${escH(u.username || '')}" ${u.id ? 'disabled' : ''}>
     <input id="u_p" type="password" class="inp" placeholder="${u.id ? 'Password baru (kosongkan jika tidak diganti)' : 'Password (min 6)'}">
     <select id="u_r" class="inp"><option>Operator</option><option>Admin</option></select>
     <select id="u_s" class="inp"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select>
     <div class="flex gap-2 justify-end"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn" onclick="saveUser('${u.id || ''}')">Simpan</button></div></div>`);
-  if (u.id) { $('u_r').value = u.role; $('u_s').value = u.status; }
-}
-async function saveUser(id) { try { await api(id ? 'updateUser' : 'addUser', { id, nama: val('u_n'), username: val('u_u'), password: val('u_p'), role: val('u_r'), status: val('u_s') }); closeModal(); toast('Pengguna disimpan'); route(); } catch (e) {} }
-async function delUser(id) { if (!confirm('Hapus pengguna ini?')) return; try { await api('deleteUser', { id }); toast('Pengguna dihapus'); route(); } catch (e) {} }
-async function del(a, id) { if (!confirm('Hapus data ini?')) return; try { await api(a, { id }); toast('Terhapus'); route(); } catch (e) {} }
-async function doBackup() { try { const d = await api('backup'); toast('Backup dibuat di Google Drive'); window.open(d.url); } catch (e) {} }
+            if (u.id) {
+                $('u_r').value = u.role;
+                $('u_s').value = u.status;
+            }
+        }
+        async function saveUser(id) {
+            try {
+                await api(id ? 'updateUser' : 'addUser', {
+                    id,
+                    nama: val('u_n'),
+                    username: val('u_u'),
+                    password: val('u_p'),
+                    role: val('u_r'),
+                    status: val('u_s')
+                });
+                closeModal();
+                toast('Pengguna disimpan');
+                route();
+            } catch (e) {}
+        }
+        async function delUser(id) {
+            if (!confirm('Hapus pengguna ini?')) return;
+            try {
+                await api('deleteUser', {
+                    id
+                });
+                toast('Pengguna dihapus');
+                route();
+            } catch (e) {}
+        }
+        async function del(a, id) {
+            if (!confirm('Hapus data ini?')) return;
+            try {
+                await api(a, {
+                    id
+                });
+                toast('Terhapus');
+                route();
+            } catch (e) {}
+        }
+        async function doBackup() {
+            try {
+                const d = await api('backup');
+                toast('Backup dibuat di Google Drive');
+                window.open(d.url);
+            } catch (e) {}
+        }
 
-/* ===== Printer thermal Bluetooth (ESC/POS via Web Bluetooth) ===== */
-const SET = Object.assign({ toko: 'AGEN BRILINK', alamat: '', footer: 'Terima kasih', lebar: 32, auto: false }, JSON.parse(localStorage.setting || '{}'));
-const BT = { dev: null, ch: null, chunk: 100 };
-const BT_SVC = ['000018f0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb', '0000fff0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2'];
-const btOn = () => !!(BT.ch && BT.dev && BT.dev.gatt.connected);
-function paintPrinter() { const e = $('btst'); if (e) e.innerHTML = btOn() ? `<span class="text-emerald-500 font-bold">Terhubung:</span> ${escH(BT.dev.name)}` : 'Belum terhubung' + (localStorage.btName ? ` (terakhir: ${escH(localStorage.btName)})` : ''); }
-async function btConnect(pick) {
-  if (!navigator.bluetooth) throw new Error('Browser tidak mendukung Bluetooth. Pakai Chrome/Edge (Android atau komputer).');
-  if (!BT.dev || pick) {
-    BT.dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: BT_SVC });
-    BT.dev.addEventListener('gattserverdisconnected', () => { BT.ch = null; paintPrinter(); toast('Printer terputus', false); });
-  }
-  BT.ch = null;
-  const srv = await BT.dev.gatt.connect();
-  for (const sv of await srv.getPrimaryServices()) {
-    const w = (await sv.getCharacteristics()).find(c => c.properties.write || c.properties.writeWithoutResponse);
-    if (w) { BT.ch = w; break; }
-  }
-  if (!BT.ch) throw new Error('Printer ini tidak dikenali (tidak ada jalur tulis data). Coba printer ESC/POS BLE lain.');
-  localStorage.btName = BT.dev.name || 'Printer'; return BT.dev.name || 'Printer';
-}
-async function btSend(bytes) {
-  if (!btOn()) await btConnect(false);
-  for (let n = BT.chunk, i = 0; i < bytes.length;) {
-    try { BT.ch.properties.writeWithoutResponse ? await BT.ch.writeValueWithoutResponse(bytes.slice(i, i + n)) : await BT.ch.writeValue(bytes.slice(i, i + n)); i += n; }
-    catch (e) { if (n > 20) { n = BT.chunk = 20; continue; } throw e; }
-    await new Promise(r => setTimeout(r, 20));
-  }
-}
-const enc = x => Array.from(String(x ?? '').normalize('NFD').replace(/[^\x20-\x7E]/g, ''), c => c.charCodeAt(0));
-function escpos(t) {
-  const W = Number(SET.lebar) || 32, B = [], txt = x => B.push(...enc(x), 10), line = () => txt('-'.repeat(W));
-  const row = (a, b) => { a = String(a); b = String(b); const l = a.slice(0, Math.max(1, W - b.length - 1)); txt(l + ' '.repeat(Math.max(1, W - l.length - b.length)) + b); };
-  B.push(27, 64, 27, 97, 1, 27, 69, 1); txt(SET.toko); B.push(27, 69, 0); if (SET.alamat) txt(SET.alamat);
-  B.push(27, 97, 0); line(); txt(t.tanggal + ' ' + t.waktu); txt('No: ' + t.id); row('Jenis', t.jenis_transaksi); row('Pelanggan', t.pelanggan);
-  line(); row('Nominal', rp(t.nominal)); row('Biaya admin', rp(t.biaya_admin));
-  B.push(27, 69, 1); row('TOTAL', rp(Number(t.nominal) + Number(t.biaya_admin))); B.push(27, 69, 0);
-  line(); txt('Operator: ' + t.operator); B.push(27, 97, 1); txt(SET.footer); B.push(10, 10, 10, 29, 86, 66, 0);
-  return new Uint8Array(B);
-}
-async function struk(t) {
-  if (navigator.bluetooth && (BT.dev || localStorage.btName)) {
-    try { await btSend(escpos(t)); return toast('Struk dikirim ke printer'); }
-    catch (e) { if (e.name === 'NotFoundError') return; toast('Printer gagal: ' + e.message + '. Memakai cetak browser.', false); }
-  }
-  const w = open('', '', 'width=320,height=480'); if (!w) return toast('Pop-up diblokir, izinkan pop-up untuk mencetak', false);
-  w.document.write(`<pre style="font:12px monospace;width:58mm">${escH(SET.toko)}\n${escH(SET.alamat)}\n--------------------------------\n${t.tanggal} ${t.waktu}\nNo: ${t.id}\n${escH(t.jenis_transaksi)}\n${escH(t.pelanggan)}\nNominal : ${rp(t.nominal)}\nAdmin   : ${rp(t.biaya_admin)}\nTOTAL   : ${rp(Number(t.nominal) + Number(t.biaya_admin))}\n--------------------------------\n${escH(SET.footer)}</pre>`);
-  w.document.close(); w.print();
-}
-async function btPair() { try { toast('Terhubung ke ' + await btConnect(true)); } catch (e) { if (e.name !== 'NotFoundError') toast(e.message, false); } paintPrinter(); }
-async function btTest() { try { await btSend(escpos({ tanggal: today(), waktu: 'TES', id: 'TES', jenis_transaksi: 'Tes cetak', pelanggan: '-', nominal: 0, biaya_admin: 0, operator: S.user.username })); toast('Tes cetak dikirim'); } catch (e) { if (e.name !== 'NotFoundError') toast(e.message, false); } paintPrinter(); }
-function btOff() { try { if (btOn()) BT.dev.gatt.disconnect(); } catch (e) {} BT.ch = null; localStorage.removeItem('btName'); paintPrinter(); toast('Printer diputuskan'); }
-function saveSetting() { Object.assign(SET, { toko: val('s_toko'), alamat: val('s_alamat'), footer: val('s_footer'), lebar: Number(val('s_lebar')), auto: $('s_auto').checked }); localStorage.setting = JSON.stringify(SET); toast('Pengaturan disimpan'); }
+        /* ===== Printer thermal Bluetooth (ESC/POS via Web Bluetooth) ===== */
+        const SET = Object.assign({
+            toko: 'AGEN BRILINK',
+            alamat: '',
+            footer: 'Terima kasih',
+            lebar: 32,
+            auto: false
+        }, JSON.parse(localStorage.setting || '{}'));
+        const BT = {
+            dev: null,
+            ch: null,
+            chunk: 100
+        };
+        const BT_SVC = ['000018f0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb', '0000fff0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2'];
+        const btOn = () => !!(BT.ch && BT.dev && BT.dev.gatt.connected);
 
-/* ===== Laporan ===== */
-function setRange(n) {
-  if (n === 'x') return; const d = new Date(); d.setDate(d.getDate() - Number(n)); $('rd').value = d.toLocaleDateString('sv-SE'); $('rs').value = today();
-}
-const escH = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const sumK = (a, k) => a.reduce((t, x) => t + Number(x[k] || 0), 0);
-let RPT = null, SEL = new Set(), MODE = 'all';
-async function runReport() {
-  loadLib('barcode').catch(() => {});
-  if (val('rd') > val('rs')) return toast('Tanggal awal melebihi tanggal akhir', false);
-  RPT = await api('getReports', { dari: val('rd'), sampai: val('rs') }); SEL.clear();
-  if (val('rj')) RPT.transaksi = RPT.transaksi.filter(x => x.jenis_transaksi === val('rj'));
-  const t = RPT.transaksi; RPT.totalTransaksi = t.length; RPT.totalNominal = sumK(t, 'nominal'); RPT.totalLaba = sumK(t, 'laba'); RPT.saldoAkhir = RPT.totalLaba - RPT.totalPengeluaran;
-  $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">${card('Transaksi', t.length, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir', rp(RPT.saldoAkhir), 'landmark')}</div>
+        function paintPrinter() {
+            const e = $('btst');
+            if (e) e.innerHTML = btOn() ? `<span class="text-emerald-500 font-bold">Terhubung:</span> ${escH(BT.dev.name)}` : 'Belum terhubung' + (localStorage.btName ? ` (terakhir: ${escH(localStorage.btName)})` : '');
+        }
+        async function btConnect(pick) {
+            if (!navigator.bluetooth) throw new Error('Browser tidak mendukung Bluetooth. Pakai Chrome/Edge (Android atau komputer).');
+            if (!BT.dev || pick) {
+                BT.dev = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: BT_SVC
+                });
+                BT.dev.addEventListener('gattserverdisconnected', () => {
+                    BT.ch = null;
+                    paintPrinter();
+                    toast('Printer terputus', false);
+                });
+            }
+            BT.ch = null;
+            const srv = await BT.dev.gatt.connect();
+            for (const sv of await srv.getPrimaryServices()) {
+                const w = (await sv.getCharacteristics()).find(c => c.properties.write || c.properties.writeWithoutResponse);
+                if (w) {
+                    BT.ch = w;
+                    break;
+                }
+            }
+            if (!BT.ch) throw new Error('Printer ini tidak dikenali (tidak ada jalur tulis data). Coba printer ESC/POS BLE lain.');
+            localStorage.btName = BT.dev.name || 'Printer';
+            return BT.dev.name || 'Printer';
+        }
+        async function btSend(bytes) {
+            if (!btOn()) await btConnect(false);
+            for (let n = BT.chunk, i = 0; i < bytes.length;) {
+                try {
+                    BT.ch.properties.writeWithoutResponse ? await BT.ch.writeValueWithoutResponse(bytes.slice(i, i + n)) : await BT.ch.writeValue(bytes.slice(i, i + n));
+                    i += n;
+                } catch (e) {
+                    if (n > 20) {
+                        n = BT.chunk = 20;
+                        continue;
+                    }
+                    throw e;
+                }
+                await new Promise(r => setTimeout(r, 20));
+            }
+        }
+        const enc = x => Array.from(String(x ?? '').normalize('NFD').replace(/[^\x20-\x7E]/g, ''), c => c.charCodeAt(0));
+
+        function escpos(t) {
+            const W = Number(SET.lebar) || 32,
+                B = [],
+                txt = x => B.push(...enc(x), 10),
+                line = () => txt('-'.repeat(W));
+            const row = (a, b) => {
+                a = String(a);
+                b = String(b);
+                const l = a.slice(0, Math.max(1, W - b.length - 1));
+                txt(l + ' '.repeat(Math.max(1, W - l.length - b.length)) + b);
+            };
+            B.push(27, 64, 27, 97, 1, 27, 69, 1);
+            txt(SET.toko);
+            B.push(27, 69, 0);
+            if (SET.alamat) txt(SET.alamat);
+            B.push(27, 97, 0);
+            line();
+            txt(t.tanggal + ' ' + t.waktu);
+            txt('No: ' + t.id);
+            row('Jenis', t.jenis_transaksi);
+            row('Pelanggan', t.pelanggan);
+            if (t.rekening_tujuan) row('Rek/Tujuan', t.rekening_tujuan);
+            if (t.no_referensi) row('No Ref', t.no_referensi);
+            line();
+            row('Nominal', rp(t.nominal));
+            row('Biaya admin', rp(t.biaya_admin));
+            B.push(27, 69, 1);
+            row('TOTAL', rp(Number(t.nominal) + Number(t.biaya_admin)));
+            B.push(27, 69, 0);
+            line();
+            txt('Operator: ' + t.operator);
+            B.push(27, 97, 1);
+            txt(SET.footer);
+            B.push(10, 10, 10, 29, 86, 66, 0);
+            return new Uint8Array(B);
+        }
+        async function struk(t) {
+            if (navigator.bluetooth && (BT.dev || localStorage.btName)) {
+                try {
+                    await btSend(escpos(t));
+                    return toast('Struk dikirim ke printer');
+                } catch (e) {
+                    if (e.name === 'NotFoundError') return;
+                    toast('Printer gagal: ' + e.message + '. Memakai cetak browser.', false);
+                }
+            }
+            const w = open('', '', 'width=320,height=480');
+            if (!w) return toast('Pop-up diblokir, izinkan pop-up untuk mencetak', false);
+            w.document.write(`<pre style="font:12px monospace;width:58mm">${escH(SET.toko)}\n${escH(SET.alamat)}\n--------------------------------\n${t.tanggal} ${t.waktu}\nNo: ${t.id}\n${escH(t.jenis_transaksi)}\n${escH(t.pelanggan)}\n${t.rekening_tujuan ? 'Rek: ' + escH(t.rekening_tujuan) + '\n' : ''}${t.no_referensi ? 'Ref: ' + escH(t.no_referensi) + '\n' : ''}Nominal : ${rp(t.nominal)}\nAdmin   : ${rp(t.biaya_admin)}\nTOTAL   : ${rp(Number(t.nominal) + Number(t.biaya_admin))}\n--------------------------------\n${escH(SET.footer)}</pre>`);
+            w.document.close();
+            w.print();
+        }
+        async function btPair() {
+            try {
+                toast('Terhubung ke ' + await btConnect(true));
+            } catch (e) {
+                if (e.name !== 'NotFoundError') toast(e.message, false);
+            }
+            paintPrinter();
+        }
+        async function btTest() {
+            try {
+                await btSend(escpos({
+                    tanggal: today(),
+                    waktu: 'TES',
+                    id: 'TES',
+                    jenis_transaksi: 'Tes cetak',
+                    pelanggan: '-',
+                    nominal: 0,
+                    biaya_admin: 0,
+                    operator: S.user.username
+                }));
+                toast('Tes cetak dikirim');
+            } catch (e) {
+                if (e.name !== 'NotFoundError') toast(e.message, false);
+            }
+            paintPrinter();
+        }
+
+        function btOff() {
+            try {
+                if (btOn()) BT.dev.gatt.disconnect();
+            } catch (e) {}
+            BT.ch = null;
+            localStorage.removeItem('btName');
+            paintPrinter();
+            toast('Printer diputuskan');
+        }
+
+        function saveSetting() {
+            Object.assign(SET, {
+                toko: val('s_toko'),
+                alamat: val('s_alamat'),
+                footer: val('s_footer'),
+                lebar: Number(val('s_lebar')),
+                auto: $('s_auto').checked
+            });
+            localStorage.setting = JSON.stringify(SET);
+            toast('Pengaturan disimpan');
+        }
+
+        /* ===== Laporan ===== */
+        function setRange(n) {
+            if (n === 'x') return;
+            const d = new Date();
+            d.setDate(d.getDate() - Number(n));
+            $('rd').value = d.toLocaleDateString('sv-SE');
+            $('rs').value = today();
+        }
+        const escH = x => String(x ?? '').replace(/[&<>"]/g, c => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;'
+        } [c]));
+        const sumK = (a, k) => a.reduce((t, x) => t + Number(x[k] || 0), 0);
+        let RPT = null,
+            SEL = new Set(),
+            MODE = 'all';
+        async function runReport() {
+            loadLib('barcode').catch(() => {});
+            if (val('rd') > val('rs')) return toast('Tanggal awal melebihi tanggal akhir', false);
+            RPT = await api('getReports', {
+                dari: val('rd'),
+                sampai: val('rs')
+            });
+            SEL.clear();
+            if (val('rj')) RPT.transaksi = RPT.transaksi.filter(x => x.jenis_transaksi === val('rj'));
+            const t = RPT.transaksi;
+            RPT.totalTransaksi = t.length;
+            RPT.totalNominal = sumK(t, 'nominal');
+            RPT.totalLaba = sumK(t, 'laba');
+            RPT.saldoAkhir = RPT.totalLaba - RPT.totalPengeluaran;
+            $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">${card('Transaksi', t.length, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir', rp(RPT.saldoAkhir), 'landmark')}</div>
   <div class="glass rounded-2xl p-4 mt-3 noprint"><div class="font-bold mb-2 flex items-center gap-2"><i data-lucide="printer" class="w-4"></i>Cetak laporan</div><div class="flex flex-wrap gap-3 items-center">
     <label class="flex items-center gap-2"><input type="radio" name="pm" checked onchange="MODE='all'">Semua data per tanggal</label>
     <label class="flex items-center gap-2"><input type="radio" name="pm" onchange="MODE='detail'">Detail per transaksi (centang di tabel)</label>
@@ -485,51 +1321,168 @@ async function runReport() {
     <button class="btn btn2" onclick="pdfOut()"><i data-lucide="file-down" class="w-4"></i>PDF</button></div></div>
   <div class="glass rounded-2xl overflow-x-auto mt-3"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3"><input type="checkbox" onchange="selAll(this.checked)"></th><th>Tanggal</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Laba</th></tr></thead><tbody>
   ${t.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3"><input type="checkbox" class="sel" onchange="this.checked?SEL.add('${x.id}'):SEL.delete('${x.id}')"></td><td>${x.tanggal} ${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.laba)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="6">Tidak ada transaksi pada rentang ini.</td></tr>'}</tbody></table></div>`;
-  icons();
-}
-function selAll(on) { RPT.transaksi.forEach(x => on ? SEL.add(x.id) : SEL.delete(x.id)); document.querySelectorAll('.sel').forEach(c => c.checked = on); }
-async function printReport() {
-  try { await loadLib('barcode'); } catch (e) { return toast(e.message, false); }
-  const t = RPT.transaksi; if (!t.length) return toast('Tidak ada data untuk dicetak', false);
-  let body;
-  if (MODE === 'detail') {
-    const s = t.filter(x => SEL.has(x.id)); if (!s.length) return toast('Centang minimal satu transaksi', false);
-    body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Pelanggan', x.pelanggan], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Operator', x.operator]].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
-  } else {
-    const g = {}; t.forEach(x => (g[x.tanggal] = g[x.tanggal] || []).push(x));
-    body = Object.keys(g).sort().map(d => { const a = g[d]; return `<h3>${d}</h3><table><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="3">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`; }).join('')
-      + `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
-  }
-  const w = open('', '_blank');
-  w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>@page{size:A4;margin:3cm 3cm 3cm 4cm}body{font:12pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
-  w.document.close(); w.focus(); w.print();
-}
-const barcodeURL = txt => { const c = document.createElement('canvas'); JsBarcode(c, txt, { format: 'CODE128', width: 1.6, height: 46, displayValue: false, margin: 0 }); return c.toDataURL('image/png'); };
-const sigCode = () => { const c = ('BRL-' + S.user.username + '-' + new Date().toISOString().slice(2, 16).replace(/\D/g, '')).toUpperCase(); api('logPrint', { code: c }).catch(() => {}); return c; };
-const sigHtml = () => { const code = sigCode(); return `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><img src="${barcodeURL(code)}" style="height:46px;max-width:100%"><div style="font-size:9pt;letter-spacing:1px">${escH(code)}</div><div style="border-top:1px solid #000;padding-top:4px;margin-top:6px"><b>${escH(S.user.nama)}</b><br>${S.user.role}</div></div>`; };
-const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.nominal, t.biaya_admin, t.laba]);
-const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'];
-async function xlsxOut() { try { await loadLib('xlsx'); } catch (e) { return toast(e.message, false); } const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([HEAD, ...rptRows()]), 'Laporan'); XLSX.writeFile(wb, `laporan-${val('rd')}_${val('rs')}.xlsx`); }
-async function pdfOut() {
-  try { await Promise.all([loadLib('jspdf'), loadLib('barcode')]); await loadLib('atable'); } catch (e) { return toast(e.message, false); }
-  const doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' }), M = { top: 30, left: 40, right: 30, bottom: 30 };
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
-  doc.text('Laporan Kas BRILink', M.left, M.top); doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 6);
-  doc.autoTable({ startY: M.top + 12, margin: M, head: [['Tanggal', 'Jenis', 'Pelanggan', 'Nominal', 'Laba']], body: RPT.transaksi.map(t => [t.tanggal, t.jenis_transaksi, t.pelanggan, rp(t.nominal), rp(t.laba)]), styles: { font: 'helvetica', fontSize: 12, cellPadding: 1.5 }, headStyles: { fillColor: [0, 82, 156] } });
-  const L = [`Total transaksi : ${RPT.totalTransaksi}`, `Total nominal : ${rp(RPT.totalNominal)}`, `Total laba : ${rp(RPT.totalLaba)}`, `Total pengeluaran : ${rp(RPT.totalPengeluaran)}`, `Saldo akhir : ${rp(RPT.saldoAkhir)}`];
-  let y = doc.lastAutoTable.finalY + 8; if (y + L.length * 6 + 45 > 297 - M.bottom) { doc.addPage(); y = M.top; }
-  L.forEach((l, i) => doc.text(l, M.left, y + i * 6));
-  y += L.length * 6 + 6; const code = sigCode(), x = 210 - M.right - 60;
-  doc.text('Dibuat oleh,', x + 30, y, { align: 'center' }); doc.addImage(barcodeURL(code), 'PNG', x, y + 3, 60, 14);
-  doc.setFontSize(9); doc.text(code, x + 30, y + 21, { align: 'center' }); doc.setFontSize(12);
-  doc.text(`${S.user.nama} (${S.user.role})`, x + 30, y + 28, { align: 'center' });
-  doc.save(`laporan-${val('rd')}_${val('rs')}.pdf`);
-}
+            icons();
+        }
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-['lu', 'lp'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
-addEventListener('offline', () => toast('Tidak ada koneksi internet', false)); addEventListener('online', () => { toast('Koneksi kembali'); syncQueue(); });
-boot(); syncQueue();
-</script>
+        function selAll(on) {
+            RPT.transaksi.forEach(x => on ? SEL.add(x.id) : SEL.delete(x.id));
+            document.querySelectorAll('.sel').forEach(c => c.checked = on);
+        }
+        async function printReport() {
+            try {
+                await loadLib('barcode');
+            } catch (e) {
+                return toast(e.message, false);
+            }
+            const t = RPT.transaksi;
+            if (!t.length) return toast('Tidak ada data untuk dicetak', false);
+            let body;
+            if (MODE === 'detail') {
+                const s = t.filter(x => SEL.has(x.id));
+                if (!s.length) return toast('Centang minimal satu transaksi', false);
+                body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Pelanggan', x.pelanggan], ['No. rekening tujuan', x.rekening_tujuan || '-'], ['No. referensi', x.no_referensi || '-'], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Total dari pelanggan', Number(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) ? rp(x.jenis_transaksi === 'Tarik Tunai' ? x.biaya_admin : Number(x.nominal) + Number(x.biaya_admin)) : rp(0)], ['Dampak kas', kasTxt(x)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Operator', x.operator]].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
+            } else {
+                const g = {};
+                t.forEach(x => (g[x.tanggal] = g[x.tanggal] || []).push(x));
+                body = Object.keys(g).sort().map(d => {
+                        const a = g[d];
+                        return `<h3>${d}</h3><table><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Rek. tujuan / Ref</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${x.waktu}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${escH([x.rekening_tujuan, x.no_referensi].filter(Boolean).join(' / ') || '-')}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="4">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`;
+                    }).join('') +
+                    `<h3>Ringkasan</h3><table><tr><td>Total transaksi</td><td>${t.length}</td></tr><tr><td>Total nominal</td><td>${rp(RPT.totalNominal)}</td></tr><tr><td>Total laba</td><td>${rp(RPT.totalLaba)}</td></tr><tr><td>Total pengeluaran</td><td>${rp(RPT.totalPengeluaran)}</td></tr><tr><td>Saldo akhir</td><td>${rp(RPT.saldoAkhir)}</td></tr></table>`;
+            }
+            const w = open('', '_blank');
+            w.document.write(`<html><head><title>Laporan Kas BRILink</title><style>@page{size:A4 landscape;margin:3cm 3cm 3cm 4cm}body{font:12pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>Laporan Kas BRILink</h2><p>Periode ${val('rd')} s/d ${val('rs')}${val('rj') ? ' · ' + escH(val('rj')) : ''}</p>${body}${sigHtml()}</body></html>`);
+            w.document.close();
+            w.focus();
+            w.print();
+        }
+        const barcodeURL = txt => {
+            const c = document.createElement('canvas');
+            JsBarcode(c, txt, {
+                format: 'CODE128',
+                width: 1.6,
+                height: 46,
+                displayValue: false,
+                margin: 0
+            });
+            return c.toDataURL('image/png');
+        };
+        const sigCode = () => {
+            const c = ('BRL-' + S.user.username + '-' + new Date().toISOString().slice(2, 16).replace(/\D/g, '')).toUpperCase();
+            api('logPrint', {
+                code: c
+            }).catch(() => {});
+            return c;
+        };
+        const sigHtml = () => {
+            const code = sigCode();
+            return `<div class="sig"><p>Dicetak ${new Date().toLocaleString('id-ID')}</p><p>Dibuat oleh,</p><img src="${barcodeURL(code)}" style="height:46px;max-width:100%"><div style="font-size:9pt;letter-spacing:1px">${escH(code)}</div><div style="border-top:1px solid #000;padding-top:4px;margin-top:6px"><b>${escH(S.user.nama)}</b><br>${S.user.role}</div></div>`;
+        };
+        const rptRows = () => RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.rekening_tujuan || '', t.no_referensi || '', t.nominal, t.biaya_admin, kasDelta(t), t.laba]);
+        const HEAD = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Rek. Tujuan', 'No. Ref', 'Nominal', 'Biaya Admin', 'Dampak Kas', 'Laba'];
+        async function xlsxOut() {
+            try {
+                await loadLib('xlsx');
+            } catch (e) {
+                return toast(e.message, false);
+            }
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([HEAD, ...rptRows()]), 'Laporan');
+            XLSX.writeFile(wb, `laporan-${val('rd')}_${val('rs')}.xlsx`);
+        }
+        async function pdfOut() {
+            try {
+                await Promise.all([loadLib('jspdf'), loadLib('barcode')]);
+                await loadLib('atable');
+            } catch (e) {
+                return toast(e.message, false);
+            }
+            const doc = new jspdf.jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a4'
+                }),
+                M = {
+                    top: 30,
+                    left: 40,
+                    right: 30,
+                    bottom: 30
+                },
+                PW = 297,
+                PH = 210,
+                avail = PW - M.left - M.right;
+            const head = ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Rek. Tujuan / Ref', 'Nominal', 'Admin', 'Laba'];
+            const body = RPT.transaksi.map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, [t.rekening_tujuan, t.no_referensi].filter(Boolean).join(' / ') || '-', rp(t.nominal), rp(t.biaya_admin), rp(t.laba)]);
+            doc.setFont('helvetica', 'normal');
+            let fs = 12,
+                w = [];
+            for (; fs >= 7; fs -= .5) {
+                doc.setFontSize(fs);
+                w = head.map((h, i) => Math.max(...[h, ...body.map(r => r[i])].map(x => doc.getTextWidth(String(x)))) + 4);
+                if (w.reduce((a, b) => a + b, 0) <= avail) break;
+            }
+            fs = Math.max(fs, 7);
+            const k = avail / w.reduce((a, b) => a + b, 0); // auto fit: font terbesar yang muat, lebar kolom disesuaikan
+            doc.setFontSize(12);
+            doc.text('Laporan Kas BRILink', M.left, M.top);
+            doc.text(`Periode ${val('rd')} s/d ${val('rs')}`, M.left, M.top + 6);
+            doc.autoTable({
+                startY: M.top + 12,
+                margin: M,
+                head: [head],
+                body,
+                theme: 'grid',
+                tableWidth: avail,
+                styles: {
+                    font: 'helvetica',
+                    fontSize: fs,
+                    cellPadding: 1.5,
+                    overflow: 'linebreak'
+                },
+                headStyles: {
+                    fillColor: [0, 82, 156]
+                },
+                columnStyles: Object.fromEntries(w.map((x, i) => [i, {
+                    cellWidth: x * k
+                }]))
+            });
+            const L = [`Total transaksi : ${RPT.totalTransaksi}`, `Total nominal : ${rp(RPT.totalNominal)}`, `Total laba : ${rp(RPT.totalLaba)}`, `Total pengeluaran : ${rp(RPT.totalPengeluaran)}`, `Saldo akhir : ${rp(RPT.saldoAkhir)}`];
+            let y = doc.lastAutoTable.finalY + 8;
+            if (y + 34 > PH - M.bottom) {
+                doc.addPage();
+                y = M.top;
+            }
+            doc.setFontSize(12);
+            L.forEach((l, i) => doc.text(l, M.left, y + i * 6));
+            const code = sigCode(),
+                x = PW - M.right - 60;
+            doc.text('Dibuat oleh,', x + 30, y, {
+                align: 'center'
+            });
+            doc.addImage(barcodeURL(code), 'PNG', x, y + 3, 60, 14);
+            doc.setFontSize(9);
+            doc.text(code, x + 30, y + 21, {
+                align: 'center'
+            });
+            doc.setFontSize(12);
+            doc.text(`${S.user.nama} (${S.user.role})`, x + 30, y + 28, {
+                align: 'center'
+            });
+            doc.save(`laporan-${val('rd')}_${val('rs')}.pdf`);
+        }
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+        ['lu', 'lp'].forEach(i => $(i).addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        }));
+        addEventListener('offline', () => toast('Tidak ada koneksi internet', false));
+        addEventListener('online', () => {
+            toast('Koneksi kembali');
+            syncQueue();
+        });
+        boot();
+        syncQueue();
+    </script>
 </body>
+
 </html>
