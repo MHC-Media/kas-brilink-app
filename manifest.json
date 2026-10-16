@@ -1,0 +1,2 @@
+{"name":"Kas BRILink","short_name":"Kas BRILink","description":"Pengelolaan kas agen BRILink multi-kasir","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"#00529C","theme_color":"#00529C",
+"icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
