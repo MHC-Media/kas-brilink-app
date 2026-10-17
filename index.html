@@ -116,7 +116,7 @@ input:checked+.sw{background:#10b981}input:checked+.sw::after{left:21px}
 <script>
 /* ===== Konfigurasi: tempel URL Web App Apps Script di sini ===== */
 const LOGO_SVG = '<svg viewBox="0 0 190 48" class="h-12 mb-4 text-bri dark:text-white" role="img" aria-label="BRILink"><rect y="2" width="44" height="44" rx="12" fill="#00529C"/><path d="M12 24h20M26 15l9 9-9 9" stroke="#F37021" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="currentColor">BRI</text><text x="106" y="35" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="30" fill="#F37021">Link</text></svg>';
-const API_URL = 'https://script.google.com/macros/s/AKfycbzhJwiVrDXYcRVxr7Q8vD3AkI3WpkO38mnkKrGxUB4vfFsE6b_8uJ_BWm5D9LTppQGtqQ/exec';
+const API_URL = 'GANTI_DENGAN_URL_WEB_APP';
 const IDLE_MS = 30 * 60000;
 
 /* ===== util dasar ===== */
@@ -212,23 +212,22 @@ function menu(on) { $('side').classList.toggle('-translate-x-full', !on); $('scr
 const PAGES = [
   ['dashboard', 'Dashboard', 'home', 'Admin'], ['dashboard', 'Beranda', 'home', 'Kasir'],
   ['kasir', 'Transaksi Baru', 'circle-plus', 'Kasir'],
-  ['verifikasi', 'Verifikasi', 'shield-check', 'Admin'], ['kas', 'Kas Kasir', 'wallet-cards', 'Admin'],
+  ['kas', 'Kas Kasir', 'wallet-cards', 'Admin'],
   ['transaksi', 'Transaksi', 'credit-card', 'Admin'], ['transaksi', 'Riwayat', 'history', 'Kasir'],
   ['pengeluaran', 'Pengeluaran', 'wallet', 'Admin'], ['laporan', 'Laporan', 'file-text', 'Admin'],
   ['users', 'Pengguna', 'users', 'Admin'], ['aktivitas', 'Aktivitas', 'activity', 'Admin'], ['setting', 'Pengaturan', 'settings', 'Admin'], ['setting', 'Pengaturan', 'settings', 'Kasir']
 ];
-const BOTTOM = { Admin: ['dashboard', 'verifikasi', 'kas', 'transaksi'], Kasir: ['dashboard', 'kasir', 'transaksi'] };
+const BOTTOM = { Admin: ['dashboard', 'kas', 'transaksi', 'laporan'], Kasir: ['dashboard', 'kasir', 'transaksi'] };
 const NAVC = { dashboard: 'bg-sky-500/15 text-sky-500', kasir: 'bg-emerald-500/15 text-emerald-500', verifikasi: 'bg-amber-500/15 text-amber-500', kas: 'bg-indigo-500/15 text-indigo-500', transaksi: 'bg-emerald-500/15 text-emerald-500', pengeluaran: 'bg-rose-500/15 text-rose-500', laporan: 'bg-violet-500/15 text-violet-500', users: 'bg-orange-500/15 text-orange-500', aktivitas: 'bg-slate-500/15 text-slate-500', setting: 'bg-teal-500/15 text-teal-500' };
 const myPages = () => PAGES.filter(p => p[3] === S.user.role);
 const curPage = () => { const h = location.hash.slice(1) || 'dashboard'; return myPages().find(x => x[0] === h) || myPages()[0]; };
 function nav() {
-  const cur = curPage()[0], bg = n => n === 'verifikasi' && S.pending ? `<span class="nb">${S.pending}</span>` : '';
-  $('nav').innerHTML = myPages().map(p => `<a href="#${p[0]}" onclick="menu(false)" class="relative flex items-center gap-3 px-2 py-2 rounded-xl transition ${cur === p[0] ? 'bg-bri text-white font-bold shadow-md' : 'hover:bg-slate-500/10'}"><span class="w-9 h-9 rounded-lg grid place-items-center ${cur === p[0] ? 'bg-white/20 text-white' : NAVC[p[0]]}"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1]}${p[0] === 'verifikasi' && S.pending ? `<span class="ml-auto badge bg-oren text-white">${S.pending}</span>` : ''}</a>`).join('');
-  $('bnav').innerHTML = BOTTOM[S.user.role].map(k => { const p = myPages().find(x => x[0] === k); return `<a href="#${k}" class="${cur === k ? 'on' : ''}"><span class="ic"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1].replace('Transaksi Baru', 'Transaksi')}${bg(k)}</a>`; }).join('')
+  const cur = curPage()[0];
+  $('nav').innerHTML = myPages().map(p => `<a href="#${p[0]}" onclick="menu(false)" class="relative flex items-center gap-3 px-2 py-2 rounded-xl transition ${cur === p[0] ? 'bg-bri text-white font-bold shadow-md' : 'hover:bg-slate-500/10'}"><span class="w-9 h-9 rounded-lg grid place-items-center ${cur === p[0] ? 'bg-white/20 text-white' : NAVC[p[0]]}"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1]}</a>`).join('');
+  $('bnav').innerHTML = BOTTOM[S.user.role].map(k => { const p = myPages().find(x => x[0] === k); return `<a href="#${k}" class="${cur === k ? 'on' : ''}"><span class="ic"><i data-lucide="${p[2]}" class="w-5 h-5"></i></span>${p[1].replace('Transaksi Baru', 'Transaksi')}</a>`; }).join('')
     + `<button onclick="menu(true)"><span class="ic"><i data-lucide="menu" class="w-5 h-5"></i></span>Menu</button>`;
   icons();
 }
-function setBadge(n) { S.pending = n; document.title = (n ? `(${n}) ` : '') + 'Kas BRILink'; if (S.token) nav(); }
 
 /* ===== Router ===== */
 const JENIS = ['Transfer', 'Tarik Tunai', 'Setor Tunai', 'BRIVA', 'Pembayaran Tagihan', 'Top Up E-Wallet', 'Pulsa', 'Token PLN', 'Cicilan', 'QRIS', 'Lainnya'];
@@ -289,22 +288,27 @@ function chart(id, type, labels, data, label) {
 
 /* ===== Data transaksi (peta id -> objek, aman dari injeksi HTML) ===== */
 const TRX = new Map(); const keep = a => { a.forEach(t => TRX.set(t.id, t)); return a; };
-const shiftCard = s => `<div class="glass rounded-2xl p-4 fade"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grid place-items-center bg-emerald-500/15 text-emerald-500 shrink-0"><i data-lucide="user-round" class="w-5"></i></div><div class="min-w-0 flex-1"><div class="font-bold truncate">${escH(s.kasir_nama)}</div><div class="text-xs text-slate-500">Buka ${escH(String(s.waktu_buka).slice(11, 16))} · @${escH(s.kasir)}</div></div>${s.pending ? `<span class="badge bg-amber-500/15 text-amber-600">${s.pending} menunggu</span>` : ''}</div>
-  <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs"><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Saldo awal</div><b class="text-sm">${rp(s.saldo_awal)}</b></div><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Transaksi</div><b class="text-sm">${s.trx}</b></div><div class="rounded-xl bg-sky-500/10 p-2"><div class="text-slate-500">Saldo kas</div><b class="text-sm text-sky-600 dark:text-sky-400">${rp(s.saldo_sistem)}</b></div></div></div>`;
+const sgn = v => (Number(v) >= 0 ? '+' : '−') + rp(Math.abs(Number(v)));
+const fxT = v => `<b class="whitespace-nowrap ${Number(v) >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${sgn(v)}</b>`;
+const balBox = (ic, label, sis, awal, masuk, keluar, tone) => `<div class="rounded-xl ${tone} p-2.5 text-xs"><div class="text-slate-500 flex items-center gap-1"><i data-lucide="${ic}" class="w-3"></i>${label}</div><b class="text-base block">${rp(sis)}</b><div class="text-slate-500 mt-0.5">awal ${rp(awal)}</div><div class="text-emerald-600">masuk +${rp(masuk)}</div><div class="text-rose-600">keluar −${rp(keluar)}</div></div>`;
+const shiftCard = s => `<div class="glass rounded-2xl p-4 fade"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grid place-items-center bg-emerald-500/15 text-emerald-500 shrink-0"><i data-lucide="user-round" class="w-5"></i></div><div class="min-w-0 flex-1"><div class="font-bold truncate">${escH(s.kasir_nama)}</div><div class="text-xs text-slate-500">Buka ${escH(String(s.waktu_buka).slice(11, 16))} · @${escH(s.kasir)}</div></div></div>
+  <div class="grid grid-cols-2 gap-2 mt-3">${balBox('banknote', 'Kas tunai', s.saldo_sistem, s.saldo_awal, s.tunai_masuk, s.tunai_keluar, 'bg-emerald-500/10')}${balBox('landmark', 'Saldo rekening', s.saldo_sistem_rek, s.saldo_awal_rek, s.rek_masuk, s.rek_keluar, 'bg-sky-500/10')}</div>
+  <div class="text-xs text-slate-500 mt-2">${s.trx} transaksi · laba ${rp(s.laba)}</div></div>`;
 
 /* ===== Pages ===== */
 const VIEWS = {
   async dashboard() {
     if (S.user.role === 'Kasir') return this.dashKasir();
     charts.forEach(c => c.destroy()); charts = [];
-    const [d] = await Promise.all([api('getDashboard'), loadLib('chart')]); setBadge(d.pending);
-    const ks = Object.keys(d.harian).sort(), lh = d.labaHarian || {};
+    const [d] = await Promise.all([api('getDashboard'), loadLib('chart')]); 
+    const ks = Object.keys(d.harian).sort(), lh = d.labaHarian || {}, last = JSON.stringify(d);
+    PT = setInterval(async () => { try { if (document.hidden) return; const x = await api('getDashboard', { _: Date.now() }, 1, true); if (JSON.stringify(x) !== last) show('dashboard'); } catch (e) {} }, 12000);
     return [`<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      ${card('Transaksi hari ini', d.trxHari, 'receipt')}${card('Laba hari ini', rp(d.labaHari), 'trending-up')}
+      ${card('Transaksi sesi berjalan', d.trxSesi, 'receipt')}${card('Laba sesi berjalan', rp(d.labaSesi), 'trending-up')}
       ${card('Transaksi bulan ini', d.trxBulan, 'calendar')}${card('Laba bulan ini', rp(d.labaBulan), 'trending-up')}
-      ${card('Menunggu verifikasi', d.pending, 'clock', "show('verifikasi')")}${card('Pengeluaran bulan ini', rp(d.pengeluaranBulan), 'wallet')}
+      ${card('Kas tunai semua kasir', rp(d.tunaiKasir), 'banknote')}${card('Saldo rekening semua kasir', rp(d.rekKasir), 'landmark')}${card('Pengeluaran bulan ini', rp(d.pengeluaranBulan), 'wallet')}${card('Pelanggan', d.pelanggan, 'users')}
       <div class="col-span-2 rounded-2xl p-5 text-white shadow-lg flex items-center justify-between" style="background:linear-gradient(135deg,#00529C,#0ea5e9 70%,#F37021 150%)"><div><div class="text-sm opacity-80">Saldo kas saat ini</div><div class="text-2xl font-bold">${rp(d.saldoKas)}</div></div><i data-lucide="landmark" class="w-10 h-10 opacity-70"></i></div></div>
-      <div class="flex items-center justify-between mt-5 mb-2"><b class="flex items-center gap-2"><i data-lucide="users" class="w-4 text-emerald-500"></i>Kasir aktif (${d.kasirAktif.length})</b><button class="btn !min-h-0 !py-1.5 text-sm" onclick="show('kas')">Kelola kas</button></div>
+      <div class="flex items-center justify-between mt-5 mb-2"><b class="flex items-center gap-2"><i data-lucide="users" class="w-4 text-emerald-500"></i>Kasir aktif (${d.kasirAktif.length}) <span class="text-xs font-normal text-slate-500">· kembali 0 saat kas ditutup, data tersimpan di Laporan</span></b><button class="btn !min-h-0 !py-1.5 text-sm" onclick="show('kas')">Kelola kas</button></div>
       ${d.kasirAktif.length ? `<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">${d.kasirAktif.map(shiftCard).join('')}</div>` : empty('wallet-cards', 'Belum ada kas dibuka', 'Buka kas dan tentukan saldo awal tiap kasir agar mereka bisa bertransaksi.', `<button class="btn mx-auto" onclick="show('kas').then(openKasForm)"><i data-lucide="unlock" class="w-4"></i>Buka kas</button>`)}
       <div class="grid md:grid-cols-2 gap-3 mt-4">
       <div class="glass rounded-2xl p-5"><div class="flex items-center gap-2 mb-3 font-bold"><i data-lucide="activity" class="w-4 text-sky-500"></i>Transaksi harian bulan ini</div><div class="h-64"><canvas id="c1"></canvas></div></div>
@@ -316,60 +320,52 @@ const VIEWS = {
   async dashKasir() {
     const d = await api('getDashboard'); S.me = Object.assign(S.me || {}, { shift: d.shift }); keep(d.terbaru);
     if (!d.shift) { PT = setInterval(async () => { try { const m = await api('me', {}, 1, true); if (m.shift) show('dashboard'); } catch (e) {} }, 8000); return empty('lock', 'Kas belum dibuka', 'Minta admin membuka kas dan mengisi saldo awal Anda. Halaman ini otomatis terbuka saat kas siap.', `<button class="btn mx-auto" onclick="show('dashboard')"><i data-lucide="refresh-cw" class="w-4"></i>Cek lagi</button>`); }
-    const s = d.shift;
-    return `<div class="rounded-3xl p-5 text-white shadow-lg" style="background:linear-gradient(135deg,#00529C,#0ea5e9 70%,#F37021 150%)"><div class="text-sm opacity-80">Saldo kas Anda</div><div class="text-3xl font-bold mt-1">${rp(s.saldo_sistem)}</div><div class="text-xs opacity-80 mt-2">Saldo awal ${rp(s.saldo_awal)} · buka ${escH(String(s.waktu_buka).slice(11, 16))}</div></div>
+    const s = d.shift, sig = JSON.stringify([s.id, s.trx]);
+    PT = setInterval(async () => { try { if (document.hidden) return; const m = await api('me', {}, 1, true); S.me = m; if (JSON.stringify(m.shift ? [m.shift.id, m.shift.trx] : null) !== sig) show('dashboard'); } catch (e) {} }, 8000);
+    return `<div class="grid grid-cols-2 gap-3"><div class="rounded-3xl p-4 text-white shadow-lg" style="background:linear-gradient(135deg,#047857,#10b981)"><div class="text-xs opacity-80 flex items-center gap-1"><i data-lucide="banknote" class="w-3.5"></i>Kas tunai</div><div class="text-xl font-bold mt-1">${rp(s.saldo_sistem)}</div><div class="text-[11px] opacity-90 mt-2 leading-5">awal ${rp(s.saldo_awal)}<br>masuk +${rp(s.tunai_masuk)}<br>keluar −${rp(s.tunai_keluar)}</div></div>
+      <div class="rounded-3xl p-4 text-white shadow-lg" style="background:linear-gradient(135deg,#00529C,#0ea5e9)"><div class="text-xs opacity-80 flex items-center gap-1"><i data-lucide="landmark" class="w-3.5"></i>Saldo rekening</div><div class="text-xl font-bold mt-1">${rp(s.saldo_sistem_rek)}</div><div class="text-[11px] opacity-90 mt-2 leading-5">awal ${rp(s.saldo_awal_rek)}<br>masuk +${rp(s.rek_masuk)}<br>keluar −${rp(s.rek_keluar)}</div></div></div>
       <button class="btn btn-or w-full mt-3 !py-4 text-lg" onclick="show('kasir')"><i data-lucide="circle-plus" class="w-6"></i>Transaksi baru</button>
-      <div class="grid grid-cols-2 gap-3 mt-3">${card('Transaksi hari ini', d.trxHari, 'receipt')}${card('Laba hari ini', rp(d.labaHari), 'trending-up')}${card('Nominal hari ini', rp(d.nominalHari), 'banknote')}${card('Menunggu admin', d.pendingSaya, 'clock')}</div>
-      <b class="block mt-5 mb-2">Terakhir hari ini</b><div class="space-y-2">${d.terbaru.map(trxCard).join('') || '<p class="text-sm text-slate-500 text-center py-4">Belum ada transaksi hari ini.</p>'}</div>`;
+      <div class="grid grid-cols-2 gap-3 mt-3">${card('Transaksi sesi ini', d.trxHari, 'receipt')}${card('Laba sesi ini', rp(d.labaHari), 'trending-up')}${card('Nominal sesi ini', rp(d.nominalHari), 'banknote')}${card('Kas dibuka', escH(String(s.waktu_buka).slice(11, 16)), 'clock')}</div>
+      <b class="block mt-5 mb-2">Transaksi sesi ini</b><div class="space-y-2">${d.terbaru.map(trxCard).join('') || '<p class="text-sm text-slate-500 text-center py-4">Belum ada transaksi di sesi ini.</p>'}</div>`;
   },
 
   /* --- form transaksi cepat (kasir) --- */
   async kasir() {
-    const m = S.me && S.me.shift !== undefined ? S.me : await api('me'); S.me = m; S.verif = m.verifikasi;
+    const m = S.me && S.me.shift !== undefined ? S.me : await api('me'); S.me = m;
     if (!m.shift) { PT = setInterval(async () => { try { const x = await api('me', {}, 1, true); if (x.shift) show('kasir'); } catch (e) {} }, 8000); return empty('lock', 'Kas belum dibuka', 'Minta admin membuka kas dan mengisi saldo awal Anda. Halaman ini otomatis terbuka saat kas siap.', `<button class="btn mx-auto" onclick="S.me=null;show('kasir')"><i data-lucide="refresh-cw" class="w-4"></i>Cek lagi</button>`); }
-    api('me', {}, 1, true).then(x => { S.me = x; S.verif = x.verifikasi; }).catch(() => {});
-    return [`<div class="glass rounded-3xl p-4 md:p-6 max-w-xl mx-auto">${trxFormHTML({}, true)}</div>`, () => $('f_nom') && $('f_nom').focus()];
+    api('me', {}, 1, true).then(x => { S.me = x; }).catch(() => {});
+    const sh = m.shift, sid = sh.id;
+    PT = setInterval(async () => { try { if (document.hidden) return; const x = await api('me', {}, 1, true); S.me = x; if (!x.shift || x.shift.id !== sid) { toast('Status kas berubah', false); show('kasir'); } } catch (e) {} }, 8000);
+    return [`<div class="max-w-xl mx-auto"><div class="grid grid-cols-2 gap-2 mb-3 text-sm"><div class="rounded-2xl bg-emerald-500/10 px-3 py-2"><div class="text-xs text-slate-500">Kas tunai</div><b id="b_t">${rp(sh.saldo_sistem)}</b></div><div class="rounded-2xl bg-sky-500/10 px-3 py-2"><div class="text-xs text-slate-500">Saldo rekening</div><b id="b_r">${rp(sh.saldo_sistem_rek)}</b></div></div><div class="glass rounded-3xl p-4 md:p-6">${trxFormHTML({}, true)}</div></div>`, () => $('f_nom') && $('f_nom').focus()];
   },
 
   async transaksi(page = 1) {
     const f = this.f = this.f || { q: '', jenis: '', dari: '', sampai: '', status: '', operator: '' }, isA = S.user.role === 'Admin';
     const [d, us] = await Promise.all([api('getTransactions', { ...f, page, size: 10 }), isA ? api('getUsers') : []]); keep(d.items);
     return `<div class="flex flex-wrap gap-2 mb-3 noprint">
-      <input class="inp !w-full md:!w-44" placeholder="Cari nama / kode..." value="${escH(f.q)}" onchange="VIEWS.f.q=this.value;show('transaksi')">
+      <input class="inp !w-full md:!w-44" placeholder="Cari nama pelanggan..." value="${escH(f.q)}" onchange="VIEWS.f.q=this.value;show('transaksi')">
       <select class="inp !w-[48%] md:!w-40" onchange="VIEWS.f.jenis=this.value;show('transaksi')"><option value="">Semua jenis</option>${opt(JENIS, f.jenis)}</select>
-      <select class="inp !w-[48%] md:!w-40" onchange="VIEWS.f.status=this.value;show('transaksi')"><option value="">Semua status</option>${opt(['Menunggu', 'Disetujui', 'Ditolak', 'Dibatalkan'], f.status)}</select>
       ${isA ? `<select class="inp !w-[48%] md:!w-40" onchange="VIEWS.f.operator=this.value;show('transaksi')"><option value="">Semua kasir</option>${us.filter(u => u.role === 'Kasir').map(u => `<option value="${escH(u.username)}" ${u.username === f.operator ? 'selected' : ''}>${escH(u.nama)}</option>`).join('')}</select>` : ''}
       <input type="date" class="inp !w-[48%] md:!w-40" value="${escH(f.dari)}" onchange="VIEWS.f.dari=this.value;show('transaksi')"><input type="date" class="inp !w-[48%] md:!w-40" value="${escH(f.sampai)}" onchange="VIEWS.f.sampai=this.value;show('transaksi')">
       <button class="btn md:ml-auto w-full md:w-auto" onclick="${isA ? 'trxForm()' : "show('kasir')"}"><i data-lucide="plus" class="w-4"></i>Transaksi</button></div>
       <div class="md:hidden space-y-2">${d.items.map(trxCard).join('') || '<p class="p-6 text-center text-slate-500">Belum ada transaksi.</p>'}</div>
-      <div class="hidden md:block glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Jenis</th><th>Pelanggan</th>${isA ? '<th>Kasir</th>' : ''}<th>Nominal</th><th>Admin</th><th>Laba</th><th>Status</th><th></th></tr></thead><tbody>
-      ${d.items.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(t.tanggal)}<br><small>${escH(t.waktu)}</small></td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td>${isA ? `<td>${escH(t.kasir_nama)}</td>` : ''}<td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td>${rp(t.laba)}</td><td>${badge(t.status)}${t.status === 'Menunggu' && t.kode ? `<br><small class="font-bold">#${escH(t.kode)}</small>` : ''}</td><td class="whitespace-nowrap noprint">${trxActs(t)}</td></tr>`).join('') || `<tr><td class="p-6 text-center text-slate-500" colspan="9">Belum ada transaksi.</td></tr>`}
+      <div class="hidden md:block glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Waktu</th><th>Jenis</th><th>Pelanggan</th>${isA ? '<th>Kasir</th>' : ''}<th>Nominal</th><th>Admin</th><th>Laba</th><th>Kas tunai</th><th>Rekening</th><th></th></tr></thead><tbody>
+      ${d.items.map(t => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(t.tanggal)}<br><small>${escH(t.waktu)}</small></td><td>${escH(t.jenis_transaksi)}</td><td>${escH(t.pelanggan)}</td>${isA ? `<td>${escH(t.kasir_nama)}</td>` : ''}<td>${rp(t.nominal)}</td><td>${rp(t.biaya_admin)}</td><td>${rp(t.laba)}</td><td>${fxT(t.kas_tunai)}</td><td>${fxT(t.kas_rek)}</td><td class="whitespace-nowrap noprint">${trxActs(t)}</td></tr>`).join('') || `<tr><td class="p-6 text-center text-slate-500" colspan="10">Belum ada transaksi.</td></tr>`}
       </tbody></table></div>
       <div class="flex justify-between items-center mt-3 noprint"><button class="btn btn2" ${page < 2 ? 'disabled' : ''} onclick="show('transaksi',${page - 1})"><i data-lucide="chevron-left" class="w-4"></i><span class="hidden sm:inline">Sebelumnya</span></button><span class="text-sm">Hal ${page} / ${Math.ceil(d.total / 10) || 1}</span><button class="btn btn2" ${page * 10 >= d.total ? 'disabled' : ''} onclick="show('transaksi',${page + 1})"><span class="hidden sm:inline">Berikutnya</span><i data-lucide="chevron-right" class="w-4"></i></button></div>`;
-  },
-
-  /* --- verifikasi admin --- */
-  async verifikasi() {
-    const d = await api('getPending', {}, 2, true); keep(d.items); setBadge(d.count); NOTIF.n = d.count;
-    PT = setInterval(async () => { try { const x = await api('getPending', {}, 1, true); if (x.count !== NOTIF.n) { alertNew(x.count); show('verifikasi'); } } catch (e) {} }, 6000);
-    return `<div class="glass rounded-2xl p-4 mb-3 flex gap-2 items-center"><i data-lucide="hash" class="w-5 text-amber-500 shrink-0"></i><input id="vk" inputmode="numeric" maxlength="5" class="inp" placeholder="Masukkan kode transaksi (5 angka)" onkeydown="if(event.key==='Enter')verifKode()"><button class="btn btn-ok" onclick="verifKode()">Setujui</button></div>
-      ${d.items.length ? `<div class="grid md:grid-cols-2 gap-3">${d.items.map(t => `<div class="glass rounded-2xl p-4 fade"><div class="flex items-center justify-between"><div class="kode !text-3xl text-amber-600">${escH(t.kode)}</div><span class="text-xs text-slate-500">${escH(t.waktu)}</span></div>
-        <div class="mt-2 text-sm"><b>${escH(t.jenis_transaksi)}</b> · ${escH(t.pelanggan)}<div class="text-slate-500 text-xs">Kasir: ${escH(t.kasir_nama)} · ${escH(t.metode_bayar)}${t.keterangan ? ' · ' + escH(t.keterangan) : ''}</div></div>
-        <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs"><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Nominal</div><b class="text-sm">${rp(t.nominal)}</b></div><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Admin</div><b class="text-sm">${rp(t.biaya_admin)}</b></div><div class="rounded-xl bg-emerald-500/10 p-2"><div class="text-slate-500">Laba</div><b class="text-sm">${rp(t.laba)}</b></div></div>
-        <div class="flex gap-2 mt-3"><button class="btn btn-no flex-1" onclick="rejectForm('${escH(t.id)}')"><i data-lucide="x" class="w-4"></i>Tolak</button><button class="btn btn-ok flex-[2]" onclick="verify('${escH(t.id)}','setuju',this)"><i data-lucide="check" class="w-4"></i>Setujui</button></div></div>`).join('')}</div>`
-        : empty('shield-check', 'Semua transaksi sudah diverifikasi', 'Transaksi baru dari kasir akan muncul di sini otomatis.')}`;
   },
 
   /* --- kas kasir (buka / tutup) --- */
   async kas() {
     const [act, his] = await Promise.all([api('getShifts', { status: 'Buka' }), api('getShifts', { status: 'Tutup', dari: daysAgo(7), sampai: today() })]); KAS = { act, his };
-    PT = setInterval(async () => { try { const x = await api('getShifts', { status: 'Buka' }, 1, true); if (JSON.stringify(x.map(s => [s.id, s.trx, s.pending])) !== JSON.stringify(KAS.act.map(s => [s.id, s.trx, s.pending]))) show('kas'); } catch (e) {} }, 10000);
+    PT = setInterval(async () => { try { const x = await api('getShifts', { status: 'Buka' }, 1, true); if (JSON.stringify(x.map(s => [s.id, s.trx])) !== JSON.stringify(KAS.act.map(s => [s.id, s.trx]))) show('kas'); } catch (e) {} }, 10000);
+    const sel = v => `<td class="font-bold ${Number(v) === 0 ? 'text-emerald-600' : 'text-rose-600'}">${sgn(v)}</td>`;
     return `<div class="flex gap-2 mb-3"><button class="btn flex-1 md:flex-none" onclick="openKasForm()"><i data-lucide="unlock" class="w-4"></i>Buka kas kasir</button></div>
       <b class="block mb-2">Kas terbuka (${act.length})</b>
-      ${act.length ? `<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">${act.map(s => `<div>${shiftCard(s)}<button class="btn btn-no w-full mt-2" onclick="closeKasForm('${escH(s.id)}')"><i data-lucide="lock" class="w-4"></i>Tutup kas</button></div>`).join('')}</div>` : empty('wallet-cards', 'Belum ada kas terbuka', 'Pilih kasir dan isi saldo awal untuk memulai.')}
+      ${act.length ? `<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3">${act.map(s => `<div>${shiftCard(s)}<button class="btn btn-no w-full mt-2" onclick="closeKasForm('${escH(s.id)}')"><i data-lucide="lock" class="w-4"></i>Tutup kas</button></div>`).join('')}</div>` : empty('wallet-cards', 'Belum ada kas terbuka', 'Pilih kasir lalu isi saldo awal tunai dan saldo rekening masing-masing.')}
       <b class="block mt-6 mb-2">Riwayat tutup kas (7 hari)</b>
-      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Kasir</th><th>Saldo awal</th><th>Sistem</th><th>Fisik</th><th>Selisih</th></tr></thead><tbody>
-      ${his.map(s => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(s.tanggal)}</td><td>${escH(s.kasir_nama)}</td><td>${rp(s.saldo_awal)}</td><td>${rp(s.saldo_sistem)}</td><td>${rp(s.saldo_fisik)}</td><td class="font-bold ${Number(s.selisih) === 0 ? 'text-emerald-600' : 'text-rose-600'}">${rp(s.selisih)}</td></tr>`).join('') || '<tr><td colspan="6" class="p-6 text-center text-slate-500">Belum ada riwayat.</td></tr>'}</tbody></table></div>`;
+      <div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Tanggal</th><th>Kasir</th><th>Tunai sistem</th><th>Tunai fisik</th><th>Selisih</th><th>Rek. sistem</th><th>Rek. aktual</th><th>Selisih</th></tr></thead><tbody>
+      ${his.map(s => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(s.tanggal)}</td><td>${escH(s.kasir_nama)}</td><td>${rp(s.saldo_sistem)}</td><td>${rp(s.saldo_fisik)}</td>${sel(s.selisih)}<td>${rp(s.saldo_sistem_rek)}</td><td>${rp(s.saldo_fisik_rek)}</td>${sel(s.selisih_rek)}</tr>`).join('') || '<tr><td colspan="8" class="p-6 text-center text-slate-500">Belum ada riwayat.</td></tr>'}</tbody></table></div>`;
   },
 
   async pengeluaran() {
@@ -401,8 +397,7 @@ const VIEWS = {
   async setting() {
     const isA = S.user.role === 'Admin', sv = isA ? await api('getSettings') : null;
     return [`<div class="grid md:grid-cols-2 gap-3">
-      ${isA ? `<div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4"></i>Keamanan transaksi</b>
-        <label class="flex items-center gap-3 cursor-pointer"><input id="sv_v" type="checkbox" class="sr-only" ${sv.verifikasi ? 'checked' : ''}><span class="sw"></span><span class="text-sm">Wajib verifikasi admin sebelum transaksi kasir sah</span></label>
+      ${isA ? `<div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4"></i>Saldo awal usaha</b>
         <div><label class="text-xs text-slate-500">Saldo awal kas usaha</label><input id="sv_a" inputmode="numeric" class="inp" oninput="mi(this)" value="${fmtN(sv.saldo_awal)}"></div>
         <button class="btn" onclick="saveServer()"><i data-lucide="save" class="w-4"></i>Simpan</button></div>` : ''}
       <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="bluetooth" class="w-4"></i>Printer thermal Bluetooth</b>
@@ -412,7 +407,7 @@ const VIEWS = {
       <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="receipt" class="w-4"></i>Struk</b>
         <input id="s_toko" class="inp" placeholder="Nama usaha" value="${escH(SET.toko)}"><input id="s_alamat" class="inp" placeholder="Alamat / telepon" value="${escH(SET.alamat)}"><input id="s_footer" class="inp" placeholder="Pesan penutup" value="${escH(SET.footer)}">
         <select id="s_lebar" class="inp"><option value="32">Kertas 58 mm (32 karakter)</option><option value="48">Kertas 80 mm (48 karakter)</option></select>
-        <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak otomatis setelah transaksi disetujui</label>
+        <label class="flex items-center gap-2"><input id="s_auto" type="checkbox" ${SET.auto ? 'checked' : ''}>Cetak struk otomatis setelah transaksi disimpan</label>
         <button class="btn" onclick="saveSetting()"><i data-lucide="save" class="w-4"></i>Simpan pengaturan</button></div>
       <div class="glass rounded-2xl p-5 space-y-3"><b class="flex items-center gap-2"><i data-lucide="smartphone" class="w-4"></i>Pasang di HP</b><p class="text-sm text-slate-500">Pasang sebagai aplikasi agar terbuka layar penuh dan lebih cepat.</p><button id="inst" class="btn" onclick="installApp()"><i data-lucide="download" class="w-4"></i>Pasang aplikasi</button><button class="btn btn2" onclick="pwForm()"><i data-lucide="key-round" class="w-4"></i>Ubah password</button></div></div>`, () => { $('s_lebar').value = SET.lebar; paintPrinter(); }];
   }
@@ -421,20 +416,21 @@ let KAS = { act: [], his: [] };
 
 /* ===== kartu & aksi transaksi ===== */
 function trxCard(t) {
-  return `<div class="glass rounded-2xl p-3 fade" onclick="trxDetail('${escH(t.id)}')"><div class="flex items-center justify-between gap-2"><b class="truncate">${escH(t.jenis_transaksi)}</b>${badge(t.status)}</div>
-  <div class="flex items-end justify-between mt-1"><div class="text-xs text-slate-500 min-w-0 truncate">${escH(t.pelanggan)} · ${escH(t.tanggal)} ${escH(t.waktu)}${S.user.role === 'Admin' ? ' · ' + escH(t.kasir_nama || t.operator) : ''}${t.status === 'Menunggu' && t.kode ? ' · <b>#' + escH(t.kode) + '</b>' : ''}</div><div class="text-right shrink-0"><div class="font-bold">${rp(t.nominal)}</div><div class="text-xs text-emerald-600">+${rp(t.laba)}</div></div></div></div>`;
+  return `<div class="glass rounded-2xl p-3 fade" onclick="trxDetail('${escH(t.id)}')"><div class="flex items-center justify-between gap-2"><b class="truncate">${escH(t.jenis_transaksi)}</b><span class="font-bold">${rp(t.nominal)}</span></div>
+  <div class="text-xs text-slate-500 truncate mt-0.5">${escH(t.pelanggan)} · ${escH(t.tanggal)} ${escH(t.waktu)}${S.user.role === 'Admin' ? ' · ' + escH(t.kasir_nama || t.operator) : ''}</div>
+  <div class="flex gap-3 text-xs mt-1.5"><span>Tunai ${fxT(t.kas_tunai)}</span><span>Rekening ${fxT(t.kas_rek)}</span><span class="ml-auto text-emerald-600">laba ${rp(t.laba)}</span></div></div>`;
 }
 function trxActs(t) {
-  const isA = S.user.role === 'Admin', i = escH(t.id);
-  return (t.status === 'Disetujui' ? `<button class="icon-btn inline-grid" onclick="struk('${i}')" aria-label="Cetak"><i data-lucide="printer" class="w-4"></i></button>` : '')
-    + (t.status === 'Menunggu' ? (isA ? `<button class="icon-btn inline-grid" onclick="show('verifikasi')" aria-label="Verifikasi"><i data-lucide="shield-check" class="w-4 text-amber-500"></i></button>` : `<button class="icon-btn inline-grid" onclick="cancelTrx('${i}')" aria-label="Batalkan"><i data-lucide="x-circle" class="w-4 text-rose-500"></i></button>`) : '')
-    + (isA ? `<button class="icon-btn inline-grid" onclick="trxForm('${i}')"><i data-lucide="pencil" class="w-4"></i></button><button class="icon-btn inline-grid" onclick="del('deleteTransaction','${i}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : '');
+  const i = escH(t.id);
+  return `<button class="icon-btn inline-grid" onclick="struk('${i}')" aria-label="Cetak"><i data-lucide="printer" class="w-4"></i></button>`
+    + (S.user.role === 'Admin' ? `<button class="icon-btn inline-grid" onclick="trxForm('${i}')"><i data-lucide="pencil" class="w-4"></i></button><button class="icon-btn inline-grid" onclick="del('deleteTransaction','${i}')"><i data-lucide="trash-2" class="w-4 text-red-500"></i></button>` : '');
 }
 function trxDetail(id) {
   const t = TRX.get(id); if (!t) return;
-  openModal(`<div class="flex items-center justify-between mb-3"><h3 class="font-bold text-lg">${escH(t.jenis_transaksi)}</h3>${badge(t.status)}</div>
-  <div class="text-sm space-y-1.5">${[['Tanggal', t.tanggal + ' ' + t.waktu], ['Pelanggan', t.pelanggan], ['Kasir', t.kasir_nama || t.operator], ['Metode', t.metode_bayar], ['Nominal', rp(t.nominal)], ['Biaya admin', rp(t.biaya_admin)], ['Laba', rp(t.laba)], ['Keterangan', t.keterangan || '-'], ['Kode', t.kode || '-'], ['Diverifikasi', t.verified_by ? t.verified_by + ' ' + String(t.verified_at || '').slice(11, 16) : '-'], ['Catatan admin', t.catatan_admin || '-']].map(r => `<div class="flex justify-between gap-4"><span class="text-slate-500">${r[0]}</span><b class="text-right">${escH(r[1])}</b></div>`).join('')}</div>
-  <div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Tutup</button>${t.status === 'Disetujui' ? `<button class="btn" onclick="struk('${escH(t.id)}')"><i data-lucide="printer" class="w-4"></i>Cetak struk</button>` : ''}${t.status === 'Menunggu' && S.user.role !== 'Admin' ? `<button class="btn btn-no" onclick="cancelTrx('${escH(t.id)}')">Batalkan</button>` : ''}</div>`);
+  openModal(`<h3 class="font-bold text-lg mb-3">${escH(t.jenis_transaksi)}</h3>
+  <div class="text-sm space-y-1.5">${[['Tanggal', t.tanggal + ' ' + t.waktu], ['Pelanggan', t.pelanggan], ['Kasir', t.kasir_nama || t.operator], ['Metode', t.metode_bayar], ['Nominal', rp(t.nominal)], ['Biaya admin', rp(t.biaya_admin)], ['Laba', rp(t.laba)], ['Keterangan', t.keterangan || '-']].map(r => `<div class="flex justify-between gap-4"><span class="text-slate-500">${r[0]}</span><b class="text-right">${escH(r[1])}</b></div>`).join('')}
+  <div class="flex justify-between gap-4"><span class="text-slate-500">Kas tunai</span>${fxT(t.kas_tunai)}</div><div class="flex justify-between gap-4"><span class="text-slate-500">Saldo rekening</span>${fxT(t.kas_rek)}</div></div>
+  <div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Tutup</button><button class="btn" onclick="struk('${escH(t.id)}')"><i data-lucide="printer" class="w-4"></i>Cetak struk</button></div>`);
 }
 
 /* ===== Form transaksi (cepat) ===== */
@@ -455,18 +451,20 @@ function trxFormHTML(t = {}, inline = false) {
     <div><label class="text-xs text-slate-500">Biaya admin</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">Rp</span><input id="f_adm" inputmode="numeric" class="inp !pl-10 !text-lg !font-bold" placeholder="0" value="${fmtN(adm)}" oninput="mi(this);ADMDIRTY=true;calc()" onkeydown="if(event.key==='Enter')saveTrx('${escH(t.id || '')}')"></div>
       <div id="admch" class="flex gap-1.5 mt-2 overflow-x-auto pb-1"></div></div>
     <input id="f_met" type="hidden" value="${escH(met)}"><div class="flex gap-1.5 flex-wrap">${METS.map(m => `<button type="button" class="chip ${m === met ? 'on' : ''}" onclick="pick('f_met','${m}',this)">${m}</button>`).join('')}</div>
-    <input id="f_pel" class="inp" placeholder="Nama pelanggan (opsional)" maxlength="60" value="${escH(t.pelanggan && t.pelanggan !== '-' ? t.pelanggan : '')}">
+    <p class="text-xs text-slate-500 -mt-1">Tunai = uang lewat laci. Transfer / QRIS / Saldo = uang lewat saldo rekening.</p><input id="f_pel" class="inp" placeholder="Nama pelanggan (opsional)" maxlength="60" value="${escH(t.pelanggan && t.pelanggan !== '-' ? t.pelanggan : '')}">
     <details ${t.id ? 'open' : ''}><summary class="text-sm text-slate-500 cursor-pointer py-1">Opsi lanjutan</summary><div class="space-y-2 mt-2"><input id="f_ops" inputmode="numeric" class="inp" placeholder="Biaya operasional (opsional)" oninput="mi(this);calc()" value="${t.id ? fmtN(Number(t.biaya_admin) - Number(t.laba)) : ''}"><input id="f_ket" class="inp" placeholder="Keterangan" maxlength="150" value="${escH(t.keterangan || '')}"></div></details>
-    <div class="rounded-2xl bg-sky-500/10 p-3 flex justify-between text-sm"><div>Total bayar<div id="f_tot" class="font-bold text-lg">Rp 0</div></div><div class="text-right">Laba<div id="f_laba" class="font-bold text-lg text-emerald-600">Rp 0</div></div></div>
-    <div class="flex gap-2">${inline ? '' : '<button class="btn btn2" onclick="closeModal()">Batal</button>'}<button id="f_save" class="btn btn-or flex-1 !py-3.5 text-base" onclick="saveTrx('${escH(t.id || '')}')"><i data-lucide="${S.verif && S.user.role !== 'Admin' ? 'send' : 'check'}" class="w-5"></i>${S.verif && S.user.role !== 'Admin' ? 'Kirim untuk verifikasi' : 'Simpan transaksi'}</button></div>
-    ${S.verif && S.user.role !== 'Admin' ? '<p class="text-xs text-center text-slate-500">Transaksi sah setelah admin menyetujui kode yang muncul.</p>' : ''}</div>`;
+    <div class="grid grid-cols-2 gap-2"><div class="rounded-2xl bg-emerald-500/10 p-3"><div class="text-xs text-slate-500">Kas tunai</div><div id="f_ft" class="font-bold text-lg">Rp 0</div></div><div class="rounded-2xl bg-sky-500/10 p-3"><div class="text-xs text-slate-500">Saldo rekening</div><div id="f_fr" class="font-bold text-lg">Rp 0</div></div></div>
+    <div class="rounded-2xl bg-slate-500/10 p-3 flex justify-between text-sm"><div>Total bayar<div id="f_tot" class="font-bold text-lg">Rp 0</div></div><div class="text-right">Laba<div id="f_laba" class="font-bold text-lg text-emerald-600">Rp 0</div></div></div>
+    <div class="flex gap-2">${inline ? '' : '<button class="btn btn2" onclick="closeModal()">Batal</button>'}<button id="f_save" class="btn btn-or flex-1 !py-3.5 text-base" onclick="saveTrx('${escH(t.id || '')}')"><i data-lucide="check" class="w-5"></i>Simpan transaksi</button></div></div>`;
 }
 function admChips() {
   const j = val('f_jenis'), la = lastAdm(j), list = [...new Set([la, ...ADMCH].filter(Boolean))].slice(0, 6);
   $('admch').innerHTML = list.map(n => `<button type="button" class="chip shrink-0 ${n === la ? 'on' : ''}" onclick="$('f_adm').value=fmtN(${n});ADMDIRTY=true;calc()">${n === la ? '★ ' : ''}${n.toLocaleString('id-ID')}</button>`).join('');
 }
-function pick(id, v, el) { $(id).value = v; [...el.parentNode.children].forEach(b => b.classList.toggle('on', b === el)); if (id === 'f_jenis') { if (!ADMDIRTY) { $('f_adm').value = fmtN(lastAdm(v) || ''); } admChips(); calc(); } }
-function calc() { if (!$('f_tot')) return; $('f_tot').textContent = rp(N('f_nom') + N('f_adm')); $('f_laba').textContent = rp(N('f_adm') - N('f_ops')); }
+function pick(id, v, el) { $(id).value = v; [...el.parentNode.children].forEach(b => b.classList.toggle('on', b === el)); if (id === 'f_met') calc(); if (id === 'f_jenis') { if (!ADMDIRTY) { $('f_adm').value = fmtN(lastAdm(v) || ''); } admChips(); calc(); } }
+function fx(j, m, nom, adm) { const cash = m === 'Tunai'; let t = 0, r = 0; if (j === 'Tarik Tunai') { t = -nom; r = nom; } else if (j === 'Setor Tunai') { t = nom; r = -nom; } else { r = -nom; if (cash) t += nom; else r += nom; } if (cash) t += adm; else r += adm; return { tunai: t, rek: r }; }
+function setFx(id, v) { const e = $(id); e.textContent = sgn(v); e.className = 'font-bold text-lg ' + (v >= 0 ? 'text-emerald-600' : 'text-rose-600'); }
+function calc() { if (!$('f_tot')) return; const nom = N('f_nom'), adm = N('f_adm'), f = fx(val('f_jenis'), val('f_met'), nom, adm); $('f_tot').textContent = rp(nom + adm); $('f_laba').textContent = rp(adm - N('f_ops')); setFx('f_ft', f.tunai); setFx('f_fr', f.rek); }
 function trxForm(id) { const t = id ? TRX.get(id) : {}; openModal(trxFormHTML(t)); admChips(); calc(); }
 new MutationObserver(() => { if ($('f_adm') && $('admch') && !$('admch').children.length) { admChips(); calc(); } }).observe(document.body, { childList: true, subtree: true });
 let SAVING = false;
@@ -480,91 +478,47 @@ async function saveTrx(id) {
     const r = await api(id ? 'updateTransaction' : 'addTransaction', { id, ref, tanggal: $('f_tgl') ? val('f_tgl') : undefined, jenis_transaksi: val('f_jenis'), pelanggan: val('f_pel'), nominal: N('f_nom'), biaya_admin: N('f_adm'), biaya_operasional: N('f_ops'), keterangan: val('f_ket'), metode_bayar: val('f_met') }, 2);
     window.REF = null; localStorage.lastJenis = r.jenis_transaksi; const m = JSON.parse(localStorage.adm || '{}'); m[r.jenis_transaksi] = r.biaya_admin; localStorage.adm = JSON.stringify(m);
     TRX.set(r.id, r); if (navigator.vibrate) navigator.vibrate(30);
-    if (r.status === 'Menunggu') { WATCH.add(r.id); showWait(r); }
-    else { closeModal(); toast('Transaksi disimpan'); if (S.user.role === 'Kasir') { successModal(r); } else route(); if (!id && SET.auto && r.status === 'Disetujui') struk(r.id); }
-  } catch (e) {} finally { SAVING = false; b && (b.disabled = false); }
-}
-
-/* --- menunggu verifikasi (kasir) --- */
-let WAIT = null; const WATCH = new Set();
-function showWait(t) {
-  WAIT = t.id; TRX.set(t.id, t);
-  const k = String(t.kode || '').split('').join(' '), st = t.status;
-  if (st === 'Menunggu') openModal(`<div class="text-center"><div class="w-20 h-20 mx-auto rounded-full bg-oren/15 grid place-items-center wait text-oren"><i data-lucide="shield-check" class="w-9 h-9"></i></div>
-    <h3 class="font-bold text-lg mt-4">Menunggu verifikasi admin</h3><p class="text-sm text-slate-500">Sebutkan kode ini ke admin</p><div class="kode text-bri dark:text-sky-400 my-3">${escH(k)}</div>
-    <div class="rounded-xl bg-slate-500/10 p-3 text-sm text-left"><div class="flex justify-between"><span>${escH(t.jenis_transaksi)}</span><b>${rp(t.nominal)}</b></div><div class="flex justify-between text-slate-500"><span>${escH(t.pelanggan)}</span><span>admin ${rp(t.biaya_admin)}</span></div></div>
-    <p class="text-sm mt-3 text-slate-500">Menunggu<span class="dots ml-1"><span></span><span></span><span></span></span></p>
-    <div class="flex gap-2 mt-4"><button class="btn btn2 flex-1" onclick="cancelTrx('${escH(t.id)}')">Batalkan</button><button class="btn flex-1" onclick="closeModal();show('kasir')">Transaksi baru</button></div></div>`, true);
-  else if (st === 'Disetujui') successModal(t);
-  else openModal(`<div class="text-center"><div class="w-20 h-20 mx-auto rounded-full bg-rose-500/15 grid place-items-center text-rose-500" style="animation:pop .4s"><i data-lucide="x" class="w-10 h-10"></i></div><h3 class="font-bold text-lg mt-4">Transaksi ${escH(st.toLowerCase())}</h3><p class="text-sm text-slate-500 mt-1">${escH(t.catatan_admin || 'Tidak ada catatan')}</p><button class="btn w-full mt-5" onclick="closeModal();show('kasir')">Transaksi baru</button></div>`);
+    if (S.user.role === 'Kasir') { if (!id && S.me && S.me.shift) { S.me.shift.saldo_sistem += Number(r.kas_tunai); S.me.shift.saldo_sistem_rek += Number(r.kas_rek); } successModal(r); }
+    else { closeModal(); toast('Transaksi disimpan'); route(); }
+    if (!id && SET.auto) struk(r.id);
+  } catch (e) { if (/belum dibuka/.test(e.message || '')) { S.me = null; closeModal(); show('kasir'); } } finally { SAVING = false; b && (b.disabled = false); }
 }
 function successModal(t) {
   openModal(`<div class="text-center"><div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/15 grid place-items-center" style="animation:pop .4s"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path class="chk" d="M5 13l4 4L19 7"/></svg></div>
-  <h3 class="font-bold text-lg mt-4">Transaksi disetujui</h3><p class="text-sm text-slate-500">${escH(t.jenis_transaksi)} · ${rp(t.nominal)}</p>
+  <h3 class="font-bold text-lg mt-4">Transaksi tersimpan</h3><p class="text-sm text-slate-500">${escH(t.jenis_transaksi)} · ${rp(t.nominal)}</p>
+  <div class="grid grid-cols-2 gap-2 mt-3 text-sm"><div class="rounded-xl bg-emerald-500/10 p-2"><div class="text-xs text-slate-500">Kas tunai</div>${fxT(t.kas_tunai)}</div><div class="rounded-xl bg-sky-500/10 p-2"><div class="text-xs text-slate-500">Saldo rekening</div>${fxT(t.kas_rek)}</div></div>
   <div class="flex gap-2 mt-5"><button class="btn btn2 flex-1" onclick="struk('${escH(t.id)}')"><i data-lucide="printer" class="w-4"></i>Struk</button><button class="btn flex-1" onclick="closeModal();show('kasir')">Transaksi baru</button></div></div>`);
-}
-async function cancelTrx(id) {
-  if (!confirm('Batalkan transaksi ini?')) return;
-  try { await api('cancelTransaction', { id }); WATCH.delete(id); closeModal(); toast('Transaksi dibatalkan'); route(); } catch (e) {}
-}
-async function pollWatch() {
-  for (const id of [...WATCH]) {
-    try {
-      const r = await api('getTxStatus', { id }, 1, true), t = TRX.get(id) || { id };
-      if (r.status !== 'Menunggu') {
-        WATCH.delete(id); Object.assign(t, r); TRX.set(id, t);
-        if (navigator.vibrate) navigator.vibrate(r.status === 'Disetujui' ? [60] : [80, 60, 80]);
-        if (WAIT === id) showWait(t); else { toast(`Transaksi #${t.kode || ''} ${r.status.toLowerCase()}`, r.status === 'Disetujui'); if (S.token && curPage()[0] !== 'kasir') route(); }
-        if (r.status === 'Disetujui' && SET.auto) struk(id);
-      }
-    } catch (e) { if (e.app) WATCH.delete(id); }
-  }
-}
-
-/* --- verifikasi admin: aksi --- */
-const NOTIF = { n: 0 };
-let AC = null;
-function beep() { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(); o.connect(g); g.connect(AC.destination); o.frequency.value = 880; g.gain.setValueAtTime(.15, AC.currentTime); g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + .4); o.start(); o.stop(AC.currentTime + .4); } catch (e) {} }
-function alertNew(n) { if (n > NOTIF.n) { beep(); if (navigator.vibrate) navigator.vibrate([100, 60, 100]); toast('Transaksi baru menunggu verifikasi'); } NOTIF.n = n; setBadge(n); }
-async function verify(id, keputusan, btn, alasan) {
-  if (btn) btn.disabled = true;
-  try { await api('verifyTransaction', { id, keputusan, alasan }); toast(keputusan === 'setuju' ? 'Transaksi disetujui' : 'Transaksi ditolak'); closeModal(); show('verifikasi'); } catch (e) { if (btn) btn.disabled = false; }
-}
-async function verifKode() {
-  const k = val('vk').trim(); if (!/^\d{5}$/.test(k)) return toast('Kode terdiri dari 5 angka', false);
-  try { const t = await api('verifyTransaction', { kode: k, keputusan: 'setuju' }); toast(`Disetujui: ${t.jenis_transaksi} ${rp(t.nominal)}`); show('verifikasi'); } catch (e) {}
-}
-function rejectForm(id) {
-  openModal(`<h3 class="font-bold mb-3">Tolak transaksi</h3><div class="flex gap-1.5 flex-wrap mb-2">${['Nominal salah', 'Data tidak sesuai', 'Dicurigai', 'Dibatalkan pelanggan'].map(a => `<button class="chip" onclick="$('rj_a').value='${a}'">${a}</button>`).join('')}</div>
-  <input id="rj_a" class="inp" placeholder="Alasan penolakan (wajib)" maxlength="150"><div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn btn-no" onclick="if(!val('rj_a').trim())return toast('Isi alasan penolakan',false);verify('${escH(id)}','tolak',this,val('rj_a'))">Tolak</button></div>`);
 }
 
 /* --- buka / tutup kas --- */
 async function openKasForm() {
   const us = (await api('getUsers')).filter(u => u.role === 'Kasir' && u.status === 'aktif'), open = new Set(KAS.act.map(s => s.kasir)), last = {};
-  KAS.his.slice().reverse().forEach(s => last[s.kasir] = s.saldo_fisik);
+  KAS.his.slice().reverse().forEach(s => last[s.kasir] = s);
   const list = us.filter(u => !open.has(u.username));
   if (!list.length) return toast(us.length ? 'Semua kasir sudah dibuka' : 'Belum ada kasir. Tambah di menu Pengguna', false);
-  openModal(`<h3 class="font-bold text-lg mb-1">Buka kas kasir</h3><p class="text-xs text-slate-500 mb-3">Centang kasir dan tentukan saldo awal masing-masing.</p><div class="space-y-2">${list.map((u, i) => `<div class="rounded-xl border border-slate-300 dark:border-slate-600 p-3"><label class="flex items-center gap-2 font-bold"><input type="checkbox" class="ok_k w-5 h-5" data-u="${escH(u.username)}" data-i="${i}" checked>${escH(u.nama)} <span class="text-xs font-normal text-slate-500">@${escH(u.username)}</span></label><input id="sa${i}" inputmode="numeric" class="inp mt-2" placeholder="Saldo awal" oninput="mi(this)" value="${fmtN(last[u.username] || '')}"></div>`).join('')}</div>
+  openModal(`<h3 class="font-bold text-lg mb-1">Buka kas kasir</h3><p class="text-xs text-slate-500 mb-3">Centang kasir lalu isi saldo awal kas tunai dan saldo rekening masing-masing.</p><div class="space-y-2">${list.map((u, i) => `<div class="rounded-xl border border-slate-300 dark:border-slate-600 p-3"><label class="flex items-center gap-2 font-bold"><input type="checkbox" class="ok_k w-5 h-5" data-u="${escH(u.username)}" data-i="${i}" checked>${escH(u.nama)} <span class="text-xs font-normal text-slate-500">@${escH(u.username)}</span></label>
+  <div class="grid grid-cols-2 gap-2 mt-2"><div><label class="text-xs text-slate-500">Saldo awal tunai</label><input id="sa${i}" inputmode="numeric" class="inp" placeholder="0" oninput="mi(this)" value="${fmtN((last[u.username] || {}).saldo_fisik || '')}"></div><div><label class="text-xs text-slate-500">Saldo awal rekening</label><input id="sr${i}" inputmode="numeric" class="inp" placeholder="0" oninput="mi(this)" value="${fmtN((last[u.username] || {}).saldo_fisik_rek || '')}"></div></div></div>`).join('')}</div>
   <div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn btn-ok" onclick="doOpenKas()"><i data-lucide="unlock" class="w-4"></i>Buka kas</button></div>`);
 }
 async function doOpenKas() {
-  const items = [...document.querySelectorAll('.ok_k')].filter(c => c.checked).map(c => ({ username: c.dataset.u, saldo_awal: N('sa' + c.dataset.i) }));
+  const items = [...document.querySelectorAll('.ok_k')].filter(c => c.checked).map(c => ({ username: c.dataset.u, saldo_awal: N('sa' + c.dataset.i), saldo_awal_rek: N('sr' + c.dataset.i) }));
   if (!items.length) return toast('Pilih minimal satu kasir', false);
   try { await api('openShifts', { items }); closeModal(); toast('Kas dibuka'); show('kas'); } catch (e) {}
 }
 function closeKasForm(id) {
   const s = KAS.act.find(x => x.id === id); if (!s) return;
+  const box = (l, aw, m, k, sis) => `<div class="rounded-xl bg-slate-500/10 p-2.5 text-xs"><div class="font-bold text-sm mb-1">${l}</div><div class="flex justify-between"><span>Saldo awal</span><b>${rp(aw)}</b></div><div class="flex justify-between text-emerald-600"><span>Masuk</span><b>+${rp(m)}</b></div><div class="flex justify-between text-rose-600"><span>Keluar</span><b>−${rp(k)}</b></div><div class="flex justify-between border-t border-slate-400/30 mt-1 pt-1"><span>Saldo sistem</span><b>${rp(sis)}</b></div></div>`;
   openModal(`<h3 class="font-bold text-lg mb-3">Tutup kas ${escH(s.kasir_nama)}</h3>
-  <div class="grid grid-cols-3 gap-2 text-center text-xs mb-3"><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Saldo awal</div><b class="text-sm">${rp(s.saldo_awal)}</b></div><div class="rounded-xl bg-slate-500/10 p-2"><div class="text-slate-500">Transaksi</div><b class="text-sm">${s.trx}</b></div><div class="rounded-xl bg-sky-500/10 p-2"><div class="text-slate-500">Saldo sistem</div><b class="text-sm">${rp(s.saldo_sistem)}</b></div></div>
-  ${s.pending ? `<p class="rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 p-3 text-sm mb-3">${s.pending} transaksi masih menunggu verifikasi. Proses dulu sebelum menutup kas.</p>` : ''}
-  <label class="text-xs text-slate-500">Uang fisik di laci</label><input id="cf" inputmode="numeric" class="inp !text-xl !font-bold" placeholder="0" oninput="mi(this);const d=N('cf')-${s.saldo_sistem};$('cs').textContent=rp(d);$('cs').className='font-bold '+(d===0?'text-emerald-600':'text-rose-600')">
-  <p class="text-sm mt-2">Selisih: <span id="cs" class="font-bold">Rp 0</span></p><input id="cn" class="inp mt-2" placeholder="Catatan (opsional)" maxlength="200">
-  <div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn btn-no" ${s.pending ? 'disabled' : ''} onclick="doCloseKas('${escH(id)}')"><i data-lucide="lock" class="w-4"></i>Tutup kas</button></div>`);
+  <div class="grid grid-cols-2 gap-2 mb-3">${box('Kas tunai', s.saldo_awal, s.tunai_masuk, s.tunai_keluar, s.saldo_sistem)}${box('Saldo rekening', s.saldo_awal_rek, s.rek_masuk, s.rek_keluar, s.saldo_sistem_rek)}</div>
+  <label class="text-xs text-slate-500">Uang fisik di laci</label><input id="cf" inputmode="numeric" class="inp !text-lg !font-bold" placeholder="0" oninput="mi(this);const d=N('cf')-${s.saldo_sistem};$('cs').textContent=sgn(d);$('cs').className='font-bold '+(d===0?'text-emerald-600':'text-rose-600')">
+  <p class="text-sm mt-1">Selisih tunai: <span id="cs" class="font-bold">+Rp 0</span></p>
+  <label class="text-xs text-slate-500 mt-2 block">Saldo rekening aktual (cek aplikasi BRILink)</label><input id="cr" inputmode="numeric" class="inp !text-lg !font-bold" placeholder="0" oninput="mi(this);const d=N('cr')-${s.saldo_sistem_rek};$('cq').textContent=sgn(d);$('cq').className='font-bold '+(d===0?'text-emerald-600':'text-rose-600')">
+  <p class="text-sm mt-1">Selisih rekening: <span id="cq" class="font-bold">+Rp 0</span></p><input id="cn" class="inp mt-2" placeholder="Catatan (opsional)" maxlength="200">
+  <div class="flex gap-2 justify-end mt-4"><button class="btn btn2" onclick="closeModal()">Batal</button><button class="btn btn-no" onclick="doCloseKas('${escH(id)}')"><i data-lucide="lock" class="w-4"></i>Tutup kas</button></div>`);
 }
 async function doCloseKas(id) {
-  if (!val('cf')) return toast('Isi uang fisik di laci', false);
-  try { const r = await api('closeShift', { id, saldo_fisik: N('cf'), catatan: val('cn') }); closeModal(); toast(r.selisih === 0 ? 'Kas ditutup, saldo sesuai' : 'Kas ditutup, selisih ' + rp(r.selisih), r.selisih === 0); show('kas'); } catch (e) {}
+  if (!val('cf') || !val('cr')) return toast('Isi uang fisik dan saldo rekening aktual', false);
+  try { const r = await api('closeShift', { id, saldo_fisik: N('cf'), saldo_fisik_rek: N('cr'), catatan: val('cn') }, 1); closeModal(); const ok = r.selisih === 0 && r.selisih_rek === 0; toast(ok ? 'Kas ditutup, saldo sesuai' : `Kas ditutup. Selisih tunai ${sgn(r.selisih)}, rekening ${sgn(r.selisih_rek)}`, ok); show('kas'); } catch (e) {}
 }
 
 /* ===== Aksi umum ===== */
@@ -606,7 +560,7 @@ async function saveUser(id) { try { await api(id ? 'updateUser' : 'addUser', { i
 async function delUser(id) { if (!confirm('Hapus pengguna ini?')) return; try { await api('deleteUser', { id }, 1); toast('Pengguna dihapus'); route(); } catch (e) {} }
 async function del(a, id) { if (!confirm('Hapus data ini? Tindakan tidak bisa dibatalkan.')) return; try { await api(a, { id }, 1); toast('Terhapus'); route(); } catch (e) {} }
 async function doBackup() { busy('Membuat backup'); try { const d = await api('backup', {}, 1); toast('Backup dibuat di Google Drive'); window.open(d.url, '_blank', 'noopener'); } catch (e) {} finally { busy(); } }
-async function saveServer() { try { await api('saveSettings', { verifikasi: $('sv_v').checked, saldo_awal: N('sv_a') }, 1); toast('Pengaturan keamanan disimpan'); } catch (e) {} }
+async function saveServer() { try { await api('saveSettings', { saldo_awal: N('sv_a') }, 1); toast('Pengaturan disimpan'); } catch (e) {} }
 let DEF = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); DEF = e; });
 async function installApp() { if (DEF) { DEF.prompt(); DEF = null; } else toast('Buka menu browser > "Tambahkan ke layar utama"', true); }
 
@@ -652,7 +606,7 @@ function escpos(t) {
 }
 async function struk(id) {
   const t = typeof id === 'string' ? TRX.get(id) : id; if (!t) return;
-  if (t.status && t.status !== 'Disetujui') return toast('Struk hanya untuk transaksi yang sudah disetujui', false);
+  
   if (navigator.bluetooth && (BT.dev || localStorage.btName)) {
     try { await btSend(escpos(t)); return toast('Struk dikirim ke printer'); }
     catch (e) { if (e.name === 'NotFoundError') return; toast('Printer gagal: ' + e.message + '. Memakai cetak browser.', false); }
@@ -677,53 +631,57 @@ const judul = () => { const d = val('rd'), s = val('rs'); if (d === s) return 'L
 function RM() {
   const t = RPT.transaksi, nm = RPT.nama || {}, g = {};
   t.forEach(x => (g[x.operator] = g[x.operator] || []).push(x));
-  Object.keys(RPT.shifts.reduce((o, s) => (o[s.kasir] = 1, o), {})).forEach(u => g[u] = g[u] || []);
-  const ks = Object.keys(g).sort().map(u => { const a = g[u]; return { u, nama: nm[u] || u, a, n: a.length, nom: sumK(a, 'nominal'), adm: sumK(a, 'biaya_admin'), laba: sumK(a, 'laba'), kas: sumK(a, 'kas'), sesi: RPT.shifts.filter(s => s.kasir === u) }; });
-  const hr = {}; t.forEach(x => { const k = x.tanggal + '|' + x.operator; const o = hr[k] = hr[k] || { tgl: x.tanggal, nama: nm[x.operator] || x.operator, n: 0, nom: 0, adm: 0, laba: 0 }; o.n++; o.nom += Number(x.nominal); o.adm += Number(x.biaya_admin); o.laba += Number(x.laba); });
+  RPT.shifts.forEach(x => g[x.kasir] = g[x.kasir] || []);
+  const ks = Object.keys(g).sort().map(u => { const a = g[u]; return { u, nama: nm[u] || u, a, n: a.length, nom: sumK(a, 'nominal'), adm: sumK(a, 'biaya_admin'), laba: sumK(a, 'laba'), tun: sumK(a, 'kas_tunai'), rek: sumK(a, 'kas_rek'), sesi: RPT.shifts.filter(s => s.kasir === u) }; });
+  const hr = {}; t.forEach(x => { const k = x.tanggal + '|' + x.operator; const o = hr[k] = hr[k] || { tgl: x.tanggal, nama: nm[x.operator] || x.operator, n: 0, nom: 0, adm: 0, laba: 0, tun: 0, rek: 0 }; o.n++; o.nom += Number(x.nominal); o.adm += Number(x.biaya_admin); o.laba += Number(x.laba); o.tun += Number(x.kas_tunai); o.rek += Number(x.kas_rek); });
   return { ks, hari: Object.values(hr).sort((a, b) => (a.tgl + a.nama).localeCompare(b.tgl + b.nama)) };
 }
+const closed = s => s.status === 'Tutup', SESI_H = ['Tanggal', 'Kasir', 'Saldo awal', 'Saldo sistem', 'Saldo aktual', 'Selisih'];
+const sesiT = (list, f = rp) => list.map(s => [s.tanggal, s.kasir_nama, f(s.saldo_awal), f(s.saldo_sistem), closed(s) ? f(s.saldo_fisik) : 'Buka', closed(s) ? f(s.selisih) : '-']);
+const sesiR = (list, f = rp) => list.map(s => [s.tanggal, s.kasir_nama, f(s.saldo_awal_rek), f(s.saldo_sistem_rek), closed(s) ? f(s.saldo_fisik_rek) : 'Buka', closed(s) ? f(s.selisih_rek) : '-']);
 async function runReport() {
   loadLib('barcode').catch(() => {});
   if (val('rd') > val('rs')) return toast('Tanggal awal melebihi tanggal akhir', false);
   $('rout').innerHTML = skel();
   RPT = await api('getReports', { dari: val('rd'), sampai: val('rs'), kasir: val('rk') }); SEL.clear();
   if (val('rj')) RPT.transaksi = RPT.transaksi.filter(x => x.jenis_transaksi === val('rj'));
-  const t = RPT.transaksi; RPT.totalTransaksi = t.length; RPT.totalNominal = sumK(t, 'nominal'); RPT.totalLaba = sumK(t, 'laba'); RPT.saldoAkhir = RPT.totalLaba - RPT.totalPengeluaran;
+  const t = RPT.transaksi; RPT.totalTransaksi = t.length; RPT.totalNominal = sumK(t, 'nominal'); RPT.totalLaba = sumK(t, 'laba'); RPT.saldoAkhir = RPT.totalLaba - RPT.totalPengeluaran; RPT.totalTunai = sumK(t, 'kas_tunai'); RPT.totalRek = sumK(t, 'kas_rek');
   const m = RM();
-  $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">${card('Transaksi', t.length, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir', rp(RPT.saldoAkhir), 'landmark')}</div>
+  $('rout').innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${card('Transaksi', t.length, 'receipt')}${card('Nominal', rp(RPT.totalNominal), 'banknote')}${card('Laba', rp(RPT.totalLaba), 'trending-up')}${card('Pengeluaran', rp(RPT.totalPengeluaran), 'wallet')}${card('Saldo akhir (laba - pengeluaran)', rp(RPT.saldoAkhir), 'landmark')}${card('Arus kas tunai', sgn(RPT.totalTunai), 'banknote')}${card('Arus saldo rekening', sgn(RPT.totalRek), 'landmark')}</div>
   <div class="glass rounded-2xl p-4 mt-3 noprint"><div class="font-bold mb-2 flex items-center gap-2"><i data-lucide="printer" class="w-4"></i>${judul()}</div><div class="flex flex-wrap gap-3 items-center">
     <label class="flex items-center gap-2 text-sm"><input type="radio" name="pm" checked onchange="MODE='all'">Lengkap per kasir</label>
     <label class="flex items-center gap-2 text-sm"><input type="radio" name="pm" onchange="MODE='detail'">Detail transaksi (centang)</label>
     <div class="flex gap-2 w-full md:w-auto md:ml-auto"><button class="btn flex-1" onclick="printReport()"><i data-lucide="printer" class="w-4"></i>Cetak</button>
     <button class="btn btn2 flex-1" onclick="xlsxOut()"><i data-lucide="file-spreadsheet" class="w-4"></i>Excel</button>
     <button class="btn btn2 flex-1" onclick="pdfOut()"><i data-lucide="file-down" class="w-4"></i>PDF</button></div></div></div>
-  <b class="block mt-4 mb-2">Rekap per kasir</b><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Kasir</th><th>Trx</th><th>Nominal</th><th>Admin</th><th>Laba</th><th>Kas bersih</th></tr></thead><tbody>
-  ${m.ks.map(k => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(k.nama)}</td><td>${k.n}</td><td>${rp(k.nom)}</td><td>${rp(k.adm)}</td><td>${rp(k.laba)}</td><td>${rp(k.kas)}</td></tr>`).join('') || '<tr><td colspan="6" class="p-6 text-center text-slate-500">Tidak ada data.</td></tr>'}</tbody></table></div>
-  <b class="block mt-4 mb-2">Detail transaksi</b><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3"><input type="checkbox" onchange="selAll(this.checked)"></th><th>Tanggal</th><th>Kasir</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Laba</th></tr></thead><tbody>
-  ${t.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3"><input type="checkbox" class="sel" onchange="this.checked?SEL.add('${escH(x.id)}'):SEL.delete('${escH(x.id)}')"></td><td>${escH(x.tanggal)} ${escH(x.waktu)}</td><td>${escH((RPT.nama || {})[x.operator] || x.operator)}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.laba)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="7">Tidak ada transaksi pada rentang ini.</td></tr>'}</tbody></table></div>`;
+  <b class="block mt-4 mb-2">Rekap per kasir</b><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3">Kasir</th><th>Trx</th><th>Nominal</th><th>Admin</th><th>Laba</th><th>Arus tunai</th><th>Arus rekening</th></tr></thead><tbody>
+  ${m.ks.map(k => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3">${escH(k.nama)}</td><td>${k.n}</td><td>${rp(k.nom)}</td><td>${rp(k.adm)}</td><td>${rp(k.laba)}</td><td>${fxT(k.tun)}</td><td>${fxT(k.rek)}</td></tr>`).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-500">Tidak ada data.</td></tr>'}</tbody></table></div>
+  <b class="block mt-4 mb-2">Detail transaksi</b><div class="glass rounded-2xl overflow-x-auto"><table class="w-full text-sm"><thead class="text-left text-slate-500"><tr><th class="p-3"><input type="checkbox" onchange="selAll(this.checked)"></th><th>Tanggal</th><th>Kasir</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Laba</th><th>Tunai</th><th>Rekening</th></tr></thead><tbody>
+  ${t.map(x => `<tr class="border-t border-slate-200 dark:border-slate-700"><td class="p-3"><input type="checkbox" class="sel" onchange="this.checked?SEL.add('${escH(x.id)}'):SEL.delete('${escH(x.id)}')"></td><td>${escH(x.tanggal)} ${escH(x.waktu)}</td><td>${escH((RPT.nama || {})[x.operator] || x.operator)}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.laba)}</td><td>${fxT(x.kas_tunai)}</td><td>${fxT(x.kas_rek)}</td></tr>`).join('') || '<tr><td class="p-6 text-center text-slate-500" colspan="9">Tidak ada transaksi pada rentang ini.</td></tr>'}</tbody></table></div>`;
   icons();
 }
 function selAll(on) { RPT.transaksi.forEach(x => on ? SEL.add(x.id) : SEL.delete(x.id)); document.querySelectorAll('.sel').forEach(c => c.checked = on); }
 const periode = () => `${val('rd')} s/d ${val('rs')}${val('rk') ? ' · Kasir: ' + ((RPT.nama || {})[val('rk')] || val('rk')) : ''}${val('rj') ? ' · ' + val('rj') : ''}`;
 async function printReport() {
   try { await loadLib('barcode'); } catch (e) { return toast(e.message, false); }
-  const t = RPT.transaksi; if (!t.length) return toast('Tidak ada data untuk dicetak', false);
+  const t = RPT.transaksi; if (!t.length && !RPT.shifts.length) return toast('Tidak ada data untuk dicetak', false);
+  const th = a => '<tr>' + a.map(x => `<th>${x}</th>`).join('') + '</tr>', tr = a => '<tr>' + a.map(x => `<td>${escH(x)}</td>`).join('') + '</tr>', tb = (h, rows, foot) => `<table>${th(h)}${rows.map(tr).join('')}${foot || ''}</table>`;
   let body;
   if (MODE === 'detail') {
     const s = t.filter(x => SEL.has(x.id)); if (!s.length) return toast('Centang minimal satu transaksi', false);
-    body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Kasir', (RPT.nama || {})[x.operator] || x.operator], ['Pelanggan', x.pelanggan], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Keterangan', x.keterangan || '-'], ['Diverifikasi', x.verified_by || '-']].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
+    body = s.map(x => `<section><h3>${escH(x.jenis_transaksi)}</h3><table>${[['ID', x.id], ['Tanggal', x.tanggal + ' ' + x.waktu], ['Kasir', (RPT.nama || {})[x.operator] || x.operator], ['Pelanggan', x.pelanggan], ['Nominal', rp(x.nominal)], ['Biaya admin', rp(x.biaya_admin)], ['Laba', rp(x.laba)], ['Metode bayar', x.metode_bayar], ['Kas tunai', sgn(x.kas_tunai)], ['Saldo rekening', sgn(x.kas_rek)], ['Keterangan', x.keterangan || '-']].map(r => `<tr><td>${r[0]}</td><td>${escH(r[1])}</td></tr>`).join('')}</table></section>`).join('');
   } else {
-    const m = RM(), R = (a, b) => `<tr><td>${a}</td><td>${b}</td></tr>`;
-    body = `<h3>Ringkasan</h3><table>${R('Total transaksi', t.length)}${R('Total nominal', rp(RPT.totalNominal))}${R('Total laba', rp(RPT.totalLaba))}${R('Total pengeluaran', rp(RPT.totalPengeluaran))}${R('Saldo akhir', rp(RPT.saldoAkhir))}</table>
-    <h3>Rekap per kasir</h3><table><tr><th>Kasir</th><th>Trx</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${m.ks.map(k => `<tr><td>${escH(k.nama)}</td><td>${k.n}</td><td>${rp(k.nom)}</td><td>${rp(k.adm)}</td><td>${rp(k.laba)}</td></tr>`).join('')}</table>`
+    const m = RM();
+    body = `<h3>Ringkasan</h3>${tb(['Keterangan', 'Nilai'], [['Total transaksi', t.length], ['Total nominal', rp(RPT.totalNominal)], ['Total laba', rp(RPT.totalLaba)], ['Total pengeluaran', rp(RPT.totalPengeluaran)], ['Saldo akhir (laba - pengeluaran)', rp(RPT.saldoAkhir)], ['Arus kas tunai', sgn(RPT.totalTunai)], ['Arus saldo rekening', sgn(RPT.totalRek)]])}
+    <h3>Rekap per kasir</h3>${tb(['Kasir', 'Trx', 'Nominal', 'Admin', 'Laba', 'Arus tunai', 'Arus rek.'], m.ks.map(k => [k.nama, k.n, rp(k.nom), rp(k.adm), rp(k.laba), sgn(k.tun), sgn(k.rek)]))}`
+      + (RPT.shifts.length ? `<h3>Sesi kas tunai</h3>${tb(SESI_H, sesiT(RPT.shifts))}<h3>Sesi saldo rekening</h3>${tb(SESI_H, sesiR(RPT.shifts))}` : '')
       + m.ks.map(k => { const g = {}; k.a.forEach(x => (g[x.tanggal] = g[x.tanggal] || []).push(x));
-        return `<h3>Kasir: ${escH(k.nama)}</h3>${k.sesi.length ? `<table><tr><th>Tanggal</th><th>Saldo awal</th><th>Saldo sistem</th><th>Saldo fisik</th><th>Selisih</th><th>Status</th></tr>${k.sesi.map(s => `<tr><td>${escH(s.tanggal)}</td><td>${rp(s.saldo_awal)}</td><td>${rp(s.saldo_sistem)}</td><td>${s.status === 'Tutup' ? rp(s.saldo_fisik) : '-'}</td><td>${s.status === 'Tutup' ? rp(s.selisih) : '-'}</td><td>${escH(s.status)}</td></tr>`).join('')}</table>` : ''}`
-          + Object.keys(g).sort().map(d => { const a = g[d]; return `<table><tr><th colspan="6">${escH(d)}</th></tr><tr><th>Waktu</th><th>Jenis</th><th>Pelanggan</th><th>Nominal</th><th>Admin</th><th>Laba</th></tr>${a.map(x => `<tr><td>${escH(x.waktu)}</td><td>${escH(x.jenis_transaksi)}</td><td>${escH(x.pelanggan)}</td><td>${rp(x.nominal)}</td><td>${rp(x.biaya_admin)}</td><td>${rp(x.laba)}</td></tr>`).join('')}<tr class="s"><td colspan="3">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td></tr></table>`; }).join('')
-          + `<table><tr class="s"><td>Total kasir ${escH(k.nama)} (${k.n} trx)</td><td>${rp(k.nom)}</td><td>${rp(k.adm)}</td><td>${rp(k.laba)}</td></tr></table>`; }).join('')
-      + (RPT.pengeluaran.length ? `<h3>Pengeluaran</h3><table><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th>Nominal</th></tr>${RPT.pengeluaran.map(e => `<tr><td>${escH(e.tanggal)}</td><td>${escH(e.kategori)}</td><td>${escH(e.deskripsi)}</td><td>${rp(e.nominal)}</td></tr>`).join('')}</table>` : '');
+        return `<h3>Kasir: ${escH(k.nama)} (@${escH(k.u)})</h3>` + Object.keys(g).sort().map(d => { const a = g[d]; return `<table><tr><th colspan="8">${escH(d)}</th></tr>${th(['Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Admin', 'Laba', 'Tunai', 'Rekening'])}${a.map(x => tr([x.waktu, x.jenis_transaksi, x.pelanggan, rp(x.nominal), rp(x.biaya_admin), rp(x.laba), sgn(x.kas_tunai), sgn(x.kas_rek)])).join('')}<tr class="s"><td colspan="3">Subtotal (${a.length} transaksi)</td><td>${rp(sumK(a, 'nominal'))}</td><td>${rp(sumK(a, 'biaya_admin'))}</td><td>${rp(sumK(a, 'laba'))}</td><td>${sgn(sumK(a, 'kas_tunai'))}</td><td>${sgn(sumK(a, 'kas_rek'))}</td></tr></table>`; }).join('')
+          + `<table><tr class="s"><td>Total ${escH(k.nama)} (${k.n} trx)</td><td>Nominal ${rp(k.nom)}</td><td>Laba ${rp(k.laba)}</td><td>Tunai ${sgn(k.tun)}</td><td>Rek. ${sgn(k.rek)}</td></tr></table>`; }).join('')
+      + (RPT.pengeluaran.length ? `<h3>Pengeluaran</h3>${tb(['Tanggal', 'Kategori', 'Deskripsi', 'Nominal'], RPT.pengeluaran.map(e => [e.tanggal, e.kategori, e.deskripsi, rp(e.nominal)]))}` : '');
   }
   const w = open('', '_blank'); if (!w) return toast('Pop-up diblokir, izinkan pop-up untuk mencetak', false);
-  w.document.write(`<html><head><title>${judul()} Kas BRILink</title><style>@page{size:A4;margin:3cm 3cm 3cm 4cm}body{font:11pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:5px 7px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>${judul()} Kas BRILink</h2><p>Periode ${escH(periode())}</p>${body}${sigHtml()}</body></html>`);
+  w.document.write(`<html><head><title>${judul()} Kas BRILink</title><style>@page{size:A4;margin:3cm 3cm 3cm 4cm}body{font:10pt Arial,Helvetica,sans-serif;margin:0;color:#000}table,td,th{font:inherit}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #cbd5e1;padding:4px 6px;text-align:left}th{background:#e2e8f0}.s td{font-weight:700;background:#f1f5f9}.sig{margin:32px 0 0 auto;width:220px;text-align:center;page-break-inside:avoid}section{page-break-inside:avoid;margin-bottom:20px}h3{margin:16px 0 6px;color:#00529C}</style></head><body><h2>${judul()} Kas BRILink</h2><p>Periode ${escH(periode())}</p>${body}${sigHtml()}</body></html>`);
   w.document.close(); w.focus(); w.print();
 }
 const barcodeURL = txt => { const c = document.createElement('canvas'); JsBarcode(c, txt, { format: 'CODE128', width: 1.6, height: 46, displayValue: false, margin: 0 }); return c.toDataURL('image/png'); };
@@ -735,16 +693,16 @@ async function xlsxOut() {
   if (!RPT.transaksi.length && !RPT.shifts.length) return toast('Tidak ada data untuk diekspor', false);
   busy('Menyiapkan Excel');
   try {
-    const m = RM(), nm = RPT.nama || {}, wb = XLSX.utils.book_new();
-    const fmt = ws => { Object.keys(ws).forEach(a => { if (a[0] !== '!' && ws[a].t === 'n') ws[a].z = '#,##0'; }); return ws; };
+    const m = RM(), nm = RPT.nama || {}, wb = XLSX.utils.book_new(), num = x => x === '-' || x === 'Buka' ? '' : Number(x);
+    const fmt = ws => { Object.keys(ws).forEach(a => { if (a[0] !== '!' && ws[a].t === 'n') ws[a].z = '#,##0;-#,##0'; }); return ws; };
     const add = (name, aoa, cols) => { const ws = fmt(XLSX.utils.aoa_to_sheet(aoa)); ws['!cols'] = cols.map(w => ({ wch: w })); XLSX.utils.book_append_sheet(wb, ws, name.replace(/[\\/?*\[\]:]/g, '').slice(0, 31)); };
     add('Ringkasan', [[judul() + ' Kas BRILink'], ['Periode', periode()], ['Dicetak oleh', S.user.nama + ' (' + S.user.role + ')'], ['Waktu cetak', new Date().toLocaleString('id-ID')], [],
-      ['Total transaksi', RPT.totalTransaksi], ['Total nominal', RPT.totalNominal], ['Total laba', RPT.totalLaba], ['Total pengeluaran', RPT.totalPengeluaran], ['Saldo akhir', RPT.saldoAkhir], [],
-      ['REKAP PER KASIR'], ['Kasir', 'Transaksi', 'Nominal', 'Biaya Admin', 'Laba', 'Kas Bersih'], ...m.ks.map(k => [k.nama, k.n, k.nom, k.adm, k.laba, k.kas]), [],
-      ['SESI KAS'], ['Tanggal', 'Kasir', 'Saldo Awal', 'Saldo Sistem', 'Saldo Fisik', 'Selisih', 'Status'], ...RPT.shifts.map(s => [s.tanggal, s.kasir_nama, s.saldo_awal, s.saldo_sistem, s.status === 'Tutup' ? Number(s.saldo_fisik) : '', s.status === 'Tutup' ? Number(s.selisih) : '', s.status])], [26, 22, 16, 16, 16, 16, 12]);
-    add('Harian', [['Tanggal', 'Kasir', 'Transaksi', 'Nominal', 'Biaya Admin', 'Laba'], ...m.hari.map(h => [h.tgl, h.nama, h.n, h.nom, h.adm, h.laba])], [12, 22, 10, 16, 14, 14]);
-    add('Semua Transaksi', [['Tanggal', 'Waktu', 'Kasir', 'Jenis', 'Pelanggan', 'Metode', 'Nominal', 'Biaya Admin', 'Laba', 'Diverifikasi'], ...RPT.transaksi.map(t => [t.tanggal, t.waktu, nm[t.operator] || t.operator, t.jenis_transaksi, t.pelanggan, t.metode_bayar, Number(t.nominal), Number(t.biaya_admin), Number(t.laba), t.verified_by || ''])], [12, 8, 20, 20, 22, 10, 14, 14, 14, 14]);
-    m.ks.forEach(k => add('Kasir ' + k.nama, [[`Kasir: ${k.nama} (@${k.u})`], ['Periode', periode()], [], ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Biaya Admin', 'Laba'], ...k.a.sort((a, b) => (a.tanggal + a.waktu).localeCompare(b.tanggal + b.waktu)).map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, Number(t.nominal), Number(t.biaya_admin), Number(t.laba)]), ['TOTAL', '', '', k.n + ' transaksi', k.nom, k.adm, k.laba]], [12, 8, 20, 22, 14, 14, 14]));
+      ['Total transaksi', RPT.totalTransaksi], ['Total nominal', RPT.totalNominal], ['Total laba', RPT.totalLaba], ['Total pengeluaran', RPT.totalPengeluaran], ['Saldo akhir (laba - pengeluaran)', RPT.saldoAkhir], ['Arus kas tunai', RPT.totalTunai], ['Arus saldo rekening', RPT.totalRek], [],
+      ['REKAP PER KASIR'], ['Kasir', 'Transaksi', 'Nominal', 'Biaya Admin', 'Laba', 'Arus Kas Tunai', 'Arus Saldo Rekening'], ...m.ks.map(k => [k.nama, k.n, k.nom, k.adm, k.laba, k.tun, k.rek]), [],
+      ['SESI KAS TUNAI'], SESI_H, ...sesiT(RPT.shifts, num), [], ['SESI SALDO REKENING'], SESI_H, ...sesiR(RPT.shifts, num)], [30, 22, 16, 16, 16, 16, 18]);
+    add('Harian', [['Tanggal', 'Kasir', 'Transaksi', 'Nominal', 'Biaya Admin', 'Laba', 'Arus Kas Tunai', 'Arus Saldo Rekening'], ...m.hari.map(h => [h.tgl, h.nama, h.n, h.nom, h.adm, h.laba, h.tun, h.rek])], [12, 22, 10, 16, 14, 14, 16, 18]);
+    add('Semua Transaksi', [['Tanggal', 'Waktu', 'Kasir', 'Jenis', 'Pelanggan', 'Metode', 'Nominal', 'Biaya Admin', 'Laba', 'Kas Tunai', 'Saldo Rekening'], ...RPT.transaksi.map(t => [t.tanggal, t.waktu, nm[t.operator] || t.operator, t.jenis_transaksi, t.pelanggan, t.metode_bayar, Number(t.nominal), Number(t.biaya_admin), Number(t.laba), Number(t.kas_tunai), Number(t.kas_rek)])], [12, 8, 20, 20, 22, 10, 14, 14, 14, 14, 16]);
+    m.ks.forEach(k => add('Kasir ' + k.nama, [[`Kasir: ${k.nama} (@${k.u})`], ['Periode', periode()], [], ['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Metode', 'Nominal', 'Biaya Admin', 'Laba', 'Kas Tunai', 'Saldo Rekening'], ...k.a.slice().sort((a, b) => (a.tanggal + a.waktu).localeCompare(b.tanggal + b.waktu)).map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, t.metode_bayar, Number(t.nominal), Number(t.biaya_admin), Number(t.laba), Number(t.kas_tunai), Number(t.kas_rek)]), ['TOTAL', '', '', k.n + ' transaksi', '', k.nom, k.adm, k.laba, k.tun, k.rek]], [12, 8, 20, 22, 10, 14, 14, 14, 14, 16]));
     if (RPT.pengeluaran.length) add('Pengeluaran', [['Tanggal', 'Kategori', 'Deskripsi', 'Nominal'], ...RPT.pengeluaran.map(e => [e.tanggal, e.kategori, e.deskripsi, Number(e.nominal)]), ['TOTAL', '', '', RPT.totalPengeluaran]], [12, 16, 30, 14]);
     XLSX.writeFile(wb, `${judul().replace(' ', '-').toLowerCase()}-${fileTag()}.xlsx`);
   } catch (e) { toast('Gagal membuat Excel: ' + e.message, false); } finally { busy(); }
@@ -754,17 +712,17 @@ async function pdfOut() {
   if (!RPT.transaksi.length && !RPT.shifts.length) return toast('Tidak ada data untuk diekspor', false);
   busy('Menyiapkan PDF');
   try {
-    const doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' }), M = { top: 30, left: 40, right: 30, bottom: 30 }, m = RM(), nm = RPT.nama || {};
+    const doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' }), M = { top: 30, left: 40, right: 30, bottom: 30 }, m = RM();
     let y = M.top; const need = h => { if (y + h > 297 - M.bottom) { doc.addPage(); y = M.top; } };
     const line = (s, size = 11, bold = false, dy = 6) => { need(dy); doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.text(s, M.left, y); y += dy; };
-    const tbl = (head, body, o = {}) => { doc.autoTable({ startY: y, margin: M, head: [head], body, foot: o.foot ? [o.foot] : undefined, styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 1.4 }, headStyles: { fillColor: [0, 82, 156] }, footStyles: { fillColor: [226, 232, 240], textColor: 0 }, columnStyles: o.cs || {} }); y = doc.lastAutoTable.finalY + 6; };
-    const R = { halign: 'right' };
+    const tbl = (head, body, o = {}) => { doc.autoTable({ startY: y, margin: M, head: [head], body, foot: o.foot ? [o.foot] : undefined, styles: { font: 'helvetica', fontSize: o.fs || 8.5, cellPadding: 1.3 }, headStyles: { fillColor: [0, 82, 156] }, footStyles: { fillColor: [226, 232, 240], textColor: 0 }, columnStyles: o.cs || {} }); y = doc.lastAutoTable.finalY + 6; };
+    const R = { halign: 'right' }, rr = n => Object.fromEntries([...Array(n)].map((_, i) => [i, R])); // kolom angka rata kanan
     line(judul() + ' Kas BRILink', 14, true, 7); line('Periode ' + periode(), 10, false, 8);
-    tbl(['Keterangan', 'Nilai'], [['Total transaksi', RPT.totalTransaksi], ['Total nominal', rp(RPT.totalNominal)], ['Total laba', rp(RPT.totalLaba)], ['Total pengeluaran', rp(RPT.totalPengeluaran)], ['Saldo akhir', rp(RPT.saldoAkhir)]]);
-    line('Rekap per kasir', 11, true); tbl(['Kasir', 'Trx', 'Nominal', 'Biaya Admin', 'Laba', 'Kas Bersih'], m.ks.map(k => [k.nama, k.n, rp(k.nom), rp(k.adm), rp(k.laba), rp(k.kas)]), { cs: { 2: R, 3: R, 4: R, 5: R } });
-    if (RPT.shifts.length) { line('Sesi kas kasir', 11, true); tbl(['Tanggal', 'Kasir', 'Saldo awal', 'Saldo sistem', 'Saldo fisik', 'Selisih'], RPT.shifts.map(s => [s.tanggal, s.kasir_nama, rp(s.saldo_awal), rp(s.saldo_sistem), s.status === 'Tutup' ? rp(s.saldo_fisik) : 'Buka', s.status === 'Tutup' ? rp(s.selisih) : '-']), { cs: { 2: R, 3: R, 4: R, 5: R } }); }
-    m.ks.forEach(k => { need(20); line(`Kasir: ${k.nama} (@${k.u})`, 11, true); if (k.a.length) tbl(['Tanggal', 'Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Admin', 'Laba'], k.a.slice().sort((a, b) => (a.tanggal + a.waktu).localeCompare(b.tanggal + b.waktu)).map(t => [t.tanggal, t.waktu, t.jenis_transaksi, t.pelanggan, rp(t.nominal), rp(t.biaya_admin), rp(t.laba)]), { foot: ['Total', '', '', k.n + ' trx', rp(k.nom), rp(k.adm), rp(k.laba)], cs: { 4: R, 5: R, 6: R } }); else line('Tidak ada transaksi.', 9, false, 8); });
-    if (m.hari.length > 1) { line('Rekap harian per kasir', 11, true); tbl(['Tanggal', 'Kasir', 'Trx', 'Nominal', 'Laba'], m.hari.map(h => [h.tgl, h.nama, h.n, rp(h.nom), rp(h.laba)]), { cs: { 3: R, 4: R } }); }
+    tbl(['Keterangan', 'Nilai'], [['Total transaksi', RPT.totalTransaksi], ['Total nominal', rp(RPT.totalNominal)], ['Total laba', rp(RPT.totalLaba)], ['Total pengeluaran', rp(RPT.totalPengeluaran)], ['Saldo akhir (laba - pengeluaran)', rp(RPT.saldoAkhir)], ['Arus kas tunai', sgn(RPT.totalTunai)], ['Arus saldo rekening', sgn(RPT.totalRek)]]);
+    line('Rekap per kasir', 11, true); tbl(['Kasir', 'Trx', 'Nominal', 'Laba', 'Arus tunai', 'Arus rek.'], m.ks.map(k => [k.nama, k.n, rp(k.nom), rp(k.laba), sgn(k.tun), sgn(k.rek)]), { cs: { 2: R, 3: R, 4: R, 5: R } });
+    if (RPT.shifts.length) { line('Sesi kas tunai', 11, true); tbl(SESI_H, sesiT(RPT.shifts), { cs: { 2: R, 3: R, 4: R, 5: R } }); line('Sesi saldo rekening', 11, true); tbl(SESI_H, sesiR(RPT.shifts), { cs: { 2: R, 3: R, 4: R, 5: R } }); }
+    m.ks.forEach(k => { need(20); line(`Kasir: ${k.nama} (@${k.u})`, 11, true); if (k.a.length) tbl(['Waktu', 'Jenis', 'Pelanggan', 'Nominal', 'Laba', 'Tunai', 'Rekening'], k.a.slice().sort((a, b) => (a.tanggal + a.waktu).localeCompare(b.tanggal + b.waktu)).map(t => [t.tanggal.slice(5) + ' ' + t.waktu, t.jenis_transaksi, t.pelanggan, rp(t.nominal), rp(t.laba), sgn(t.kas_tunai), sgn(t.kas_rek)]), { fs: 7.5, foot: ['Total', '', k.n + ' trx', rp(k.nom), rp(k.laba), sgn(k.tun), sgn(k.rek)], cs: { 3: R, 4: R, 5: R, 6: R } }); else line('Tidak ada transaksi.', 9, false, 8); });
+    if (m.hari.length > 1) { line('Rekap harian per kasir', 11, true); tbl(['Tanggal', 'Kasir', 'Trx', 'Nominal', 'Laba', 'Tunai', 'Rek.'], m.hari.map(h => [h.tgl, h.nama, h.n, rp(h.nom), rp(h.laba), sgn(h.tun), sgn(h.rek)]), { fs: 7.5, cs: { 3: R, 4: R, 5: R, 6: R } }); }
     if (RPT.pengeluaran.length) { line('Pengeluaran', 11, true); tbl(['Tanggal', 'Kategori', 'Deskripsi', 'Nominal'], RPT.pengeluaran.map(e => [e.tanggal, e.kategori, e.deskripsi, rp(e.nominal)]), { cs: { 3: R } }); }
     need(45); const code = sigCode(), x = 210 - M.right - 60; doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
     doc.text('Dibuat oleh,', x + 30, y, { align: 'center' }); doc.addImage(barcodeURL(code), 'PNG', x, y + 3, 60, 14);
@@ -774,15 +732,9 @@ async function pdfOut() {
   } catch (e) { toast('Gagal membuat PDF: ' + e.message, false); } finally { busy(); }
 }
 
-/* ===== Polling & siklus hidup ===== */
-let POLLS = false;
-function startPolls() {
-  if (POLLS) return; POLLS = true;
-  setInterval(() => { if (document.hidden || !S.token) return; if (WATCH.size) pollWatch(); }, 4000);
-  setInterval(async () => { if (document.hidden || !S.token || S.user.role !== 'Admin' || curPage()[0] === 'verifikasi') return; try { const d = await api('getPending', {}, 1, true); alertNew(d.count); } catch (e) {} }, 15000);
-  if (S.user.role === 'Admin') api('getPending', {}, 1, true).then(d => { NOTIF.n = d.count; setBadge(d.count); }).catch(() => {});
-}
-document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token) { if (Date.now() - S.last > IDLE_MS) logoutLocal(); else if (S.user.role === 'Admin') api('getPending', {}, 1, true).then(d => alertNew(d.count)).catch(() => {}); } });
+/* ===== Siklus hidup ===== */
+function startPolls() {}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.token && Date.now() - S.last > IDLE_MS) logoutLocal(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 ['lu', 'lp'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
 const net = () => { $('offl').classList.toggle('hidden', navigator.onLine); };
